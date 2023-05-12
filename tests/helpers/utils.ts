@@ -34,9 +34,7 @@ export async function mintAndDeposit(
 
         // TODO: implement a method to get the coin with balance > amt
         // assuming 0th index coin will have balance > amount
-        coin = (
-            await onChain.getUSDCCoins({ address: ownerAddress })
-        ).data.pop();
+        coin = (await onChain.getUSDCCoins({ address: ownerAddress })).data.pop();
     }
 
     // transferring from owners usdc coin to receiver

@@ -37,9 +37,7 @@ async function main() {
         const deploymentData = getDeploymentData(deployerAddress, objects);
 
         await writeFile(DeploymentConfigs.filePath, deploymentData);
-        console.log(
-            `Object details written to file: ${DeploymentConfigs.filePath}`
-        );
+        console.log(`Object details written to file: ${DeploymentConfigs.filePath}`);
     }
 }
 

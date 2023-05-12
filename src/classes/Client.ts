@@ -42,9 +42,7 @@ export class Client {
 
     static buildPackage(pkgPath: string) {
         return JSON.parse(
-            execCommand(
-                `sui move build --dump-bytecode-as-base64 --path ${pkgPath}`
-            )
+            execCommand(`sui move build --dump-bytecode-as-base64 --path ${pkgPath}`)
         );
     }
 

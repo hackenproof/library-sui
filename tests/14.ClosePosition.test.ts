@@ -407,11 +407,9 @@ describe("Position Closure Traders After De-listing Perpetual", () => {
 
             switch (testCase.action) {
                 case "trade":
-                    testCaseDescription = `${
-                        testCase.maker
-                    } opens size:${Math.abs(testCase.size)} price:${
-                        testCase.price
-                    } leverage:${testCase.leverage}x ${
+                    testCaseDescription = `${testCase.maker} opens size:${Math.abs(
+                        testCase.size
+                    )} price:${testCase.price} leverage:${testCase.leverage}x ${
                         testCase.size > 0 ? "Long" : "Short"
                     } against ${testCase.taker}`;
                     break;
@@ -437,10 +435,7 @@ describe("Position Closure Traders After De-listing Perpetual", () => {
                 const oraclePrice = toBigNumber(testCase.pOracle as number);
 
                 // set oracle price if need be
-                if (
-                    testCase.pOracle &&
-                    !oraclePrice.isEqualTo(lastOraclePrice)
-                ) {
+                if (testCase.pOracle && !oraclePrice.isEqualTo(lastOraclePrice)) {
                     expectTxToSucceed(
                         await onChain.updateOraclePrice({
                             price: oraclePrice.toFixed(),
@@ -515,12 +510,8 @@ describe("Position Closure Traders After De-listing Perpetual", () => {
                     );
 
                     expect(
-                        bankAcctDetails.balance
-                            .shiftedBy(-BASE_DECIMALS)
-                            .toFixed(6)
-                    ).to.be.equal(
-                        new BigNumber(testCase.expect.balance).toFixed(6)
-                    );
+                        bankAcctDetails.balance.shiftedBy(-BASE_DECIMALS).toFixed(6)
+                    ).to.be.equal(new BigNumber(testCase.expect.balance).toFixed(6));
                 }
             });
         });
@@ -546,28 +537,19 @@ describe("Position Closure Traders After De-listing Perpetual", () => {
         });
 
         priceOracleCapID = (
-            Transaction.getObjects(
-                tx1,
-                "newObject",
-                "PriceOracleOperatorCap"
-            )[0] as any
+            Transaction.getObjects(tx1, "newObject", "PriceOracleOperatorCap")[0] as any
         ).id as string;
     });
 
     const setupTest = async () => {
         lastOraclePrice = new BigNumber(0);
-        const marketData = await createMarket(
-            deployment,
-            ownerSigner,
-            provider,
-            {
-                initialMarginRequired: toBigNumberStr(0.0625),
-                maintenanceMarginRequired: toBigNumberStr(0.05),
-                maxPrice: toBigNumberStr(2000),
-                makerFee: toBigNumberStr(0.01),
-                takerFee: toBigNumberStr(0.02)
-            }
-        );
+        const marketData = await createMarket(deployment, ownerSigner, provider, {
+            initialMarginRequired: toBigNumberStr(0.0625),
+            maintenanceMarginRequired: toBigNumberStr(0.05),
+            maxPrice: toBigNumberStr(2000),
+            makerFee: toBigNumberStr(0.01),
+            takerFee: toBigNumberStr(0.02)
+        });
 
         deployment["markets"]["ETH-PERP"].Objects = marketData.marketObjects;
 

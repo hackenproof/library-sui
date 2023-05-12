@@ -1493,170 +1493,166 @@ const tradesWithFee: TestCaseJSON = {
             }
         }
     ],
-    "Test # 3 -   Long Position + Short Trade = Long Position -> user books profit":
-        [
-            {
-                pOracle: 99,
-                isTaker: true,
-                price: 100,
-                size: -10,
-                leverage: 4,
-                expectMaker: {
-                    mro: 0.25,
-                    oiOpen: 1000,
-                    qPos: 10,
-                    margin: 250,
-                    marginRatio: 0.242424,
-                    bankBalance: 1600,
-                    pPos: 100
-                },
-                expectSystem: {
-                    fee: 200
-                }
+    "Test # 3 -   Long Position + Short Trade = Long Position -> user books profit": [
+        {
+            pOracle: 99,
+            isTaker: true,
+            price: 100,
+            size: -10,
+            leverage: 4,
+            expectMaker: {
+                mro: 0.25,
+                oiOpen: 1000,
+                qPos: 10,
+                margin: 250,
+                marginRatio: 0.242424,
+                bankBalance: 1600,
+                pPos: 100
             },
-            {
-                pOracle: 99,
-                isTaker: false,
-                price: 105,
-                size: -4,
-                leverage: 4,
-                expectMaker: {
-                    mro: 0.25,
-                    oiOpen: 600,
-                    qPos: 6,
-                    margin: 150,
-                    marginRatio: 0.242424,
-                    bankBalance: 1699,
-                    pPos: 100
-                },
-                expectSystem: {
-                    fee: 284
-                }
+            expectSystem: {
+                fee: 200
             }
-        ],
-    "Test # 4 -   Long Position + Short Trade = Long Position -> User books loss":
-        [
-            {
-                pOracle: 99,
-                isTaker: false,
-                price: 100,
-                size: 10,
-                leverage: 4,
-                expectMaker: {
-                    mro: 0.25,
-                    oiOpen: 1000,
-                    qPos: 10,
-                    margin: 250,
-                    marginRatio: 0.242424,
-                    bankBalance: 1700,
-                    pPos: 100
-                },
-                expectSystem: {
-                    fee: 200
-                }
+        },
+        {
+            pOracle: 99,
+            isTaker: false,
+            price: 105,
+            size: -4,
+            leverage: 4,
+            expectMaker: {
+                mro: 0.25,
+                oiOpen: 600,
+                qPos: 6,
+                margin: 150,
+                marginRatio: 0.242424,
+                bankBalance: 1699,
+                pPos: 100
             },
-            {
-                pOracle: 101,
-                isTaker: false,
-                price: 95,
-                size: -4,
-                leverage: 4,
-                expectMaker: {
-                    mro: 0.25,
-                    oiOpen: 600,
-                    qPos: 6,
-                    margin: 150,
-                    marginRatio: 0.257426,
-                    bankBalance: 1761,
-                    pPos: 100
-                },
-                expectSystem: {
-                    fee: 276
-                }
+            expectSystem: {
+                fee: 284
             }
-        ],
-    "Test # 5 -   Short Position + Long Trade = Short Position -> User books profit":
-        [
-            {
-                pOracle: 100,
-                isTaker: true,
-                price: 100,
-                size: 10,
-                leverage: 4,
-                expectMaker: {
-                    mro: 0.25,
-                    oiOpen: 1000,
-                    qPos: -10,
-                    margin: 250,
-                    marginRatio: 0.25,
-                    bankBalance: 1600,
-                    pPos: 100
-                },
-                expectSystem: {
-                    fee: 200
-                }
+        }
+    ],
+    "Test # 4 -   Long Position + Short Trade = Long Position -> User books loss": [
+        {
+            pOracle: 99,
+            isTaker: false,
+            price: 100,
+            size: 10,
+            leverage: 4,
+            expectMaker: {
+                mro: 0.25,
+                oiOpen: 1000,
+                qPos: 10,
+                margin: 250,
+                marginRatio: 0.242424,
+                bankBalance: 1700,
+                pPos: 100
             },
-            {
-                pOracle: 99,
-                isTaker: false,
-                price: 95,
-                size: 4,
-                leverage: 4,
-                expectMaker: {
-                    mro: 0.25,
-                    oiOpen: 600,
-                    qPos: -6,
-                    margin: 150,
-                    marginRatio: 0.262626,
-                    bankBalance: 1701,
-                    pPos: 100
-                },
-                expectSystem: {
-                    fee: 276
-                }
+            expectSystem: {
+                fee: 200
             }
-        ],
-    "Test # 6 -   Short Position + Long Trade = Short Position -> User books loss":
-        [
-            {
-                pOracle: 102,
-                isTaker: true,
-                price: 100,
-                size: 10,
-                leverage: 4,
-                expectMaker: {
-                    mro: 0.25,
-                    oiOpen: 1000,
-                    qPos: -10,
-                    margin: 250,
-                    marginRatio: 0.22549,
-                    bankBalance: 1600,
-                    pPos: 100
-                },
-                expectSystem: {
-                    fee: 200
-                }
+        },
+        {
+            pOracle: 101,
+            isTaker: false,
+            price: 95,
+            size: -4,
+            leverage: 4,
+            expectMaker: {
+                mro: 0.25,
+                oiOpen: 600,
+                qPos: 6,
+                margin: 150,
+                marginRatio: 0.257426,
+                bankBalance: 1761,
+                pPos: 100
             },
-            {
-                pOracle: 101,
-                isTaker: true,
-                price: 105,
-                size: -4,
-                leverage: 4,
-                expectMaker: {
-                    mro: 0.25,
-                    oiOpen: 600,
-                    qPos: -6,
-                    margin: 150,
-                    marginRatio: 0.237624,
-                    bankBalance: 1617,
-                    pPos: 100
-                },
-                expectSystem: {
-                    fee: 284
-                }
+            expectSystem: {
+                fee: 276
             }
-        ],
+        }
+    ],
+    "Test # 5 -   Short Position + Long Trade = Short Position -> User books profit": [
+        {
+            pOracle: 100,
+            isTaker: true,
+            price: 100,
+            size: 10,
+            leverage: 4,
+            expectMaker: {
+                mro: 0.25,
+                oiOpen: 1000,
+                qPos: -10,
+                margin: 250,
+                marginRatio: 0.25,
+                bankBalance: 1600,
+                pPos: 100
+            },
+            expectSystem: {
+                fee: 200
+            }
+        },
+        {
+            pOracle: 99,
+            isTaker: false,
+            price: 95,
+            size: 4,
+            leverage: 4,
+            expectMaker: {
+                mro: 0.25,
+                oiOpen: 600,
+                qPos: -6,
+                margin: 150,
+                marginRatio: 0.262626,
+                bankBalance: 1701,
+                pPos: 100
+            },
+            expectSystem: {
+                fee: 276
+            }
+        }
+    ],
+    "Test # 6 -   Short Position + Long Trade = Short Position -> User books loss": [
+        {
+            pOracle: 102,
+            isTaker: true,
+            price: 100,
+            size: 10,
+            leverage: 4,
+            expectMaker: {
+                mro: 0.25,
+                oiOpen: 1000,
+                qPos: -10,
+                margin: 250,
+                marginRatio: 0.22549,
+                bankBalance: 1600,
+                pPos: 100
+            },
+            expectSystem: {
+                fee: 200
+            }
+        },
+        {
+            pOracle: 101,
+            isTaker: true,
+            price: 105,
+            size: -4,
+            leverage: 4,
+            expectMaker: {
+                mro: 0.25,
+                oiOpen: 600,
+                qPos: -6,
+                margin: 150,
+                marginRatio: 0.237624,
+                bankBalance: 1617,
+                pPos: 100
+            },
+            expectSystem: {
+                fee: 284
+            }
+        }
+    ],
     "Test # 7 - Long Position + Short Trade = Short Position -> Margin is added back to Bank (New Short Value is less than the notional value of Long Value)":
         [
             {

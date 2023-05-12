@@ -49,14 +49,9 @@ export function readFile(filePath: string): any {
         : {};
 }
 
-export function getProvider(
-    rpcURL: string,
-    faucetURL: string
-): JsonRpcProvider {
+export function getProvider(rpcURL: string, faucetURL: string): JsonRpcProvider {
     // return new JsonRpcProvider(rpcURL, { faucetURL: faucetURL });
-    return new JsonRpcProvider(
-        new Connection({ fullnode: rpcURL, faucet: faucetURL })
-    );
+    return new JsonRpcProvider(new Connection({ fullnode: rpcURL, faucet: faucetURL }));
 }
 
 export function getKeyPairFromSeed(
@@ -80,10 +75,7 @@ export function getSignerFromKeyPair(
     return new RawSigner(keypair, provider);
 }
 
-export function getSignerFromSeed(
-    seed: string,
-    provider: JsonRpcProvider
-): RawSigner {
+export function getSignerFromSeed(seed: string, provider: JsonRpcProvider): RawSigner {
     return getSignerFromKeyPair(getKeyPairFromSeed(seed), provider);
 }
 
@@ -183,9 +175,9 @@ export async function getGenesisMap(
 
             // check if it is a coin creation event
             if (/^0x2::coin::CurrencyCreated/.test(type)) {
-                const coinType =
-                    /^0x2::coin::CurrencyCreated<(?<type>[\w:]+)>$/.exec(type)
-                        ?.groups?.type;
+                const coinType = /^0x2::coin::CurrencyCreated<(?<type>[\w:]+)>$/.exec(
+                    type
+                )?.groups?.type;
 
                 if (coinType) {
                     event = {
@@ -211,14 +203,8 @@ export async function getGenesisMap(
         }
 
         if (event) {
-            if (
-                event.dataType.endsWith(">") &&
-                event.dataType.indexOf("<") == -1
-            ) {
-                event.dataType = event.dataType.slice(
-                    0,
-                    event.dataType.length - 1
-                );
+            if (event.dataType.endsWith(">") && event.dataType.indexOf("<") == -1) {
+                event.dataType = event.dataType.slice(0, event.dataType.length - 1);
             }
 
             map[event.dataType] = {
@@ -304,12 +290,8 @@ export function createOrder(params: {
         reduceOnly: params.reduceOnly == true,
         postOnly: params.postOnly == true,
         price: params.price ? toBigNumber(params.price) : DEFAULT.ORDER.price,
-        quantity: params.quantity
-            ? toBigNumber(params.quantity)
-            : DEFAULT.ORDER.quantity,
-        leverage: params.leverage
-            ? toBigNumber(params.leverage)
-            : DEFAULT.ORDER.leverage,
+        quantity: params.quantity ? toBigNumber(params.quantity) : DEFAULT.ORDER.quantity,
+        leverage: params.leverage ? toBigNumber(params.leverage) : DEFAULT.ORDER.leverage,
         expiration: params.expiration
             ? bigNumber(params.expiration)
             : DEFAULT.ORDER.expiration,

@@ -6,12 +6,7 @@ export const expect = chai.expect;
 import { SuiExecuteTransactionResponse } from "@mysten/sui.js";
 import { TestPositionExpect } from "./interfaces";
 import { getExpectedTestPosition, toExpectedPositionFormat } from "./utils";
-import {
-    Transaction,
-    Balance,
-    UserPositionExtended,
-    OnChainCalls
-} from "../../src";
+import { Transaction, Balance, UserPositionExtended, OnChainCalls } from "../../src";
 import BigNumber from "bignumber.js";
 import { bigNumber, bnToBaseStr } from "../../src/library";
 import { Account } from "./accounts";
@@ -30,21 +25,15 @@ export function expectPosition(
     onChainPosition: TestPositionExpect,
     expectedPosition: TestPositionExpect
 ) {
-    expect(onChainPosition.isPosPositive).to.be.equal(
-        expectedPosition.isPosPositive
-    );
+    expect(onChainPosition.isPosPositive).to.be.equal(expectedPosition.isPosPositive);
 
-    expect(onChainPosition.mro.toFixed(3)).to.be.equal(
-        expectedPosition.mro.toFixed(3)
-    );
+    expect(onChainPosition.mro.toFixed(3)).to.be.equal(expectedPosition.mro.toFixed(3));
 
     expect(onChainPosition.oiOpen.toFixed(3)).to.be.equal(
         expectedPosition.oiOpen.toFixed(3)
     );
 
-    expect(onChainPosition.qPos.toFixed(0)).to.be.equal(
-        expectedPosition.qPos.toFixed(0)
-    );
+    expect(onChainPosition.qPos.toFixed(0)).to.be.equal(expectedPosition.qPos.toFixed(0));
 
     expect(onChainPosition.margin.toFixed(3)).to.be.equal(
         expectedPosition.margin.toFixed(3)
@@ -54,19 +43,12 @@ export function expectPosition(
         expectedPosition.marginRatio.toFixed(3)
     );
 
-    expect(onChainPosition.pPos.toFixed(3)).to.be.equal(
-        expectedPosition.pPos.toFixed(3)
-    );
+    expect(onChainPosition.pPos.toFixed(3)).to.be.equal(expectedPosition.pPos.toFixed(3));
 
-    expect(onChainPosition.pnl.toFixed(3)).to.be.equal(
-        expectedPosition.pnl.toFixed(3)
-    );
+    expect(onChainPosition.pnl.toFixed(3)).to.be.equal(expectedPosition.pnl.toFixed(3));
 
     // we don't get bank balance from tx events if no funds were transferred from user's margin
-    if (
-        !expectedPosition.bankBalance.eq(0) &&
-        !onChainPosition.bankBalance.eq(0)
-    ) {
+    if (!expectedPosition.bankBalance.eq(0) && !onChainPosition.bankBalance.eq(0)) {
         expect(onChainPosition.bankBalance.toFixed(6)).to.be.equal(
             expectedPosition.bankBalance.toFixed(6)
         );
@@ -85,7 +67,7 @@ export function expectTxToEmitEvent(
     expect(events?.[0]).to.not.be.undefined;
 
     if (emission) {
-        const eventObjects = events?.map((event) => event.fields);
+        const eventObjects = events?.map(event => event.fields);
         expect(emission).to.deep.equal(eventObjects);
     }
 }
@@ -107,18 +89,18 @@ export async function evaluateSystemExpect(
     }
 
     if (expectedSystemValues.insurancePool) {
-        const insurancePoolBalance =
-            await onChain.getBankAccountDetailsUsingAddress(
-                insurancePoolAddress
-            );
+        const insurancePoolBalance = await onChain.getBankAccountDetailsUsingAddress(
+            insurancePoolAddress
+        );
         expect(bnToBaseStr(insurancePoolBalance)).to.be.equal(
             bigNumber(expectedSystemValues.insurancePool).toFixed(6)
         );
     }
 
     if (expectedSystemValues.perpetual) {
-        const perpetualBalance =
-            await onChain.getBankAccountDetailsUsingAddress(perpetualAddress);
+        const perpetualBalance = await onChain.getBankAccountDetailsUsingAddress(
+            perpetualAddress
+        );
         expect(bnToBaseStr(perpetualBalance)).to.be.equal(
             bigNumber(expectedSystemValues.perpetual).toFixed(6)
         );

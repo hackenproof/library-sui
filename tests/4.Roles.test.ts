@@ -49,10 +49,7 @@ describe("Roles", () => {
             });
             expectTxToSucceed(tx);
 
-            const event = Transaction.getEvents(
-                tx,
-                "ExchangeAdminUpdateEvent"
-            )[0];
+            const event = Transaction.getEvents(tx, "ExchangeAdminUpdateEvent")[0];
             expect(event.fields.account).to.be.equal(alice.address);
         });
 
@@ -88,10 +85,7 @@ describe("Roles", () => {
                 bob.address
             );
             await expect(
-                onChain.setExchangeGuardian(
-                    { address: alice.address },
-                    bob.signer
-                )
+                onChain.setExchangeGuardian({ address: alice.address }, bob.signer)
             ).to.be.eventually.rejectedWith(error);
         });
 
@@ -154,11 +148,7 @@ describe("Roles", () => {
             expectTxToSucceed(tx1);
 
             const capID = (
-                Transaction.getObjects(
-                    tx1,
-                    "newObject",
-                    "SettlementCap"
-                )[0] as any
+                Transaction.getObjects(tx1, "newObject", "SettlementCap")[0] as any
             ).id;
 
             const tx2 = await onChain.removeSettlementOperator({
@@ -175,11 +165,7 @@ describe("Roles", () => {
             expectTxToSucceed(tx1);
 
             const capID = (
-                Transaction.getObjects(
-                    tx1,
-                    "newObject",
-                    "SettlementCap"
-                )[0] as any
+                Transaction.getObjects(tx1, "newObject", "SettlementCap")[0] as any
             ).id;
 
             const tx2 = await onChain.removeSettlementOperator({
@@ -222,10 +208,7 @@ describe("Roles", () => {
             });
             expectTxToSucceed(tx);
 
-            const event = Transaction.getEvents(
-                tx,
-                "PriceOracleOperatorUpdate"
-            )[0];
+            const event = Transaction.getEvents(tx, "PriceOracleOperatorUpdate")[0];
 
             expect(event.fields.account).to.be.equal(alice.address);
         });
@@ -255,10 +238,7 @@ describe("Roles", () => {
             });
             expectTxToSucceed(tx);
 
-            const event = Transaction.getEvents(
-                tx,
-                "DelevergingOperatorUpdate"
-            )[0];
+            const event = Transaction.getEvents(tx, "DelevergingOperatorUpdate")[0];
 
             expect(event.fields.account).to.be.equal(alice.address);
         });
@@ -291,10 +271,7 @@ describe("Roles", () => {
             );
             expectTxToSucceed(tx2);
 
-            const event = Transaction.getEvents(
-                tx2,
-                "SubAccountUpdateEvent"
-            )[0];
+            const event = Transaction.getEvents(tx2, "SubAccountUpdateEvent")[0];
 
             expect(event.fields.account).to.be.equal(alice.address);
             expect(event.fields.subAccount).to.be.equal(bob.address);
@@ -328,10 +305,7 @@ describe("Roles", () => {
             );
             expectTxToSucceed(tx2);
 
-            const event = Transaction.getEvents(
-                tx2,
-                "SubAccountUpdateEvent"
-            )[0];
+            const event = Transaction.getEvents(tx2, "SubAccountUpdateEvent")[0];
 
             expect(event.fields.account).to.be.equal(alice.address);
             expect(event.fields.subAccount).to.be.equal(bob.address);

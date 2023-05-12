@@ -44,12 +44,7 @@ export class OnChainCalls {
         callArgs.push(args.adminID || this.getExchangeAdminCap());
         callArgs.push(args.address);
 
-        return this.signAndCall(
-            caller,
-            "set_exchange_admin",
-            callArgs,
-            "roles"
-        );
+        return this.signAndCall(caller, "set_exchange_admin", callArgs, "roles");
     }
 
     public async setExchangeGuardian(
@@ -67,12 +62,7 @@ export class OnChainCalls {
         callArgs.push(args.safeID || this.getSafeID());
         callArgs.push(args.address);
 
-        return this.signAndCall(
-            caller,
-            "set_exchange_guardian",
-            callArgs,
-            "roles"
-        );
+        return this.signAndCall(caller, "set_exchange_guardian", callArgs, "roles");
     }
 
     public async createPerpetual(
@@ -124,21 +114,14 @@ export class OnChainCalls {
         callArgs.push(args.insurancePoolRatio || toBigNumberStr(0.3));
 
         callArgs.push(
-            args.insurancePool
-                ? args.insurancePool
-                : DEFAULT.INSURANCE_POOL_ADDRESS
+            args.insurancePool ? args.insurancePool : DEFAULT.INSURANCE_POOL_ADDRESS
         );
 
         callArgs.push(args.feePool ? args.feePool : DEFAULT.FEE_POOL_ADDRESS);
 
         const caller = signer || this.signer;
 
-        return this.signAndCall(
-            caller,
-            "create_perpetual",
-            callArgs,
-            "exchange"
-        );
+        return this.signAndCall(caller, "create_perpetual", callArgs, "exchange");
     }
 
     public async setMinPrice(
@@ -271,12 +254,7 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(toBigNumberStr(args.maxQtyLimit));
 
-        return this.signAndCall(
-            caller,
-            "set_max_qty_limit",
-            callArgs,
-            "perpetual"
-        );
+        return this.signAndCall(caller, "set_max_qty_limit", callArgs, "perpetual");
     }
 
     public async setMaxQtyMarket(
@@ -295,12 +273,7 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(toBigNumberStr(args.maxQtyMarket));
 
-        return this.signAndCall(
-            caller,
-            "set_max_qty_market",
-            callArgs,
-            "perpetual"
-        );
+        return this.signAndCall(caller, "set_max_qty_market", callArgs, "perpetual");
     }
 
     public async setMinQty(
@@ -338,12 +311,7 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.maxLimit);
 
-        return this.signAndCall(
-            caller,
-            "set_max_oi_open",
-            callArgs,
-            "perpetual"
-        );
+        return this.signAndCall(caller, "set_max_oi_open", callArgs, "perpetual");
     }
 
     public async createSettlementOperator(
@@ -361,12 +329,7 @@ export class OnChainCalls {
         callArgs.push(args.safeID || this.getSafeID());
         callArgs.push(args.operator);
 
-        return this.signAndCall(
-            caller,
-            "create_settlement_operator",
-            callArgs,
-            "roles"
-        );
+        return this.signAndCall(caller, "create_settlement_operator", callArgs, "roles");
     }
 
     public async removeSettlementOperator(
@@ -384,12 +347,7 @@ export class OnChainCalls {
         callArgs.push(args.safeID || this.getSafeID());
         callArgs.push(args.capID);
 
-        return this.signAndCall(
-            caller,
-            "remove_settlement_operator",
-            callArgs,
-            "roles"
-        );
+        return this.signAndCall(caller, "remove_settlement_operator", callArgs, "roles");
     }
 
     public async setFeePoolAddress(
@@ -407,12 +365,7 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.address);
 
-        return this.signAndCall(
-            caller,
-            "set_fee_pool_address",
-            callArgs,
-            "perpetual"
-        );
+        return this.signAndCall(caller, "set_fee_pool_address", callArgs, "perpetual");
     }
 
     public async setInsurancePoolAddress(
@@ -544,9 +497,7 @@ export class OnChainCalls {
         );
 
         callArgs.push(
-            args.fillPrice
-                ? args.fillPrice.toFixed(0)
-                : args.makerOrder.price.toFixed(0)
+            args.fillPrice ? args.fillPrice.toFixed(0) : args.makerOrder.price.toFixed(0)
         );
 
         return this.signAndCall(caller, "trade", callArgs, "exchange");
@@ -672,12 +623,7 @@ export class OnChainCalls {
         callArgs.push(args.account || (await getAddressFromSigner(caller)));
         callArgs.push(toBigNumberStr(args.leverage));
 
-        return this.signAndCall(
-            caller,
-            "adjust_leverage",
-            callArgs,
-            "exchange"
-        );
+        return this.signAndCall(caller, "adjust_leverage", callArgs, "exchange");
     }
 
     public async updateOraclePrice(
@@ -698,12 +644,7 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.price);
 
-        return this.signAndCall(
-            caller,
-            "set_oracle_price",
-            callArgs,
-            "perpetual"
-        );
+        return this.signAndCall(caller, "set_oracle_price", callArgs, "perpetual");
     }
 
     public async setPriceOracleOperator(
@@ -723,12 +664,7 @@ export class OnChainCalls {
 
         callArgs.push(args.operator);
 
-        return this.signAndCall(
-            caller,
-            "set_price_oracle_operator",
-            callArgs,
-            "roles"
-        );
+        return this.signAndCall(caller, "set_price_oracle_operator", callArgs, "roles");
     }
 
     public async setDeleveragingOperator(
@@ -748,12 +684,7 @@ export class OnChainCalls {
 
         callArgs.push(args.operator);
 
-        return this.signAndCall(
-            caller,
-            "set_deleveraging_operator",
-            callArgs,
-            "roles"
-        );
+        return this.signAndCall(caller, "set_deleveraging_operator", callArgs, "roles");
     }
 
     public async setSubAccount(
@@ -814,19 +745,12 @@ export class OnChainCalls {
 
         callArgs.push(args.bankID ? args.bankID : this.getBankID());
         callArgs.push(
-            args.accountAddress
-                ? args.accountAddress
-                : await getAddressFromSigner(caller)
+            args.accountAddress ? args.accountAddress : await getAddressFromSigner(caller)
         );
         callArgs.push(args.amount);
         callArgs.push(args.coinID);
 
-        return this.signAndCall(
-            caller,
-            "deposit_to_bank",
-            callArgs,
-            "margin_bank"
-        );
+        return this.signAndCall(caller, "deposit_to_bank", callArgs, "margin_bank");
     }
 
     public async setBankWithdrawalStatus(
@@ -847,12 +771,7 @@ export class OnChainCalls {
         callArgs.push(args.bankID || this.getBankID());
         callArgs.push(args.isAllowed);
 
-        return this.signAndCall(
-            caller,
-            "set_withdrawal_status",
-            callArgs,
-            "margin_bank"
-        );
+        return this.signAndCall(caller, "set_withdrawal_status", callArgs, "margin_bank");
     }
 
     public async setPerpetualTradingPermit(
@@ -873,12 +792,7 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.isPermitted);
 
-        return this.signAndCall(
-            caller,
-            "set_trading_permit",
-            callArgs,
-            "perpetual"
-        );
+        return this.signAndCall(caller, "set_trading_permit", callArgs, "perpetual");
     }
 
     public async withdrawFromBank(
@@ -895,18 +809,11 @@ export class OnChainCalls {
 
         callArgs.push(args.bankID ? args.bankID : this.getBankID());
         callArgs.push(
-            args.accountAddress
-                ? args.accountAddress
-                : await getAddressFromSigner(caller)
+            args.accountAddress ? args.accountAddress : await getAddressFromSigner(caller)
         );
         callArgs.push(args.amount);
 
-        return this.signAndCall(
-            caller,
-            "withdraw_from_bank",
-            callArgs,
-            "margin_bank"
-        );
+        return this.signAndCall(caller, "withdraw_from_bank", callArgs, "margin_bank");
     }
 
     public async withdrawAllMarginFromBank(
@@ -943,12 +850,7 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.price);
 
-        return this.signAndCall(
-            caller,
-            "delist_perpetual",
-            callArgs,
-            "perpetual"
-        );
+        return this.signAndCall(caller, "delist_perpetual", callArgs, "perpetual");
     }
 
     public async closePosition(
@@ -1052,9 +954,7 @@ export class OnChainCalls {
         return undefined;
     }
 
-    public async getBankAccountDetails(
-        id: string
-    ): Promise<BankAccountDetails> {
+    public async getBankAccountDetails(id: string): Promise<BankAccountDetails> {
         const obj = await this.getOnChainObject(id);
         if (obj) {
             return this._parseAccountDetails(obj);
@@ -1063,9 +963,7 @@ export class OnChainCalls {
         }
     }
 
-    public async getBankAccountDetailsUsingAddress(
-        address: string
-    ): Promise<BigNumber> {
+    public async getBankAccountDetailsUsingAddress(address: string): Promise<BigNumber> {
         if (this.deployment.bankAccounts[address] === undefined)
             throw `Address: ${address} not found in deployment map`;
 
@@ -1152,14 +1050,12 @@ export class OnChainCalls {
     }
 
     getPriceOracleOperatorCap(): string {
-        return this.deployment["objects"]["PriceOracleOperatorCap"]
-            .id as string;
+        return this.deployment["objects"]["PriceOracleOperatorCap"].id as string;
     }
 
     // by default returns the perpetual id of 1st market
     getPerpetualID(market = "ETH-PERP"): string {
-        return this.deployment["markets"][market]["Objects"]["Perpetual"]
-            .id as string;
+        return this.deployment["markets"][market]["Objects"]["Perpetual"].id as string;
     }
 
     getOrdersTableID(): string {

@@ -55,11 +55,7 @@ describe("Liquidation Trade Method", () => {
             operator: ownerAddress
         });
         priceOracleCapID = (
-            Transaction.getObjects(
-                tx1,
-                "newObject",
-                "PriceOracleOperatorCap"
-            )[0] as any
+            Transaction.getObjects(tx1, "newObject", "PriceOracleOperatorCap")[0] as any
         ).id as string;
 
         // make admin operator

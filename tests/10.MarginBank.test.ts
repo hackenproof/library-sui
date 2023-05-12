@@ -72,12 +72,8 @@ describe("Margin Bank", () => {
             )[0];
 
             expect(bankBalanceUpdateEvent).to.not.be.undefined;
-            expect(bankBalanceUpdateEvent?.fields?.srcAddress).to.be.equal(
-                aliceAddress
-            );
-            expect(bankBalanceUpdateEvent?.fields?.destAddress).to.be.equal(
-                aliceAddress
-            );
+            expect(bankBalanceUpdateEvent?.fields?.srcAddress).to.be.equal(aliceAddress);
+            expect(bankBalanceUpdateEvent?.fields?.destAddress).to.be.equal(aliceAddress);
             expect(bankBalanceUpdateEvent?.fields?.action).to.be.equal("0");
             expect(bankBalanceUpdateEvent?.fields?.amount).to.be.equal(
                 toBigNumberStr("10000")
@@ -115,21 +111,17 @@ describe("Margin Bank", () => {
 
             const coinValue = toBigNumberStr((coin as any).balance, 3); // converting a 6 decimal coin to 9 decimal value
             expect(depositBankBalanceUpdateEvent).to.not.be.undefined;
-            expect(
-                depositBankBalanceUpdateEvent?.fields?.destAddress
-            ).to.be.equal(aliceAddress);
-            expect(
-                depositBankBalanceUpdateEvent?.fields?.srcAddress
-            ).to.be.equal(aliceAddress);
-            expect(depositBankBalanceUpdateEvent?.fields?.action).to.be.equal(
-                "0"
+            expect(depositBankBalanceUpdateEvent?.fields?.destAddress).to.be.equal(
+                aliceAddress
             );
-            expect(depositBankBalanceUpdateEvent?.fields?.amount).to.be.equal(
+            expect(depositBankBalanceUpdateEvent?.fields?.srcAddress).to.be.equal(
+                aliceAddress
+            );
+            expect(depositBankBalanceUpdateEvent?.fields?.action).to.be.equal("0");
+            expect(depositBankBalanceUpdateEvent?.fields?.amount).to.be.equal(coinValue);
+            expect(depositBankBalanceUpdateEvent?.fields?.srcBalance).to.be.equal(
                 coinValue
             );
-            expect(
-                depositBankBalanceUpdateEvent?.fields?.srcBalance
-            ).to.be.equal(coinValue);
 
             const txResult = await onChain.withdrawFromBank(
                 {
@@ -144,16 +136,10 @@ describe("Margin Bank", () => {
             )[0];
 
             expect(bankBalanceUpdateEvent).to.not.be.undefined;
-            expect(bankBalanceUpdateEvent?.fields?.destAddress).to.be.equal(
-                aliceAddress
-            );
-            expect(bankBalanceUpdateEvent?.fields?.srcAddress).to.be.equal(
-                aliceAddress
-            );
+            expect(bankBalanceUpdateEvent?.fields?.destAddress).to.be.equal(aliceAddress);
+            expect(bankBalanceUpdateEvent?.fields?.srcAddress).to.be.equal(aliceAddress);
             expect(bankBalanceUpdateEvent?.fields?.action).to.be.equal("1");
-            expect(bankBalanceUpdateEvent?.fields?.amount).to.be.equal(
-                coinValue
-            );
+            expect(bankBalanceUpdateEvent?.fields?.amount).to.be.equal(coinValue);
             expect(bankBalanceUpdateEvent?.fields?.srcBalance).to.be.equal("0");
         });
 

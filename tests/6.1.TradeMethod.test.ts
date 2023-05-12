@@ -53,11 +53,7 @@ describe("Regular Trade Method", () => {
             operator: ownerAddress
         });
         priceOracleCapID = (
-            Transaction.getObjects(
-                tx,
-                "newObject",
-                "PriceOracleOperatorCap"
-            )[0] as any
+            Transaction.getObjects(tx, "newObject", "PriceOracleOperatorCap")[0] as any
         ).id as string;
 
         // make admin operator
@@ -119,12 +115,8 @@ describe("Regular Trade Method", () => {
 
         const tx = await onChain.trade({ ...trade, settlementCapID });
         expectTxToSucceed(tx); // tx should succeed
-        expect(Transaction.getEvents(tx, "TradeExecuted").length).to.be.equal(
-            0
-        );
-        expect(
-            Transaction.getEvents(tx, "BankBalanceUpdate").length
-        ).to.be.equal(0);
+        expect(Transaction.getEvents(tx, "TradeExecuted").length).to.be.equal(0);
+        expect(Transaction.getEvents(tx, "BankBalanceUpdate").length).to.be.equal(0);
 
         // both alice's orders should be filled
         expect(Transaction.getEvents(tx, "OrderFill").length).to.be.equal(2);
@@ -139,11 +131,7 @@ describe("Regular Trade Method", () => {
             defaultOrder
         );
 
-        const error = OWNERSHIP_ERROR(
-            settlementCapID,
-            ownerAddress,
-            alice.address
-        );
+        const error = OWNERSHIP_ERROR(settlementCapID, ownerAddress, alice.address);
 
         await expect(
             onChain.trade({ ...tradeData, settlementCapID }, alice.signer)
@@ -162,9 +150,8 @@ describe("Regular Trade Method", () => {
         const tx = await onChain.createSettlementOperator({
             operator: alice.address
         });
-        const capID = (
-            Transaction.getObjects(tx, "newObject", "SettlementCap")[0] as any
-        ).id as string;
+        const capID = (Transaction.getObjects(tx, "newObject", "SettlementCap")[0] as any)
+            .id as string;
 
         const tx2 = await onChain.removeSettlementOperator({ capID });
         expectTxToSucceed(tx2);
@@ -641,9 +628,7 @@ describe("Regular Trade Method", () => {
             market: onChain.getPerpetualID()
         });
 
-        const takerOrderSigned = new OrderSigner(bob.keyPair).getSignedOrder(
-            takerOrder
-        );
+        const takerOrderSigned = new OrderSigner(bob.keyPair).getSignedOrder(takerOrder);
 
         const txResponse = await onChain.trade({
             makerOrder: updatedMakerOrder,
@@ -678,8 +663,7 @@ describe("Regular Trade Method", () => {
 
         // deploying a new market
         deployment["markets"]["BTC-PERP"] = {
-            Objects: (await createMarket(deployment, ownerSigner, provider))
-                .marketObjects
+            Objects: (await createMarket(deployment, ownerSigner, provider)).marketObjects
         };
 
         onChain = new OnChainCalls(ownerSigner, deployment);
@@ -740,11 +724,9 @@ describe("Regular Trade Method", () => {
         //taker of the trade was alice
         expect(TradeExecuted.fields.taker).to.be.equal(alice.address);
 
-        const orderFill = Transaction.getEvents(tx2, "OrderFill").filter(
-            (event) => {
-                return event.fields.order.fields.maker == alice.address;
-            }
-        )[0];
+        const orderFill = Transaction.getEvents(tx2, "OrderFill").filter(event => {
+            return event.fields.order.fields.maker == alice.address;
+        })[0];
 
         expect(orderFill.fields.sigMaker).to.be.equal(bob.address);
     });

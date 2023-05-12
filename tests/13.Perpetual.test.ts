@@ -148,10 +148,7 @@ describe("Perpetual", () => {
             );
 
             await expect(
-                onChain.delistPerpetual(
-                    { price: toBigNumberStr(100.234) },
-                    alice.signer
-                )
+                onChain.delistPerpetual({ price: toBigNumberStr(100.234) }, alice.signer)
             ).to.be.eventually.rejectedWith(error);
         });
 
@@ -169,11 +166,7 @@ describe("Perpetual", () => {
             );
 
             const settlementCapID = (
-                Transaction.getObjects(
-                    txs,
-                    "newObject",
-                    "SettlementCap"
-                )[0] as any
+                Transaction.getObjects(txs, "newObject", "SettlementCap")[0] as any
             ).id as string;
 
             const order = createOrder({
@@ -224,11 +217,7 @@ describe("Perpetual", () => {
             );
 
             const settlementCapID = (
-                Transaction.getObjects(
-                    txs,
-                    "newObject",
-                    "SettlementCap"
-                )[0] as any
+                Transaction.getObjects(txs, "newObject", "SettlementCap")[0] as any
             ).id as string;
 
             const tx = await onChain.setPriceOracleOperator({
@@ -298,11 +287,7 @@ describe("Perpetual", () => {
                 ownerSigner
             );
             const settlementCapID = (
-                Transaction.getObjects(
-                    tx2,
-                    "newObject",
-                    "SettlementCap"
-                )[0] as any
+                Transaction.getObjects(tx2, "newObject", "SettlementCap")[0] as any
             ).id as string;
 
             const defaultOrder = createOrder({
@@ -387,11 +372,7 @@ describe("Perpetual", () => {
             );
 
             settlementCapID = (
-                Transaction.getObjects(
-                    tx2,
-                    "newObject",
-                    "SettlementCap"
-                )[0] as any
+                Transaction.getObjects(tx2, "newObject", "SettlementCap")[0] as any
             ).id as string;
 
             // set oracle price

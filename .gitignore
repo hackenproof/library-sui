@@ -1,0 +1,23 @@
+node_modules/
+.env
+build
+yarn-error.log
+.nyc_output/
+.DS_Store
+src/swagger
+
+# dumps is for data/cache of containerized services
+.dumps
+.dumps/*
+coverage/*
+.idea
+
+**/.terraform/*
+**/.terragrunt*/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+*.terraform.lock.hcl
+

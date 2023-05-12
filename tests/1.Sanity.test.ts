@@ -34,25 +34,18 @@ describe("Sanity Tests", () => {
     });
 
     it("deployer should have non zero balance", async () => {
-        const coins = await provider.getCoinBalancesOwnedByAddress(
-            ownerAddress
-        );
+        const coins = await provider.getCoinBalancesOwnedByAddress(ownerAddress);
         expect(coins.length).to.be.greaterThan(0);
     });
 
     it("The deployer account must be the owner of ExchangeAdminCap", async () => {
-        const details = await onChain.getOnChainObject(
-            onChain.getExchangeAdminCap()
-        );
+        const details = await onChain.getOnChainObject(onChain.getExchangeAdminCap());
         expect((details.owner as any).AddressOwner).to.be.equal(ownerAddress);
     });
 
     it("should allow admin to create a perpetual", async () => {
         const txResponse = await onChain.createPerpetual({ name: "TEST-PERP" });
-        const event = Transaction.getEvents(
-            txResponse,
-            "PerpetualCreationEvent"
-        )[0];
+        const event = Transaction.getEvents(txResponse, "PerpetualCreationEvent")[0];
         expect(event).to.not.be.undefined;
     });
 
@@ -64,8 +57,8 @@ describe("Sanity Tests", () => {
             TEST_WALLETS[0].address
         );
 
-        await expect(
-            onChain.createPerpetual({}, alice)
-        ).to.eventually.be.rejectedWith(expectedError);
+        await expect(onChain.createPerpetual({}, alice)).to.eventually.be.rejectedWith(
+            expectedError
+        );
     });
 });
