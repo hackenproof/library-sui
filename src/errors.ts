@@ -1,4 +1,8 @@
-export const OWNERSHIP_ERROR = (objId: string, ownerId: string, signerId: string) => {
+export const OWNERSHIP_ERROR = (
+    objId: string,
+    ownerId: string,
+    signerId: string
+) => {
     return new RegExp(
         `Object ${objId} is owned by account address ${ownerId}, but given owner/signer address is ${signerId}`
     );
