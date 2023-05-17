@@ -152,10 +152,7 @@ describe("Perpetual", () => {
             );
 
             await expect(
-                onChain.delistPerpetual(
-                    { price: toBigNumberStr(100.234) },
-                    alice.signer
-                )
+                onChain.delistPerpetual({ price: toBigNumberStr(100.234) }, alice.signer)
             ).to.be.eventually.rejectedWith(error);
         });
 
@@ -210,10 +207,7 @@ describe("Perpetual", () => {
         it("should revert as alice has no position to close", async () => {
             await onChain.delistPerpetual({ price: toBigNumberStr(100) });
 
-            const tx = await onChain.closePosition(
-                { gasBudget: 10000000 },
-                alice.signer
-            );
+            const tx = await onChain.closePosition({ gasBudget: 10000000 }, alice.signer);
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[507]);
         });

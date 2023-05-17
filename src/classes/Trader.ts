@@ -17,10 +17,7 @@ export class Trader {
             price?: BigNumber;
         }
     ) {
-        const takerAddress = await getSignerFromKeyPair(
-            taker,
-            provider
-        ).getAddress();
+        const takerAddress = await getSignerFromKeyPair(taker, provider).getAddress();
 
         const takerOrder = options?.takerOrder || {
             ...makerOrder,

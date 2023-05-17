@@ -11,12 +11,7 @@ import {
 } from "../src/utils";
 import { TEST_WALLETS } from "./helpers/accounts";
 import { DEFAULT } from "../src/defaults";
-import {
-    base64ToBuffer,
-    base64ToHex,
-    bigNumber,
-    hexToBuffer
-} from "../src/library";
+import { base64ToBuffer, base64ToHex, bigNumber, hexToBuffer } from "../src/library";
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
@@ -50,9 +45,7 @@ describe("Order Signer", () => {
             ownerSigner,
             "verify_signature",
             [
-                Array.from(
-                    hexToBuffer(signature.slice(0, signature.length - 2))
-                ),
+                Array.from(hexToBuffer(signature.slice(0, signature.length - 2))),
                 Array.from(pubkey.toBytes()),
                 serializedOrder
             ],
@@ -77,9 +70,7 @@ describe("Order Signer", () => {
             ownerSigner,
             "verify_signature",
             [
-                Array.from(
-                    hexToBuffer(signature.slice(0, signature.length - 2))
-                ),
+                Array.from(hexToBuffer(signature.slice(0, signature.length - 2))),
                 Array.from(pubkey.toBytes()),
                 serializedOrder
             ],
@@ -106,9 +97,7 @@ describe("Order Signer", () => {
             ownerSigner,
             "verify_signature",
             [
-                Array.from(
-                    hexToBuffer(signature.slice(0, signature.length - 2))
-                ),
+                Array.from(hexToBuffer(signature.slice(0, signature.length - 2))),
                 Array.from(pubkey.toBytes()),
                 serializedOrder
             ],
@@ -185,10 +174,7 @@ describe("Order Signer", () => {
     });
 
     xit("should verify hash to given address with ed25519", async () => {
-        const ownerKeyPair = getKeyPairFromSeed(
-            DeploymentConfigs.deployer,
-            "ED25519"
-        );
+        const ownerKeyPair = getKeyPairFromSeed(DeploymentConfigs.deployer, "ED25519");
         const orderSigner = new OrderSigner(ownerKeyPair);
         const serializedOrder = orderSigner.getSerializedOrder(order);
         const signature = orderSigner.signOrder(order);
@@ -198,9 +184,7 @@ describe("Order Signer", () => {
             ownerSigner,
             "verify_signature",
             [
-                Array.from(
-                    hexToBuffer(signature.slice(0, signature.length - 2))
-                ),
+                Array.from(hexToBuffer(signature.slice(0, signature.length - 2))),
                 Array.from(pubkey.toBytes()),
                 serializedOrder
             ],
@@ -218,10 +202,7 @@ describe("Order Signer", () => {
 
     it("should not verify hash to given address ed25519", async () => {
         const alice = getKeyPairFromSeed(TEST_WALLETS[0].phrase, "ED25519");
-        const ownerKeyPair = getKeyPairFromSeed(
-            DeploymentConfigs.deployer,
-            "ED25519"
-        );
+        const ownerKeyPair = getKeyPairFromSeed(DeploymentConfigs.deployer, "ED25519");
         const orderSigner = new OrderSigner(alice);
 
         const serializedOrder = orderSigner.getSerializedOrder(order);
@@ -232,9 +213,7 @@ describe("Order Signer", () => {
             ownerSigner,
             "verify_signature",
             [
-                Array.from(
-                    hexToBuffer(signature.slice(0, signature.length - 2))
-                ),
+                Array.from(hexToBuffer(signature.slice(0, signature.length - 2))),
                 Array.from(pubkey.toBytes()),
                 serializedOrder
             ],
@@ -320,9 +299,7 @@ describe("Order Signer", () => {
 
         expect(
             Buffer.from(publicKeyRecoveredEvent.public_key).toString("hex")
-        ).to.be.equal(
-            Buffer.from(ownerKeyPair.getPublicKey().toBytes()).toString("hex")
-        );
+        ).to.be.equal(Buffer.from(ownerKeyPair.getPublicKey().toBytes()).toString("hex"));
         expect(hash).to.be.equal(onChainHash);
     });
 
@@ -330,11 +307,7 @@ describe("Order Signer", () => {
         const receipt = await onChain.signAndCall(
             ownerSigner,
             "get_public_address",
-            [
-                Array.from(
-                    base64ToBuffer(ownerKeyPair.getPublicKey().toBase64())
-                )
-            ],
+            [Array.from(base64ToBuffer(ownerKeyPair.getPublicKey().toBase64()))],
             "test"
         );
 
@@ -345,9 +318,7 @@ describe("Order Signer", () => {
 
         expect(addressGeneratedEvent).to.not.be.undefined;
 
-        const onChainAddress = base64ToHex(
-            addressGeneratedEvent?.address ?? ""
-        );
+        const onChainAddress = base64ToHex(addressGeneratedEvent?.address ?? "");
 
         expect(onChainAddress).to.be.equal(
             ownerKeyPair.getPublicKey().toSuiAddress().substring(2)
@@ -358,11 +329,7 @@ describe("Order Signer", () => {
         const receipt = await onChain.signAndCall(
             ownerSigner,
             "get_public_address",
-            [
-                Array.from(
-                    base64ToBuffer(ownerKeyPair.getPublicKey().toBase64())
-                )
-            ],
+            [Array.from(base64ToBuffer(ownerKeyPair.getPublicKey().toBase64()))],
             "test"
         );
 
@@ -373,9 +340,7 @@ describe("Order Signer", () => {
 
         expect(addressGeneratedEvent).to.not.be.undefined;
 
-        const onChainAddress = base64ToHex(
-            addressGeneratedEvent?.address ?? ""
-        );
+        const onChainAddress = base64ToHex(addressGeneratedEvent?.address ?? "");
 
         expect(onChainAddress).to.be.equal(
             ownerKeyPair.getPublicKey().toSuiAddress().substring(2)

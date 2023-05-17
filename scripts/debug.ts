@@ -1,10 +1,5 @@
 import { DeploymentConfigs } from "../src/DeploymentConfig";
-import {
-    readFile,
-    getProvider,
-    getSignerFromSeed,
-    requestGas
-} from "../src/utils";
+import { readFile, getProvider, getSignerFromSeed, requestGas } from "../src/utils";
 import { OnChainCalls } from "../src/classes/OnChainCalls";
 import { TEST_WALLETS } from "../tests/helpers/accounts";
 import { Transaction } from "../src";

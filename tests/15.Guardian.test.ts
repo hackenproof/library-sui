@@ -40,9 +40,8 @@ describe("Guardian", () => {
             ...deployment,
             markets: {
                 ["ETH-PERP"]: {
-                    Objects: (
-                        await createMarket(deployment, ownerSigner, provider)
-                    ).marketObjects
+                    Objects: (await createMarket(deployment, ownerSigner, provider))
+                        .marketObjects
                 }
             }
         };
@@ -57,9 +56,7 @@ describe("Guardian", () => {
             ownerSigner
         );
         expectTxToSucceed(tx1);
-        expectTxToEmitEvent(tx1, "WithdrawalStatusUpdate", 1, [
-            { status: false }
-        ]);
+        expectTxToEmitEvent(tx1, "WithdrawalStatusUpdate", 1, [{ status: false }]);
 
         const tx2 = await onChain.setBankWithdrawalStatus(
             {
@@ -68,9 +65,7 @@ describe("Guardian", () => {
             ownerSigner
         );
         expectTxToSucceed(tx2);
-        expectTxToEmitEvent(tx2, "WithdrawalStatusUpdate", 1, [
-            { status: true }
-        ]);
+        expectTxToEmitEvent(tx2, "WithdrawalStatusUpdate", 1, [{ status: true }]);
     });
     it("should revert when guardian disabled withdraw", async () => {
         const alice = getSignerFromSeed(TEST_WALLETS[0].phrase, provider);
@@ -103,9 +98,7 @@ describe("Guardian", () => {
         );
 
         expectTxToSucceed(tx);
-        expectTxToEmitEvent(tx, "WithdrawalStatusUpdate", 1, [
-            { status: false }
-        ]);
+        expectTxToEmitEvent(tx, "WithdrawalStatusUpdate", 1, [{ status: false }]);
 
         const txResult = await onChain.withdrawFromBank(
             {
@@ -128,9 +121,7 @@ describe("Guardian", () => {
         );
 
         expectTxToSucceed(tx1);
-        expectTxToEmitEvent(tx1, "WithdrawalStatusUpdate", 1, [
-            { status: false }
-        ]);
+        expectTxToEmitEvent(tx1, "WithdrawalStatusUpdate", 1, [{ status: false }]);
 
         // making alice new guardian
         const alice = getTestAccounts(provider)[0];
@@ -159,9 +150,7 @@ describe("Guardian", () => {
         );
 
         expectTxToSucceed(tx4);
-        expectTxToEmitEvent(tx4, "WithdrawalStatusUpdate", 1, [
-            { status: true }
-        ]);
+        expectTxToEmitEvent(tx4, "WithdrawalStatusUpdate", 1, [{ status: true }]);
     });
     it("should successfully toggle TradingPermissionStatusUpdate", async () => {
         const tx1 = await onChain.setPerpetualTradingPermit(
@@ -171,9 +160,7 @@ describe("Guardian", () => {
             ownerSigner
         );
         expectTxToSucceed(tx1);
-        expectTxToEmitEvent(tx1, "TradingPermissionStatusUpdate", 1, [
-            { status: false }
-        ]);
+        expectTxToEmitEvent(tx1, "TradingPermissionStatusUpdate", 1, [{ status: false }]);
 
         const tx2 = await onChain.setPerpetualTradingPermit(
             {
@@ -182,9 +169,7 @@ describe("Guardian", () => {
             ownerSigner
         );
         expectTxToSucceed(tx2);
-        expectTxToEmitEvent(tx2, "TradingPermissionStatusUpdate", 1, [
-            { status: true }
-        ]);
+        expectTxToEmitEvent(tx2, "TradingPermissionStatusUpdate", 1, [{ status: true }]);
     });
     it("should revert when an old guardian tries to deny trading", async () => {
         // current guardian denies permission
@@ -195,9 +180,7 @@ describe("Guardian", () => {
             ownerSigner
         );
         expectTxToSucceed(tx1);
-        expectTxToEmitEvent(tx1, "TradingPermissionStatusUpdate", 1, [
-            { status: false }
-        ]);
+        expectTxToEmitEvent(tx1, "TradingPermissionStatusUpdate", 1, [{ status: false }]);
 
         // making alice new guardian
         const alice = getTestAccounts(provider)[0];
@@ -226,8 +209,6 @@ describe("Guardian", () => {
         );
 
         expectTxToSucceed(tx4);
-        expectTxToEmitEvent(tx4, "TradingPermissionStatusUpdate", 1, [
-            { status: true }
-        ]);
+        expectTxToEmitEvent(tx4, "TradingPermissionStatusUpdate", 1, [{ status: true }]);
     });
 });

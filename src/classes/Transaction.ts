@@ -1,7 +1,4 @@
-import {
-    SuiTransactionBlockResponse,
-    getExecutionStatusError
-} from "@mysten/sui.js";
+import { SuiTransactionBlockResponse, getExecutionStatusError } from "@mysten/sui.js";
 import { UserPositionExtended } from "../interfaces";
 import { ERROR_CODES } from "../errors";
 import BigNumber from "bignumber.js";
@@ -18,12 +15,7 @@ export class Transaction {
             const error = tx.effects?.status.error as string;
 
             return error.lastIndexOf(",") > 0
-                ? Number(
-                      error.slice(
-                          error.lastIndexOf(",") + 2,
-                          error.lastIndexOf(")")
-                      )
-                  )
+                ? Number(error.slice(error.lastIndexOf(",") + 2, error.lastIndexOf(")")))
                 : undefined;
         }
         return 0;
@@ -40,10 +32,7 @@ export class Transaction {
         }
     }
 
-    static getEvents(
-        tx: SuiTransactionBlockResponse,
-        eventName?: string
-    ): Array<any> {
+    static getEvents(tx: SuiTransactionBlockResponse, eventName?: string): Array<any> {
         let events = [];
 
         if (tx?.events) {
@@ -126,18 +115,13 @@ export class Transaction {
         let userPosition: UserPositionExtended;
 
         if (events[0].account == address) userPosition = events[0].position;
-        else if (events[1].account == address)
-            userPosition = events[1].position;
-        else
-            throw `AccountPositionUpdate event not found for address: ${address}`;
+        else if (events[1].account == address) userPosition = events[1].position;
+        else throw `AccountPositionUpdate event not found for address: ${address}`;
 
         return userPosition;
     }
 
-    static getAccountPNL(
-        tx: SuiTransactionBlockResponse,
-        address: string
-    ): BigNumber {
+    static getAccountPNL(tx: SuiTransactionBlockResponse, address: string): BigNumber {
         const events = Transaction.getEvents(tx, "TradeExecuted");
 
         if (events.length == 0) {
@@ -182,10 +166,7 @@ export class Transaction {
     static getBankAccountID(tx: SuiTransactionBlockResponse): string {
         // if an object is created its bank account
         const createdObjects = this.getCreatedObjectIDs(tx);
-        const mutatedObjects = this.getMutatedObjectsUsingType(
-            tx,
-            "BankAccount"
-        );
+        const mutatedObjects = this.getMutatedObjectsUsingType(tx, "BankAccount");
         if (createdObjects.length > 0) {
             return createdObjects[0];
         } else if (mutatedObjects.length > 0) {

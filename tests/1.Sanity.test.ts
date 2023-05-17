@@ -1,12 +1,7 @@
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import { DeploymentConfigs } from "../src/DeploymentConfig";
-import {
-    readFile,
-    getProvider,
-    getSignerFromSeed,
-    requestGas
-} from "../src/utils";
+import { readFile, getProvider, getSignerFromSeed, requestGas } from "../src/utils";
 import { OnChainCalls, Transaction } from "../src/classes";
 import { TEST_WALLETS } from "./helpers/accounts";
 import { OWNERSHIP_ERROR } from "../src/errors";
@@ -40,20 +35,13 @@ describe("Sanity Tests", () => {
     });
 
     it("The deployer account must be the owner of ExchangeAdminCap", async () => {
-        const details = await onChain.getOnChainObject(
-            onChain.getExchangeAdminCap()
-        );
-        expect((details?.data?.owner as any).AddressOwner).to.be.equal(
-            ownerAddress
-        );
+        const details = await onChain.getOnChainObject(onChain.getExchangeAdminCap());
+        expect((details?.data?.owner as any).AddressOwner).to.be.equal(ownerAddress);
     });
 
     it("should allow admin to create a perpetual", async () => {
         const txResponse = await onChain.createPerpetual({ name: "TEST-PERP" });
-        const event = Transaction.getEvents(
-            txResponse,
-            "PerpetualCreationEvent"
-        )[0];
+        const event = Transaction.getEvents(txResponse, "PerpetualCreationEvent")[0];
         expect(event).to.not.be.undefined;
     });
 
@@ -65,8 +53,8 @@ describe("Sanity Tests", () => {
             TEST_WALLETS[0].address
         );
 
-        await expect(
-            onChain.createPerpetual({}, alice)
-        ).to.eventually.be.rejectedWith(expectedError);
+        await expect(onChain.createPerpetual({}, alice)).to.eventually.be.rejectedWith(
+            expectedError
+        );
     });
 });

@@ -58,16 +58,11 @@ export async function executeTests(
         feePoolAddress = createAccount(provider).address;
         insurancePoolAddress = createAccount(provider).address;
 
-        const marketData = await createMarket(
-            deployment,
-            ownerSigner,
-            provider,
-            {
-                ...marketConfig,
-                feePool: feePoolAddress,
-                insurancePool: insurancePoolAddress
-            }
-        );
+        const marketData = await createMarket(deployment, ownerSigner, provider, {
+            ...marketConfig,
+            feePool: feePoolAddress,
+            insurancePool: insurancePoolAddress
+        });
 
         // init state
         deployment["markets"]["ETH-PERP"]["Objects"] = marketData.marketObjects;
@@ -141,13 +136,13 @@ export async function executeTests(
             deleveragingCapID = Transaction.getCreatedObjectIDs(tx3)[0];
         });
 
-        Object.keys(testCases).forEach((testName) => {
+        Object.keys(testCases).forEach(testName => {
             describe(testName, () => {
                 before(async () => {
                     await setupTest();
                 });
 
-                testCases[testName].forEach(async (testCase) => {
+                testCases[testName].forEach(async testCase => {
                     testCase.size = testCase.size as any as number;
 
                     const testCaseName =
@@ -158,27 +153,21 @@ export async function executeTests(
                                   testCase.size
                               )}`
                             : testCase.tradeType == "liquidator_bob"
-                            ? `Liquidator opens size:${Math.abs(
-                                  testCase.size
-                              )} price:${testCase.price} leverage:${
-                                  testCase.leverage
-                              }x ${
+                            ? `Liquidator opens size:${Math.abs(testCase.size)} price:${
+                                  testCase.price
+                              } leverage:${testCase.leverage}x ${
                                   testCase.size > 0 ? "Long" : "Short"
                               } against Bob`
                             : testCase.tradeType == "liquidator_cat"
-                            ? `Liquidator opens size:${Math.abs(
-                                  testCase.size
-                              )} price:${testCase.price} leverage:${
-                                  testCase.leverage
-                              }x ${
+                            ? `Liquidator opens size:${Math.abs(testCase.size)} price:${
+                                  testCase.price
+                              } leverage:${testCase.leverage}x ${
                                   testCase.size > 0 ? "Long" : "Short"
                               } against Bob`
                             : testCase.tradeType == "cat_dog"
-                            ? `Cat opens size:${Math.abs(
-                                  testCase.size
-                              )} price:${testCase.price} leverage:${
-                                  testCase.leverage
-                              }x ${
+                            ? `Cat opens size:${Math.abs(testCase.size)} price:${
+                                  testCase.price
+                              } leverage:${testCase.leverage}x ${
                                   testCase.size > 0 ? "Long" : "Short"
                               } against dog`
                             : testCase.tradeType == "deleveraging"
@@ -186,19 +175,15 @@ export async function executeTests(
                                   testCase.pOracle
                               } size:${Math.abs(testCase.size)}`
                             : testCase.isTaker == true
-                            ? `Bob opens size:${Math.abs(
-                                  testCase.size
-                              )} price:${testCase.price} leverage:${
-                                  testCase.leverage
-                              }x ${
+                            ? `Bob opens size:${Math.abs(testCase.size)} price:${
+                                  testCase.price
+                              } leverage:${testCase.leverage}x ${
                                   testCase.size > 0 ? "Long" : "Short"
                               } against Alice`
                             : testCase.size && testCase.size != 0
-                            ? `Alice opens size:${Math.abs(
-                                  testCase.size
-                              )} price:${testCase.price} leverage:${
-                                  testCase.leverage
-                              }x ${
+                            ? `Alice opens size:${Math.abs(testCase.size)} price:${
+                                  testCase.price
+                              } leverage:${testCase.leverage}x ${
                                   testCase.size > 0 ? "Long" : "Short"
                               } against Bob`
                             : testCase.addMargin != undefined
@@ -235,8 +220,7 @@ export async function executeTests(
                             testCase.tradeType != "liquidation" &&
                             testCase.tradeType != "deleveraging"
                         ) {
-                            const { maker, taker } =
-                                getMakerTakerOfTrade(testCase);
+                            const { maker, taker } = getMakerTakerOfTrade(testCase);
 
                             const order = createOrder({
                                 market: onChain.getPerpetualID(),
@@ -278,9 +262,7 @@ export async function executeTests(
                             tx = await onChain.liquidate(
                                 {
                                     liquidatee: alice.address,
-                                    quantity: toBigNumberStr(
-                                        Math.abs(testCase.size)
-                                    ),
+                                    quantity: toBigNumberStr(Math.abs(testCase.size)),
                                     leverage: toBigNumberStr(
                                         testCase.leverage as any as number
                                     ),
@@ -295,9 +277,7 @@ export async function executeTests(
                                 {
                                     maker: alice.address,
                                     taker: cat.address,
-                                    quantity: toBigNumberStr(
-                                        Math.abs(testCase.size)
-                                    ),
+                                    quantity: toBigNumberStr(Math.abs(testCase.size)),
                                     deleveragingCapID,
                                     gasBudget: 100000000
                                 },

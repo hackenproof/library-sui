@@ -12,11 +12,7 @@ import { OnChainCalls, Transaction } from "../src/classes";
 import { getTestAccounts } from "./helpers/accounts";
 import { ERROR_CODES, OWNERSHIP_ERROR } from "../src/errors";
 import { bigNumber, toBigNumber } from "../src/library";
-import {
-    expectTxToEmitEvent,
-    expectTxToFail,
-    expectTxToSucceed
-} from "./helpers/expect";
+import { expectTxToEmitEvent, expectTxToFail, expectTxToSucceed } from "./helpers/expect";
 import { fundTestAccounts } from "./helpers/utils";
 
 chai.use(chaiAsPromised);
@@ -72,25 +68,17 @@ describe("Price Oracle", () => {
 
             expectTxToEmitEvent(tx, "OraclePriceUpdateEvent");
 
-            const details = await onChain.getOnChainObject(
-                onChain.getPerpetualID()
-            );
+            const details = await onChain.getOnChainObject(onChain.getPerpetualID());
 
             expect(
                 bigNumber(
-                    (details?.data?.content as any).fields.priceOracle?.fields
-                        ?.price
+                    (details?.data?.content as any).fields.priceOracle?.fields?.price
                 ).toFixed()
             ).to.equal(newPrice.toFixed());
 
-            const event = Transaction.getEvents(
-                tx,
-                "OraclePriceUpdateEvent"
-            )[0];
+            const event = Transaction.getEvents(tx, "OraclePriceUpdateEvent")[0];
 
-            expect(bigNumber(event?.price).toFixed(0)).to.be.equal(
-                newPrice.toFixed()
-            );
+            expect(bigNumber(event?.price).toFixed(0)).to.be.equal(newPrice.toFixed());
         });
 
         it("should only allow price oracle capability owner to update oracle price", async () => {
@@ -149,13 +137,12 @@ describe("Price Oracle", () => {
             const newPrice = toBigNumber(3.9);
 
             // updating allowed diff to max value to allow setting up test
-            const tx0 =
-                await onChain.updatePriceOracleMaxAllowedPriceDifference(
-                    {
-                        maxAllowedPriceDifference: toBigNumber(10000).toFixed(0)
-                    },
-                    ownerSigner
-                );
+            const tx0 = await onChain.updatePriceOracleMaxAllowedPriceDifference(
+                {
+                    maxAllowedPriceDifference: toBigNumber(10000).toFixed(0)
+                },
+                ownerSigner
+            );
             expectTxToSucceed(tx0);
 
             const tx1 = await onChain.updateOraclePrice(
@@ -168,14 +155,12 @@ describe("Price Oracle", () => {
 
             expectTxToSucceed(tx1);
 
-            const tx2 =
-                await onChain.updatePriceOracleMaxAllowedPriceDifference(
-                    {
-                        maxAllowedPriceDifference:
-                            newAllowedPriceDiff.toFixed(0)
-                    },
-                    ownerSigner
-                );
+            const tx2 = await onChain.updatePriceOracleMaxAllowedPriceDifference(
+                {
+                    maxAllowedPriceDifference: newAllowedPriceDiff.toFixed(0)
+                },
+                ownerSigner
+            );
             expectTxToSucceed(tx2);
 
             const tx3 = await onChain.updateOraclePrice(
@@ -189,13 +174,8 @@ describe("Price Oracle", () => {
             expectTxToSucceed(tx3);
             expectTxToEmitEvent(tx3, "OraclePriceUpdateEvent");
 
-            const event = Transaction.getEvents(
-                tx3,
-                "OraclePriceUpdateEvent"
-            )[0];
-            expect(bigNumber(event?.price).toFixed(0)).to.be.equal(
-                newPrice.toFixed()
-            );
+            const event = Transaction.getEvents(tx3, "OraclePriceUpdateEvent")[0];
+            expect(bigNumber(event?.price).toFixed(0)).to.be.equal(newPrice.toFixed());
         });
 
         it("should revert when new price percentage difference against old price is more than allowed percentage", async () => {
@@ -204,13 +184,12 @@ describe("Price Oracle", () => {
             const newPrice = toBigNumber(3.91);
 
             // updating allowed diff to max value to allow setting up test
-            const tx0 =
-                await onChain.updatePriceOracleMaxAllowedPriceDifference(
-                    {
-                        maxAllowedPriceDifference: toBigNumber(10000).toFixed(0)
-                    },
-                    ownerSigner
-                );
+            const tx0 = await onChain.updatePriceOracleMaxAllowedPriceDifference(
+                {
+                    maxAllowedPriceDifference: toBigNumber(10000).toFixed(0)
+                },
+                ownerSigner
+            );
 
             expectTxToSucceed(tx0);
 
@@ -224,14 +203,12 @@ describe("Price Oracle", () => {
 
             expectTxToSucceed(tx1);
 
-            const tx2 =
-                await onChain.updatePriceOracleMaxAllowedPriceDifference(
-                    {
-                        maxAllowedPriceDifference:
-                            newAllowedPriceDiff.toFixed(0)
-                    },
-                    ownerSigner
-                );
+            const tx2 = await onChain.updatePriceOracleMaxAllowedPriceDifference(
+                {
+                    maxAllowedPriceDifference: newAllowedPriceDiff.toFixed(0)
+                },
+                ownerSigner
+            );
 
             expectTxToSucceed(tx2);
 
@@ -276,13 +253,10 @@ describe("Price Oracle", () => {
 
             expectTxToSucceed(tx);
             expectTxToEmitEvent(tx, "MaxAllowedPriceDiffUpdateEvent");
-            const event = Transaction.getEvents(
-                tx,
-                "MaxAllowedPriceDiffUpdateEvent"
-            )[0];
-            expect(
-                bigNumber(event?.maxAllowedPriceDifference).toFixed(0)
-            ).to.be.equal(newAllowedPriceDiff.toFixed());
+            const event = Transaction.getEvents(tx, "MaxAllowedPriceDiffUpdateEvent")[0];
+            expect(bigNumber(event?.maxAllowedPriceDifference).toFixed(0)).to.be.equal(
+                newAllowedPriceDiff.toFixed()
+            );
         });
 
         it("should not update price oracle maxAllowedPriceDifference when non-admin is the sender", async () => {
@@ -295,8 +269,7 @@ describe("Price Oracle", () => {
             await expect(
                 onChain.updatePriceOracleMaxAllowedPriceDifference(
                     {
-                        maxAllowedPriceDifference:
-                            toBigNumber(100000).toFixed(0),
+                        maxAllowedPriceDifference: toBigNumber(100000).toFixed(0),
                         gasBudget: 1000000
                     },
                     testWallet.signer

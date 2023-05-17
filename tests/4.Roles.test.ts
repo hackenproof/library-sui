@@ -50,10 +50,7 @@ describe("Roles", () => {
             });
             expectTxToSucceed(tx);
 
-            const event = Transaction.getEvents(
-                tx,
-                "ExchangeAdminUpdateEvent"
-            )[0];
+            const event = Transaction.getEvents(tx, "ExchangeAdminUpdateEvent")[0];
             expect(event.account).to.be.equal(alice.address);
         });
 
@@ -209,10 +206,7 @@ describe("Roles", () => {
             });
             expectTxToSucceed(tx);
 
-            const event = Transaction.getEvents(
-                tx,
-                "PriceOracleOperatorUpdate"
-            )[0];
+            const event = Transaction.getEvents(tx, "PriceOracleOperatorUpdate")[0];
 
             expect(event.account).to.be.equal(alice.address);
         });
@@ -242,10 +236,7 @@ describe("Roles", () => {
             });
             expectTxToSucceed(tx);
 
-            const event = Transaction.getEvents(
-                tx,
-                "DelevergingOperatorUpdate"
-            )[0];
+            const event = Transaction.getEvents(tx, "DelevergingOperatorUpdate")[0];
 
             expect(event.account).to.be.equal(alice.address);
         });
@@ -278,10 +269,7 @@ describe("Roles", () => {
             );
             expectTxToSucceed(tx2);
 
-            const event = Transaction.getEvents(
-                tx2,
-                "SubAccountUpdateEvent"
-            )[0];
+            const event = Transaction.getEvents(tx2, "SubAccountUpdateEvent")[0];
 
             expect(event.account).to.be.equal(alice.address);
             expect(event.subAccount).to.be.equal(bob.address);
@@ -315,10 +303,7 @@ describe("Roles", () => {
             );
             expectTxToSucceed(tx2);
 
-            const event = Transaction.getEvents(
-                tx2,
-                "SubAccountUpdateEvent"
-            )[0];
+            const event = Transaction.getEvents(tx2, "SubAccountUpdateEvent")[0];
 
             expect(event.account).to.be.equal(alice.address);
             expect(event.subAccount).to.be.equal(bob.address);

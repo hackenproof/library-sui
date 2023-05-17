@@ -17,9 +17,7 @@ const signer = getSignerFromSeed(DeploymentConfigs.deployer, provider);
 
 async function main() {
     // info
-    console.log(
-        `Deploying market ${market} on : ${DeploymentConfigs.network.rpc}`
-    );
+    console.log(`Deploying market ${market} on : ${DeploymentConfigs.network.rpc}`);
     const deployerAddress = await signer.getAddress();
 
     console.log(`Deployer SUI address: ${deployerAddress}`);
@@ -43,7 +41,7 @@ async function main() {
     console.log(`Creating perpetual for market: ${market}`);
 
     // create perpetual
-    const marketConfig = DeploymentConfigs.markets.filter((data) => {
+    const marketConfig = DeploymentConfigs.markets.filter(data => {
         if (data["name"] == market) {
             return true;
         }
@@ -56,12 +54,7 @@ async function main() {
         process.exit(1);
     }
 
-    const marketMap = await createMarket(
-        deployment,
-        signer,
-        provider,
-        marketConfig
-    );
+    const marketMap = await createMarket(deployment, signer, provider, marketConfig);
 
     deployment.markets[marketConfig.name as string] = {
         Config: marketConfig,
@@ -74,9 +67,7 @@ async function main() {
     };
 
     await writeFile(DeploymentConfigs.filePath, deployment);
-    console.log(
-        `Object details written to file: ${DeploymentConfigs.filePath}`
-    );
+    console.log(`Object details written to file: ${DeploymentConfigs.filePath}`);
 }
 
 main();

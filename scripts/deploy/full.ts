@@ -19,9 +19,7 @@ const signer = getSignerFromSeed(DeploymentConfigs.deployer, provider);
 
 async function main() {
     // info
-    console.log(
-        `Performing full deployment on: ${DeploymentConfigs.network.rpc}`
-    );
+    console.log(`Performing full deployment on: ${DeploymentConfigs.network.rpc}`);
     const deployerAddress = await signer.getAddress();
 
     console.log(`Deployer SUI address: ${deployerAddress}`);
@@ -71,9 +69,7 @@ async function main() {
         }
 
         await writeFile(DeploymentConfigs.filePath, deploymentData);
-        console.log(
-            `Object details written to file: ${DeploymentConfigs.filePath}`
-        );
+        console.log(`Object details written to file: ${DeploymentConfigs.filePath}`);
     }
 }
 

@@ -75,9 +75,7 @@ describe("Evaluator", () => {
         it("should set min price to 0.2", async () => {
             const tx = await onChain.setMinPrice({ minPrice: 0.02 });
             expectTxToSucceed(tx);
-            const details = await onChain.getPerpDetails(
-                onChain.getPerpetualID()
-            );
+            const details = await onChain.getPerpDetails(onChain.getPerpetualID());
 
             expect(details.checks["fields"]["minPrice"]).to.be.equal(
                 toBigNumberStr(0.02)
@@ -114,9 +112,7 @@ describe("Evaluator", () => {
 
         it("should set max price to 10000", async () => {
             await onChain.setMaxPrice({ maxPrice: 20000 });
-            const details = await onChain.getPerpDetails(
-                onChain.getPerpetualID()
-            );
+            const details = await onChain.getPerpDetails(onChain.getPerpetualID());
             expect(details.checks["fields"]["maxPrice"]).to.be.equal(
                 toBigNumberStr(20000)
             );
@@ -145,12 +141,8 @@ describe("Evaluator", () => {
 
         it("should set tick size to 0.1", async () => {
             await onChain.setTickSize({ tickSize: 0.1 });
-            const details = await onChain.getPerpDetails(
-                onChain.getPerpetualID()
-            );
-            expect(details.checks["fields"]["tickSize"]).to.be.equal(
-                toBigNumberStr(0.1)
-            );
+            const details = await onChain.getPerpDetails(onChain.getPerpetualID());
+            expect(details.checks["fields"]["tickSize"]).to.be.equal(toBigNumberStr(0.1));
         });
 
         it("should revert when trying to set tick size as 0", async () => {
@@ -378,18 +370,14 @@ describe("Evaluator", () => {
     describe("Quantity", async () => {
         it("should set maximum quantity (limit) as 20000", async () => {
             await onChain.setMaxQtyLimit({ maxQtyLimit: 20000 });
-            const details = await onChain.getPerpDetails(
-                onChain.getPerpetualID()
-            );
+            const details = await onChain.getPerpDetails(onChain.getPerpetualID());
             expect(details.checks["fields"]["maxQtyLimit"]).to.be.equal(
                 toBigNumberStr(20000)
             );
         });
         it("should set maximum quantity (market) as 20000", async () => {
             await onChain.setMaxQtyMarket({ maxQtyMarket: 20000 });
-            const details = await onChain.getPerpDetails(
-                onChain.getPerpetualID()
-            );
+            const details = await onChain.getPerpDetails(onChain.getPerpetualID());
             expect(details.checks["fields"]["maxQtyMarket"]).to.be.equal(
                 toBigNumberStr(20000)
             );
@@ -456,12 +444,8 @@ describe("Evaluator", () => {
 
         it("should set step size to 0.1", async () => {
             await onChain.setStepSize({ stepSize: 0.1 });
-            const details = await onChain.getPerpDetails(
-                onChain.getPerpetualID()
-            );
-            expect(details.checks["fields"]["stepSize"]).to.be.equal(
-                toBigNumberStr(0.1)
-            );
+            const details = await onChain.getPerpDetails(onChain.getPerpetualID());
+            expect(details.checks["fields"]["stepSize"]).to.be.equal(toBigNumberStr(0.1));
         });
 
         it("should revert when trying to set step size as 0", async () => {
@@ -755,12 +739,8 @@ describe("Evaluator", () => {
 
         it("should set market take bound (long) to 20%", async () => {
             await onChain.setMTBLong({ mtbLong: 0.2, gasBudget: 10000000 });
-            const details = await onChain.getPerpDetails(
-                onChain.getPerpetualID()
-            );
-            expect(details.checks["fields"]["mtbLong"]).to.be.equal(
-                toBigNumberStr(0.2)
-            );
+            const details = await onChain.getPerpDetails(onChain.getPerpetualID());
+            expect(details.checks["fields"]["mtbLong"]).to.be.equal(toBigNumberStr(0.2));
         });
 
         it("should revert when trying to set market take bound (long) as 0", async () => {
@@ -785,12 +765,8 @@ describe("Evaluator", () => {
 
         it("should set market take bound (short) to 20%", async () => {
             await onChain.setMTBShort({ mtbShort: 0.2 });
-            const details = await onChain.getPerpDetails(
-                onChain.getPerpetualID()
-            );
-            expect(details.checks["fields"]["mtbShort"]).to.be.equal(
-                toBigNumberStr(0.2)
-            );
+            const details = await onChain.getPerpDetails(onChain.getPerpetualID());
+            expect(details.checks["fields"]["mtbShort"]).to.be.equal(toBigNumberStr(0.2));
         });
 
         it("should revert when trying to set market take bound (short) as 0", async () => {
@@ -991,13 +967,9 @@ describe("Evaluator", () => {
             maxLimit.push(toBigNumberStr(20000));
             maxLimit.push(toBigNumberStr(30000));
             await onChain.setMaxAllowedOIOpen({ maxLimit });
-            const details = await onChain.getPerpDetails(
-                onChain.getPerpetualID()
-            );
+            const details = await onChain.getPerpDetails(onChain.getPerpetualID());
             maxLimit.unshift(toBigNumberStr(0));
-            expect(details.checks["fields"]["maxAllowedOIOpen"]).deep.equal(
-                maxLimit
-            );
+            expect(details.checks["fields"]["maxAllowedOIOpen"]).deep.equal(maxLimit);
         });
 
         it("should revert when non-admin account tries to max Allowed OI Open values", async () => {
@@ -1253,7 +1225,7 @@ describe("Evaluator", () => {
                 market: onChain.getPerpetualID()
             });
 
-            let takerOrder = createOrder({
+            const takerOrder = createOrder({
                 maker: bob.address,
                 price: 10,
                 isBuy: true,
