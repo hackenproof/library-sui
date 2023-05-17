@@ -1142,7 +1142,9 @@ export class OnChainCalls {
             cursor: args?.cursor ?? null,
             limit: args?.limit ?? null
         });
-
+        coins.data.forEach((coin: any) => {
+            coin.balance = Number(coin.balance);
+        });
         return coins;
     }
 
@@ -1181,7 +1183,7 @@ export class OnChainCalls {
         const coins = await this.getUSDCCoins(args, signer);
 
         for (const coin of coins.data) {
-            if (bigNumber(coin.balance).gte(toBigNumber(args.amount, 6))) {
+            if (toBigNumber(coin.balance, 6).gte(toBigNumber(args.amount, 6))) {
                 return coin;
             }
         }
