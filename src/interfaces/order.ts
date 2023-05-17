@@ -17,3 +17,19 @@ export interface Order {
 export interface SignedOrder extends Order {
     typedSignature: string;
 }
+export interface OrderQuantityRules {
+    low: string;
+    high: string;
+    value: string;
+}
+
+// === used for `firefly-math` library functions ===
+export interface PositionMathDTO {
+    symbol: string;
+    quantity: string;
+    avgEntryPrice: string;
+    margin: string;
+    selectedLeverage: string;
+    isPositionPositive: boolean;
+}
+// === used for `firefly-math` library functions ===
