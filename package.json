@@ -1,5 +1,5 @@
 {
-  "name": "bluefin-exchange-contracts-sui",
+  "name": "library-sui",
   "description": "Repository containing Bluefin core exchange contracts that allow users to do on-chain derivatives trading on **SUI** blockchain.",
   "version": "0.1.0",
   "scripts": {
@@ -57,12 +57,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fireflyprotocol/bluefin-exchange-contracts-sui.git"
+    "url": "git+https://github.com/fireflyprotocol/library-sui.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/fireflyprotocol/bluefin-exchange-contracts-sui/issues"
+    "url": "https://github.com/fireflyprotocol/library-sui/issues"
   },
-  "homepage": "https://github.com/fireflyprotocol/bluefin-exchange-contracts-sui#readme"
+  "homepage": "https://github.com/fireflyprotocol/library-sui#readme"
 }
