@@ -60,7 +60,7 @@ export function getProvider(
 
 export function getKeyPairFromSeed(
     seed: string,
-    scheme: SignatureScheme = "ED25519"
+    scheme: SignatureScheme = "Secp256k1"
 ): Keypair {
     switch (scheme) {
         case "ED25519":
