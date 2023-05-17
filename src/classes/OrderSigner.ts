@@ -48,7 +48,11 @@ export class OrderSigner {
         return Buffer.from(hash).toString("hex");
     }
 
-    public verifyUsingHash(signature: string, orderHash: string, address: string) {
+    public verifyUsingHash(
+        signature: string,
+        orderHash: string,
+        address: string
+    ) {
         const signatureWithR = hexToBuffer(signature);
         if (signatureWithR.length == 65) {
             const sig = signatureWithR.subarray(0, 64);
@@ -65,6 +69,10 @@ export class OrderSigner {
     }
 
     public verifyUsingOrder(signature: string, order: Order, address: string) {
-        return this.verifyUsingHash(signature, this.getOrderHash(order), address);
+        return this.verifyUsingHash(
+            signature,
+            this.getOrderHash(order),
+            address
+        );
     }
 }
