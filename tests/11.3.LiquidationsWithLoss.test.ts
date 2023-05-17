@@ -74,29 +74,30 @@ const tests: TestCaseJSON = {
             expectError: 47
         }
     ],
-    "Test #4-Short Liquidation (Full) , Liquidator reduces with Loss > Margin": [
-        {
-            tradeType: "normal",
-            pOracle: 500,
-            price: 500,
-            size: -10,
-            leverage: 4
-        },
-        {
-            tradeType: "liquidator_cat",
-            pOracle: 700,
-            price: 700,
-            size: 14,
-            leverage: 10
-        },
-        {
-            tradeType: "liquidation",
-            pOracle: 598,
-            size: -10,
-            leverage: 10,
-            expectError: 47
-        }
-    ],
+    "Test #4-Short Liquidation (Full) , Liquidator reduces with Loss > Margin":
+        [
+            {
+                tradeType: "normal",
+                pOracle: 500,
+                price: 500,
+                size: -10,
+                leverage: 4
+            },
+            {
+                tradeType: "liquidator_cat",
+                pOracle: 700,
+                price: 700,
+                size: 14,
+                leverage: 10
+            },
+            {
+                tradeType: "liquidation",
+                pOracle: 598,
+                size: -10,
+                leverage: 10,
+                expectError: 47
+            }
+        ],
     "Test #5-Short Liquidation (Full) , Liquidator closes with Loss > Margin": [
         {
             tradeType: "normal",

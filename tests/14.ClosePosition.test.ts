@@ -3,16 +3,21 @@ import { network, DeploymentConfigs } from "../src/DeploymentConfig";
 import {
     createMarket,
     createOrder,
-    getAddressFromSigner,
     getKeyPairFromSeed,
     getProvider,
     getSignerFromSeed,
     readFile
 } from "../src/utils";
 import { BASE_DECIMALS, toBigNumber, toBigNumberStr } from "../src/library";
-import { OnChainCalls, OrderSigner, Trader, Transaction } from "../src";
+import {
+    BankAccountDetails,
+    OnChainCalls,
+    OrderSigner,
+    Trader,
+    Transaction
+} from "../src";
 import { expect, expectTxToSucceed } from "./helpers/expect";
-import { SuiExecuteTransactionResponse } from "@mysten/sui.js";
+import { SuiTransactionBlockResponse } from "@mysten/sui.js";
 import { config } from "dotenv";
 import { mintAndDeposit } from "./helpers/utils";
 import BigNumber from "bignumber.js";
@@ -393,7 +398,7 @@ describe("Position Closure Traders After De-listing Perpetual", () => {
     let priceOracleCapID: string;
     const accounts = getTestAccounts(provider);
 
-    let tx: SuiExecuteTransactionResponse;
+    let tx: SuiTransactionBlockResponse;
     let lastOraclePrice: BigNumber;
 
     const getAccount = (name: string): Account => {
@@ -407,9 +412,11 @@ describe("Position Closure Traders After De-listing Perpetual", () => {
 
             switch (testCase.action) {
                 case "trade":
-                    testCaseDescription = `${testCase.maker} opens size:${Math.abs(
-                        testCase.size
-                    )} price:${testCase.price} leverage:${testCase.leverage}x ${
+                    testCaseDescription = `${
+                        testCase.maker
+                    } opens size:${Math.abs(testCase.size)} price:${
+                        testCase.price
+                    } leverage:${testCase.leverage}x ${
                         testCase.size > 0 ? "Long" : "Short"
                     } against ${testCase.taker}`;
                     break;
@@ -435,7 +442,10 @@ describe("Position Closure Traders After De-listing Perpetual", () => {
                 const oraclePrice = toBigNumber(testCase.pOracle as number);
 
                 // set oracle price if need be
-                if (testCase.pOracle && !oraclePrice.isEqualTo(lastOraclePrice)) {
+                if (
+                    testCase.pOracle &&
+                    !oraclePrice.isEqualTo(lastOraclePrice)
+                ) {
                     expectTxToSucceed(
                         await onChain.updateOraclePrice({
                             price: oraclePrice.toFixed(),
@@ -505,20 +515,25 @@ describe("Position Closure Traders After De-listing Perpetual", () => {
                 expectTxToSucceed(tx);
 
                 if (testCase.expect) {
-                    const bankAcctDetails = await onChain.getBankAccountDetails(
-                        account.bankAccountId as string
-                    );
+                    const bankAcctDetails =
+                        (await onChain.getBankAccountDetails(
+                            account.bankAccountId as string
+                        )) as BankAccountDetails;
 
                     expect(
-                        bankAcctDetails.balance.shiftedBy(-BASE_DECIMALS).toFixed(6)
-                    ).to.be.equal(new BigNumber(testCase.expect.balance).toFixed(6));
+                        bankAcctDetails.balance
+                            .shiftedBy(-BASE_DECIMALS)
+                            .toFixed(6)
+                    ).to.be.equal(
+                        new BigNumber(testCase.expect.balance).toFixed(6)
+                    );
                 }
             });
         });
     }
 
     before(async () => {
-        ownerAddress = await getAddressFromSigner(ownerSigner);
+        ownerAddress = await await ownerSigner.getAddress();
         onChain = new OnChainCalls(ownerSigner, deployment);
 
         const tx = await onChain.createSettlementOperator({
@@ -527,29 +542,30 @@ describe("Position Closure Traders After De-listing Perpetual", () => {
 
         expectTxToSucceed(tx);
 
-        settlementCapID = (
-            Transaction.getObjects(tx, "newObject", "SettlementCap")[0] as any
-        ).id as string;
+        settlementCapID = Transaction.getCreatedObjectIDs(tx)[0];
 
         // make owner, the price oracle operator
         const tx1 = await onChain.setPriceOracleOperator({
             operator: ownerAddress
         });
 
-        priceOracleCapID = (
-            Transaction.getObjects(tx1, "newObject", "PriceOracleOperatorCap")[0] as any
-        ).id as string;
+        priceOracleCapID = Transaction.getCreatedObjectIDs(tx1)[0];
     });
 
     const setupTest = async () => {
         lastOraclePrice = new BigNumber(0);
-        const marketData = await createMarket(deployment, ownerSigner, provider, {
-            initialMarginRequired: toBigNumberStr(0.0625),
-            maintenanceMarginRequired: toBigNumberStr(0.05),
-            maxPrice: toBigNumberStr(2000),
-            makerFee: toBigNumberStr(0.01),
-            takerFee: toBigNumberStr(0.02)
-        });
+        const marketData = await createMarket(
+            deployment,
+            ownerSigner,
+            provider,
+            {
+                initialMarginRequired: toBigNumberStr(0.0625),
+                maintenanceMarginRequired: toBigNumberStr(0.05),
+                maxPrice: toBigNumberStr(2000),
+                makerFee: toBigNumberStr(0.01),
+                takerFee: toBigNumberStr(0.02)
+            }
+        );
 
         deployment["markets"]["ETH-PERP"].Objects = marketData.marketObjects;
 
@@ -557,7 +573,10 @@ describe("Position Closure Traders After De-listing Perpetual", () => {
 
         // deposit 6K to all accounts
         for (let i = 0; i < accounts.length; i++) {
-            await onChain.withdrawAllMarginFromBank(accounts[i].signer);
+            await onChain.withdrawAllMarginFromBank(
+                accounts[i].signer,
+                10000000
+            );
             accounts[i].bankAccountId = await mintAndDeposit(
                 onChain,
                 accounts[i].address,

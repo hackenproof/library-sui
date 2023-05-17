@@ -137,66 +137,68 @@ const adjustMargin: TestCaseJSON = {
             }
         }
     ],
-    "Test # 5 - Long Position Add Margin + [MR < MMR (MR Improves)] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: -10,
-            leverage: 4,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100,
-                bankBalance: 1700
+    "Test # 5 - Long Position Add Margin + [MR < MMR (MR Improves)] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: -10,
+                leverage: 4,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100,
+                    bankBalance: 1700
+                }
+            },
+            {
+                pOracle: 73.60673,
+                addMargin: 50,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 300,
+                    marginRatio: 0.049,
+                    pPos: 100,
+                    bankBalance: 1650
+                }
             }
-        },
-        {
-            pOracle: 73.60673,
-            addMargin: 50,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 300,
-                marginRatio: 0.049,
-                pPos: 100,
-                bankBalance: 1650
+        ],
+    "Test # 6 - Short Position Add Margin + [MR < MMR (MR Improves)] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: 10,
+                leverage: 4,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: -10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100,
+                    bankBalance: 1700
+                }
+            },
+            {
+                pOracle: 123.92755,
+                addMargin: 50,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: -10,
+                    margin: 300,
+                    marginRatio: 0.049,
+                    pPos: 100,
+                    bankBalance: 1650
+                }
             }
-        }
-    ],
-    "Test # 6 - Short Position Add Margin + [MR < MMR (MR Improves)] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: 10,
-            leverage: 4,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: -10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100,
-                bankBalance: 1700
-            }
-        },
-        {
-            pOracle: 123.92755,
-            addMargin: 50,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: -10,
-                margin: 300,
-                marginRatio: 0.049,
-                pPos: 100,
-                bankBalance: 1650
-            }
-        }
-    ],
+        ],
     "Test # 7 - Long Position Remove Margin  + [MR < MMR (MR falls)] + Error": [
         {
             pOracle: 100,
@@ -219,138 +221,143 @@ const adjustMargin: TestCaseJSON = {
             expectError: 503
         }
     ],
-    "Test # 8 - Short Position Remove Margin  + [MR < MMR (MR falls)] + Error": [
-        {
-            pOracle: 64,
-            price: 64,
-            size: 10,
-            leverage: 4,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 640,
-                qPos: -10,
-                margin: 160,
-                marginRatio: 0.25,
-                pPos: 64,
-                bankBalance: 1808
-            }
-        },
+    "Test # 8 - Short Position Remove Margin  + [MR < MMR (MR falls)] + Error":
+        [
+            {
+                pOracle: 64,
+                price: 64,
+                size: 10,
+                leverage: 4,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 640,
+                    qPos: -10,
+                    margin: 160,
+                    marginRatio: 0.25,
+                    pPos: 64,
+                    bankBalance: 1808
+                }
+            },
 
-        {
-            pOracle: 76.213592,
-            removeMargin: 15,
-            expectError: 503
-        }
-    ],
-    "Test # 9 - Long Position Add Margin + [IMR > MR ≥ MMR (MR Improves)] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: -10,
-            leverage: 4,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100,
-                bankBalance: 1700
+            {
+                pOracle: 76.213592,
+                removeMargin: 15,
+                expectError: 503
             }
-        },
+        ],
+    "Test # 9 - Long Position Add Margin + [IMR > MR ≥ MMR (MR Improves)] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: -10,
+                leverage: 4,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100,
+                    bankBalance: 1700
+                }
+            },
 
-        {
-            pOracle: 76.638478,
-            addMargin: 25,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 275,
-                marginRatio: 0.054,
-                pPos: 100,
-                bankBalance: 1675
+            {
+                pOracle: 76.638478,
+                addMargin: 25,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 275,
+                    marginRatio: 0.054,
+                    pPos: 100,
+                    bankBalance: 1675
+                }
             }
-        }
-    ],
+        ],
 
-    "Test # 10 - Short Position Add Margin + [IMR > MR ≥ MMR (MR Improves)] + Proceed": [
-        {
-            pOracle: 126,
-            price: 126,
-            size: 10,
-            leverage: 4,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1260,
-                qPos: -10,
-                margin: 315,
-                marginRatio: 0.25,
-                pPos: 126,
-                bankBalance: 1622
-            }
-        },
+    "Test # 10 - Short Position Add Margin + [IMR > MR ≥ MMR (MR Improves)] + Proceed":
+        [
+            {
+                pOracle: 126,
+                price: 126,
+                size: 10,
+                leverage: 4,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1260,
+                    qPos: -10,
+                    margin: 315,
+                    marginRatio: 0.25,
+                    pPos: 126,
+                    bankBalance: 1622
+                }
+            },
 
-        {
-            pOracle: 151.802657,
-            addMargin: 25,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1260,
-                qPos: -10,
-                margin: 340,
-                marginRatio: 0.054,
-                pPos: 126,
-                bankBalance: 1597
+            {
+                pOracle: 151.802657,
+                addMargin: 25,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1260,
+                    qPos: -10,
+                    margin: 340,
+                    marginRatio: 0.054,
+                    pPos: 126,
+                    bankBalance: 1597
+                }
             }
-        }
-    ],
-    "Test # 11 - Long Position Remove Margin  + [IMR > MR ≥ MMR (MR Falls)] + Error": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: -10,
-            leverage: 4,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100,
-                bankBalance: 1700
-            }
-        },
+        ],
+    "Test # 11 - Long Position Remove Margin  + [IMR > MR ≥ MMR (MR Falls)] + Error":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: -10,
+                leverage: 4,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100,
+                    bankBalance: 1700
+                }
+            },
 
-        {
-            pOracle: 79.598309,
-            removeMargin: 3,
-            expectError: 503
-        }
-    ],
-    "Test # 12 - Short Position Remove Margin  + [IMR > MR ≥ MMR (MR Falls)] + Error": [
-        {
-            pOracle: 153,
-            price: 153,
-            size: 10,
-            leverage: 4,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1530,
-                qPos: -10,
-                margin: 382.5,
-                marginRatio: 0.25,
-                pPos: 153,
-                bankBalance: 1541
+            {
+                pOracle: 79.598309,
+                removeMargin: 3,
+                expectError: 503
             }
-        },
+        ],
+    "Test # 12 - Short Position Remove Margin  + [IMR > MR ≥ MMR (MR Falls)] + Error":
+        [
+            {
+                pOracle: 153,
+                price: 153,
+                size: 10,
+                leverage: 4,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1530,
+                    qPos: -10,
+                    margin: 382.5,
+                    marginRatio: 0.25,
+                    pPos: 153,
+                    bankBalance: 1541
+                }
+            },
 
-        {
-            pOracle: 180.502846,
-            removeMargin: 10,
-            expectError: 503
-        }
-    ],
+            {
+                pOracle: 180.502846,
+                removeMargin: 10,
+                expectError: 503
+            }
+        ],
     "Test # 13 - Long Position + Add more than Bank + [Cannot add more than bank] + Error":
         [
             {
@@ -730,92 +737,94 @@ const adjustMargin: TestCaseJSON = {
             }
         }
     ],
-    "Test # 31 - Long Position + Remove previously added margin + [] + Proceed": [
-        {
-            pOracle: 101,
-            price: 101,
-            size: -10,
-            leverage: 4,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1010,
-                qPos: 10,
-                margin: 252.5,
-                marginRatio: 0.25,
-                pPos: 101,
-                bankBalance: 1697
+    "Test # 31 - Long Position + Remove previously added margin + [] + Proceed":
+        [
+            {
+                pOracle: 101,
+                price: 101,
+                size: -10,
+                leverage: 4,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1010,
+                    qPos: 10,
+                    margin: 252.5,
+                    marginRatio: 0.25,
+                    pPos: 101,
+                    bankBalance: 1697
+                }
+            },
+            {
+                pOracle: 101,
+                addMargin: 250,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1010,
+                    qPos: 10,
+                    margin: 502.5,
+                    marginRatio: 0.497525,
+                    pPos: 101,
+                    bankBalance: 1447
+                }
+            },
+            {
+                pOracle: 101,
+                removeMargin: 250,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1010,
+                    qPos: 10,
+                    margin: 252.5,
+                    marginRatio: 0.25,
+                    pPos: 101,
+                    bankBalance: 1697
+                }
             }
-        },
-        {
-            pOracle: 101,
-            addMargin: 250,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1010,
-                qPos: 10,
-                margin: 502.5,
-                marginRatio: 0.497525,
-                pPos: 101,
-                bankBalance: 1447
+        ],
+    "Test # 32 - Short Position + Remove previously added margin + [] + Proceed":
+        [
+            {
+                pOracle: 101,
+                price: 101,
+                size: 10,
+                leverage: 4,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1010,
+                    qPos: -10,
+                    margin: 252.5,
+                    marginRatio: 0.25,
+                    pPos: 101,
+                    bankBalance: 1697
+                }
+            },
+            {
+                pOracle: 101,
+                addMargin: 250,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1010,
+                    qPos: -10,
+                    margin: 502.5,
+                    marginRatio: 0.497525,
+                    pPos: 101,
+                    bankBalance: 1447
+                }
+            },
+            {
+                pOracle: 101,
+                removeMargin: 250,
+                expectTaker: {
+                    mro: 0.25,
+                    oiOpen: 1010,
+                    qPos: -10,
+                    margin: 252.5,
+                    marginRatio: 0.25,
+                    pPos: 101,
+                    bankBalance: 1697
+                }
             }
-        },
-        {
-            pOracle: 101,
-            removeMargin: 250,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1010,
-                qPos: 10,
-                margin: 252.5,
-                marginRatio: 0.25,
-                pPos: 101,
-                bankBalance: 1697
-            }
-        }
-    ],
-    "Test # 32 - Short Position + Remove previously added margin + [] + Proceed": [
-        {
-            pOracle: 101,
-            price: 101,
-            size: 10,
-            leverage: 4,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1010,
-                qPos: -10,
-                margin: 252.5,
-                marginRatio: 0.25,
-                pPos: 101,
-                bankBalance: 1697
-            }
-        },
-        {
-            pOracle: 101,
-            addMargin: 250,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1010,
-                qPos: -10,
-                margin: 502.5,
-                marginRatio: 0.497525,
-                pPos: 101,
-                bankBalance: 1447
-            }
-        },
-        {
-            pOracle: 101,
-            removeMargin: 250,
-            expectTaker: {
-                mro: 0.25,
-                oiOpen: 1010,
-                qPos: -10,
-                margin: 252.5,
-                marginRatio: 0.25,
-                pPos: 101,
-                bankBalance: 1697
-            }
-        }
-    ]
+        ]
 };
 
 describe("Adjust Margin", () => {

@@ -419,144 +419,146 @@ const liquidationTests: TestCaseJSON = {
             }
         }
     ],
-    "Test # 9 - Long Position + Full Liquidation (Liquidator Increases Position)": [
-        {
-            tradeType: "normal",
-            pOracle: 100,
-            price: 100,
-            size: 10,
-            leverage: 4,
-            settlementAmount: 0,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 250,
-                marginRatio: 0.25,
-                bankBalance: 1730,
-                pPos: 100
-            }
-        },
-        {
-            tradeType: "liquidator_bob",
-            pOracle: 100,
-            price: 100,
-            size: 5,
-            leverage: 1,
-            settlementAmount: 0,
-            expectLiquidator: {
-                mro: 1,
-                oiOpen: 500,
-                qPos: 5,
-                margin: 500,
-                marginRatio: 1,
-                bankBalance: 4490,
-                pPos: 100
-            }
-        },
-        {
-            tradeType: "liquidation",
-            pOracle: 78.947366,
-            price: 0,
-            size: 10,
-            leverage: 1,
-            settlementAmount: 0,
-            expectMaker: {
-                mro: 0,
-                oiOpen: 0,
-                qPos: 0,
-                margin: 0,
-                marginRatio: 1,
-                bankBalance: 1730,
-                pPos: 0,
-                pnl: -250
+    "Test # 9 - Long Position + Full Liquidation (Liquidator Increases Position)":
+        [
+            {
+                tradeType: "normal",
+                pOracle: 100,
+                price: 100,
+                size: 10,
+                leverage: 4,
+                settlementAmount: 0,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    bankBalance: 1730,
+                    pPos: 100
+                }
             },
-            expectLiquidator: {
-                mro: 1,
-                oiOpen: 1289.47366,
-                qPos: 15,
-                margin: 1289.47366,
-                marginRatio: 1,
-                bankBalance: 3736.052634,
-                pPos: 85.964911,
-                pnl: 35.526294
+            {
+                tradeType: "liquidator_bob",
+                pOracle: 100,
+                price: 100,
+                size: 5,
+                leverage: 1,
+                settlementAmount: 0,
+                expectLiquidator: {
+                    mro: 1,
+                    oiOpen: 500,
+                    qPos: 5,
+                    margin: 500,
+                    marginRatio: 1,
+                    bankBalance: 4490,
+                    pPos: 100
+                }
             },
-            expectSystem: {
-                fee: 105,
-                insurancePool: 3.947366,
-                perpetual: 3000
+            {
+                tradeType: "liquidation",
+                pOracle: 78.947366,
+                price: 0,
+                size: 10,
+                leverage: 1,
+                settlementAmount: 0,
+                expectMaker: {
+                    mro: 0,
+                    oiOpen: 0,
+                    qPos: 0,
+                    margin: 0,
+                    marginRatio: 1,
+                    bankBalance: 1730,
+                    pPos: 0,
+                    pnl: -250
+                },
+                expectLiquidator: {
+                    mro: 1,
+                    oiOpen: 1289.47366,
+                    qPos: 15,
+                    margin: 1289.47366,
+                    marginRatio: 1,
+                    bankBalance: 3736.052634,
+                    pPos: 85.964911,
+                    pnl: 35.526294
+                },
+                expectSystem: {
+                    fee: 105,
+                    insurancePool: 3.947366,
+                    perpetual: 3000
+                }
             }
-        }
-    ],
-    "Test # 10 - Short Position + Full Liquidation (Liquidator Increases Position)": [
-        {
-            tradeType: "normal",
-            pOracle: 102,
-            price: 100,
-            size: -10,
-            leverage: 4,
-            settlementAmount: 0,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: -10,
-                margin: 250,
-                marginRatio: 0.22549,
-                bankBalance: 1730,
-                pPos: 100
-            }
-        },
-        {
-            tradeType: "liquidator_bob",
-            pOracle: 102,
-            price: 100,
-            size: -10,
-            leverage: 2,
-            settlementAmount: 0,
-            expectLiquidator: {
-                mro: 0.5,
-                oiOpen: 1000,
-                qPos: -10,
-                margin: 500,
-                marginRatio: 0.471,
-                bankBalance: 4480,
-                pPos: 100
-            }
-        },
-        {
-            tradeType: "liquidation",
-            pOracle: 119.047622,
-            price: 0,
-            size: -10,
-            leverage: 2,
-            settlementAmount: 0,
-            expectMaker: {
-                mro: 0,
-                oiOpen: 0,
-                qPos: 0,
-                margin: 0,
-                marginRatio: 1,
-                bankBalance: 1730,
-                pPos: 0,
-                pnl: -250
+        ],
+    "Test # 10 - Short Position + Full Liquidation (Liquidator Increases Position)":
+        [
+            {
+                tradeType: "normal",
+                pOracle: 102,
+                price: 100,
+                size: -10,
+                leverage: 4,
+                settlementAmount: 0,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: -10,
+                    margin: 250,
+                    marginRatio: 0.22549,
+                    bankBalance: 1730,
+                    pPos: 100
+                }
             },
-            expectLiquidator: {
-                mro: 0.5,
-                oiOpen: 2190.47622,
-                qPos: -20,
-                margin: 1095.23811,
-                marginRatio: 0.3799999,
-                bankBalance: 3938.333292,
-                pPos: 109.523811,
-                pnl: 53.571402
+            {
+                tradeType: "liquidator_bob",
+                pOracle: 102,
+                price: 100,
+                size: -10,
+                leverage: 2,
+                settlementAmount: 0,
+                expectLiquidator: {
+                    mro: 0.5,
+                    oiOpen: 1000,
+                    qPos: -10,
+                    margin: 500,
+                    marginRatio: 0.471,
+                    bankBalance: 4480,
+                    pPos: 100
+                }
             },
-            expectSystem: {
-                fee: 140,
-                insurancePool: 5.952378,
-                perpetual: 2275.71433
+            {
+                tradeType: "liquidation",
+                pOracle: 119.047622,
+                price: 0,
+                size: -10,
+                leverage: 2,
+                settlementAmount: 0,
+                expectMaker: {
+                    mro: 0,
+                    oiOpen: 0,
+                    qPos: 0,
+                    margin: 0,
+                    marginRatio: 1,
+                    bankBalance: 1730,
+                    pPos: 0,
+                    pnl: -250
+                },
+                expectLiquidator: {
+                    mro: 0.5,
+                    oiOpen: 2190.47622,
+                    qPos: -20,
+                    margin: 1095.23811,
+                    marginRatio: 0.3799999,
+                    bankBalance: 3938.333292,
+                    pPos: 109.523811,
+                    pnl: 53.571402
+                },
+                expectSystem: {
+                    fee: 140,
+                    insurancePool: 5.952378,
+                    perpetual: 2275.71433
+                }
             }
-        }
-    ],
+        ],
     "Test # 11 - Long Position + Full Liquidation (Liquidator Nets Position)": [
         {
             tradeType: "normal",
@@ -626,144 +628,146 @@ const liquidationTests: TestCaseJSON = {
             }
         }
     ],
-    "Test # 12 - Short Position + Full Liquidation (Liquidator Nets Position)": [
-        {
-            tradeType: "normal",
-            pOracle: 100,
-            price: 100,
-            size: -10,
-            leverage: 4,
-            settlementAmount: 0,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: -10,
-                margin: 250,
-                marginRatio: 0.25,
-                bankBalance: 1730,
-                pPos: 100
-            }
-        },
-        {
-            tradeType: "liquidator_bob",
-            pOracle: 100,
-            price: 100,
-            size: 20,
-            leverage: 1,
-            settlementAmount: 0,
-            expectLiquidator: {
-                mro: 1,
-                oiOpen: 2000,
-                qPos: 20,
-                margin: 2000,
-                marginRatio: 1,
-                bankBalance: 2960,
-                pPos: 100
-            }
-        },
-        {
-            tradeType: "liquidation",
-            pOracle: 119.047622,
-            price: 0,
-            size: -10,
-            leverage: 1,
-            settlementAmount: 0,
-            expectMaker: {
-                mro: 0,
-                oiOpen: 0,
-                qPos: 0,
-                margin: 0,
-                marginRatio: 1,
-                bankBalance: 1730,
-                pPos: 0,
-                pnl: -250
+    "Test # 12 - Short Position + Full Liquidation (Liquidator Nets Position)":
+        [
+            {
+                tradeType: "normal",
+                pOracle: 100,
+                price: 100,
+                size: -10,
+                leverage: 4,
+                settlementAmount: 0,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: -10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    bankBalance: 1730,
+                    pPos: 100
+                }
             },
-            expectLiquidator: {
-                mro: 1,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 1000,
-                marginRatio: 1,
-                bankBalance: 4204.047622,
-                pPos: 100,
-                pnl: 244.047622
+            {
+                tradeType: "liquidator_bob",
+                pOracle: 100,
+                price: 100,
+                size: 20,
+                leverage: 1,
+                settlementAmount: 0,
+                expectLiquidator: {
+                    mro: 1,
+                    oiOpen: 2000,
+                    qPos: 20,
+                    margin: 2000,
+                    marginRatio: 1,
+                    bankBalance: 2960,
+                    pPos: 100
+                }
             },
-            expectSystem: {
-                fee: 210,
-                insurancePool: 5.952378,
-                perpetual: 2000
+            {
+                tradeType: "liquidation",
+                pOracle: 119.047622,
+                price: 0,
+                size: -10,
+                leverage: 1,
+                settlementAmount: 0,
+                expectMaker: {
+                    mro: 0,
+                    oiOpen: 0,
+                    qPos: 0,
+                    margin: 0,
+                    marginRatio: 1,
+                    bankBalance: 1730,
+                    pPos: 0,
+                    pnl: -250
+                },
+                expectLiquidator: {
+                    mro: 1,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 1000,
+                    marginRatio: 1,
+                    bankBalance: 4204.047622,
+                    pPos: 100,
+                    pnl: 244.047622
+                },
+                expectSystem: {
+                    fee: 210,
+                    insurancePool: 5.952378,
+                    perpetual: 2000
+                }
             }
-        }
-    ],
-    "Test # 13 - Long Position + Full Liquidation (Liquidator Flips Position)": [
-        {
-            tradeType: "normal",
-            pOracle: 101,
-            price: 100,
-            size: 10,
-            leverage: 4,
-            settlementAmount: 0,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 250,
-                marginRatio: 0.257426,
-                bankBalance: 1730,
-                pPos: 100
-            }
-        },
-        {
-            tradeType: "liquidator_bob",
-            pOracle: 101,
-            price: 100,
-            size: -4,
-            leverage: 1,
-            settlementAmount: 0,
-            expectLiquidator: {
-                mro: 1,
-                oiOpen: 400,
-                qPos: -4,
-                margin: 400,
-                marginRatio: 0.980198,
-                bankBalance: 4592,
-                pPos: 100
-            }
-        },
-        {
-            tradeType: "liquidation",
-            pOracle: 78,
-            price: 0,
-            size: 10,
-            leverage: 1,
-            settlementAmount: 0,
-            expectMaker: {
-                mro: 0,
-                oiOpen: 0,
-                qPos: 0,
-                margin: 0,
-                marginRatio: 1,
-                bankBalance: 1730,
-                pPos: 0,
-                pnl: -250
+        ],
+    "Test # 13 - Long Position + Full Liquidation (Liquidator Flips Position)":
+        [
+            {
+                tradeType: "normal",
+                pOracle: 101,
+                price: 100,
+                size: 10,
+                leverage: 4,
+                settlementAmount: 0,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 250,
+                    marginRatio: 0.257426,
+                    bankBalance: 1730,
+                    pPos: 100
+                }
             },
-            expectLiquidator: {
-                mro: 1,
-                oiOpen: 468,
-                qPos: 6,
-                margin: 468,
-                marginRatio: 1,
-                bankBalance: 4639,
-                pPos: 78,
-                pnl: 115
+            {
+                tradeType: "liquidator_bob",
+                pOracle: 101,
+                price: 100,
+                size: -4,
+                leverage: 1,
+                settlementAmount: 0,
+                expectLiquidator: {
+                    mro: 1,
+                    oiOpen: 400,
+                    qPos: -4,
+                    margin: 400,
+                    marginRatio: 0.980198,
+                    bankBalance: 4592,
+                    pPos: 100
+                }
             },
-            expectSystem: {
-                fee: 98,
-                insurancePool: 3,
-                perpetual: 1212
+            {
+                tradeType: "liquidation",
+                pOracle: 78,
+                price: 0,
+                size: 10,
+                leverage: 1,
+                settlementAmount: 0,
+                expectMaker: {
+                    mro: 0,
+                    oiOpen: 0,
+                    qPos: 0,
+                    margin: 0,
+                    marginRatio: 1,
+                    bankBalance: 1730,
+                    pPos: 0,
+                    pnl: -250
+                },
+                expectLiquidator: {
+                    mro: 1,
+                    oiOpen: 468,
+                    qPos: 6,
+                    margin: 468,
+                    marginRatio: 1,
+                    bankBalance: 4639,
+                    pPos: 78,
+                    pnl: 115
+                },
+                expectSystem: {
+                    fee: 98,
+                    insurancePool: 3,
+                    perpetual: 1212
+                }
             }
-        }
-    ],
+        ],
     "Test # 14 - Short Position + Full Liquidation": [
         {
             tradeType: "normal",

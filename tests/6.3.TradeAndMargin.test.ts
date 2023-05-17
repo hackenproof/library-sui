@@ -4,66 +4,68 @@ import { executeTests } from "./helpers/executor";
 import { TestCaseJSON } from "./helpers/interfaces";
 
 const marginTestsWithoutFee: TestCaseJSON = {
-    "Test # 1 - Long Position + Long Trade (Increasing) + [MR > IMR] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: 10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100
+    "Test # 1 - Long Position + Long Trade (Increasing) + [MR > IMR] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: 10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100
+                }
+            },
+            {
+                pOracle: 83.333333,
+                price: 100,
+                size: 6,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1600,
+                    qPos: 16,
+                    margin: 400,
+                    marginRatio: 0.1,
+                    pPos: 100
+                }
             }
-        },
-        {
-            pOracle: 83.333333,
-            price: 100,
-            size: 6,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1600,
-                qPos: 16,
-                margin: 400,
-                marginRatio: 0.1,
-                pPos: 100
+        ],
+    "Test # 2 - Long Position + Short Trade (Reducing) + [MR > IMR] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: 10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100
+                }
+            },
+            {
+                pOracle: 83.333333,
+                price: 100,
+                size: -6,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 400,
+                    qPos: 4,
+                    margin: 100,
+                    marginRatio: 0.1,
+                    pPos: 100
+                }
             }
-        }
-    ],
-    "Test # 2 - Long Position + Short Trade (Reducing) + [MR > IMR] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: 10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100
-            }
-        },
-        {
-            pOracle: 83.333333,
-            price: 100,
-            size: -6,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 400,
-                qPos: 4,
-                margin: 100,
-                marginRatio: 0.1,
-                pPos: 100
-            }
-        }
-    ],
+        ],
     "Test # 3 - Long Position + Short Trade (Closing) + [MR > IMR] + Proceed": [
         {
             pOracle: 100,
@@ -94,96 +96,99 @@ const marginTestsWithoutFee: TestCaseJSON = {
             }
         }
     ],
-    "Test # 4 - Long Position + Short Trade (Flipping) + [MR > IMR] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: 10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100
+    "Test # 4 - Long Position + Short Trade (Flipping) + [MR > IMR] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: 10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100
+                }
+            },
+            {
+                pOracle: 85.227273,
+                price: 75,
+                size: -16,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 450,
+                    qPos: -6,
+                    margin: 112.5,
+                    marginRatio: 0.1,
+                    pPos: 75
+                }
             }
-        },
-        {
-            pOracle: 85.227273,
-            price: 75,
-            size: -16,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 450,
-                qPos: -6,
-                margin: 112.5,
-                marginRatio: 0.1,
-                pPos: 75
+        ],
+    "Test # 5 - Short Position + Short Trade (Increasing) + [MR > IMR] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: -10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: -10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100
+                }
+            },
+            {
+                pOracle: 113.636364,
+                price: 100,
+                size: -6,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1600,
+                    qPos: -16,
+                    margin: 400,
+                    marginRatio: 0.1,
+                    pPos: 100
+                }
             }
-        }
-    ],
-    "Test # 5 - Short Position + Short Trade (Increasing) + [MR > IMR] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: -10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: -10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100
+        ],
+    "Test # 6 - Short Position + Long Trade (Reducing) + [MR > IMR] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: -10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: -10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100
+                }
+            },
+            {
+                pOracle: 113.636364,
+                price: 100,
+                size: 6,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 400,
+                    qPos: -4,
+                    margin: 100,
+                    marginRatio: 0.1,
+                    pPos: 100
+                }
             }
-        },
-        {
-            pOracle: 113.636364,
-            price: 100,
-            size: -6,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1600,
-                qPos: -16,
-                margin: 400,
-                marginRatio: 0.1,
-                pPos: 100
-            }
-        }
-    ],
-    "Test # 6 - Short Position + Long Trade (Reducing) + [MR > IMR] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: -10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: -10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100
-            }
-        },
-        {
-            pOracle: 113.636364,
-            price: 100,
-            size: 6,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 400,
-                qPos: -4,
-                margin: 100,
-                marginRatio: 0.1,
-                pPos: 100
-            }
-        }
-    ],
+        ],
     "Test # 7 - Short Position + Long Trade (Closing) + [MR > IMR] + Proceed": [
         {
             pOracle: 100,
@@ -1310,70 +1315,72 @@ describe("Margin Tests Without Fee", () => {
 });
 
 const marginTestsWithFee: TestCaseJSON = {
-    "Test # 1 - Long Position + Long Trade (Increasing) + [MR > IMR] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: 10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100
+    "Test # 1 - Long Position + Long Trade (Increasing) + [MR > IMR] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: 10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100
+                },
+                expectSystem: { fee: 70 }
             },
-            expectSystem: { fee: 70 }
-        },
-        {
-            pOracle: 83.333333,
-            price: 100,
-            size: 6,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1600,
-                qPos: 16,
-                margin: 400,
-                marginRatio: 0.1,
-                pPos: 100
+            {
+                pOracle: 83.333333,
+                price: 100,
+                size: 6,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1600,
+                    qPos: 16,
+                    margin: 400,
+                    marginRatio: 0.1,
+                    pPos: 100
+                },
+                expectSystem: { fee: 112 }
+            }
+        ],
+    "Test # 2 - Long Position + Short Trade (Reducing) + [MR > IMR] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: 10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100
+                },
+                expectSystem: { fee: 70 }
             },
-            expectSystem: { fee: 112 }
-        }
-    ],
-    "Test # 2 - Long Position + Short Trade (Reducing) + [MR > IMR] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: 10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100
-            },
-            expectSystem: { fee: 70 }
-        },
-        {
-            pOracle: 83.333333,
-            price: 100,
-            size: -6,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 400,
-                qPos: 4,
-                margin: 100,
-                marginRatio: 0.1,
-                pPos: 100
-            },
-            expectSystem: { fee: 112 }
-        }
-    ],
+            {
+                pOracle: 83.333333,
+                price: 100,
+                size: -6,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 400,
+                    qPos: 4,
+                    margin: 100,
+                    marginRatio: 0.1,
+                    pPos: 100
+                },
+                expectSystem: { fee: 112 }
+            }
+        ],
     "Test # 3 - Long Position + Short Trade (Closing) + [MR > IMR] + Proceed": [
         {
             pOracle: 100,
@@ -1406,102 +1413,105 @@ const marginTestsWithFee: TestCaseJSON = {
             expectSystem: { fee: 140 }
         }
     ],
-    "Test # 4 - Long Position + Short Trade (Flipping) + [MR > IMR] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: 10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100
+    "Test # 4 - Long Position + Short Trade (Flipping) + [MR > IMR] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: 10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100
+                },
+                expectSystem: { fee: 70 }
             },
-            expectSystem: { fee: 70 }
-        },
-        {
-            pOracle: 86.363636,
-            price: 76,
-            size: -16,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 456,
-                qPos: -6,
-                margin: 114,
-                marginRatio: 0.1,
-                pPos: 76
+            {
+                pOracle: 86.363636,
+                price: 76,
+                size: -16,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 456,
+                    qPos: -6,
+                    margin: 114,
+                    marginRatio: 0.1,
+                    pPos: 76
+                },
+                expectSystem: { fee: 149.92 }
+            }
+        ],
+    "Test # 5 - Short Position + Short Trade (Increasing) + [MR > IMR] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: -10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: -10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100
+                },
+                expectSystem: { fee: 70 }
             },
-            expectSystem: { fee: 149.92 }
-        }
-    ],
-    "Test # 5 - Short Position + Short Trade (Increasing) + [MR > IMR] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: -10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: -10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100
+            {
+                pOracle: 113.636364,
+                price: 100,
+                size: -6,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1600,
+                    qPos: -16,
+                    margin: 400,
+                    marginRatio: 0.1,
+                    pPos: 100
+                },
+                expectSystem: { fee: 112 }
+            }
+        ],
+    "Test # 6 - Short Position + Long Trade (Reducing) + [MR > IMR] + Proceed":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: -10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: -10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100
+                },
+                expectSystem: { fee: 70 }
             },
-            expectSystem: { fee: 70 }
-        },
-        {
-            pOracle: 113.636364,
-            price: 100,
-            size: -6,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1600,
-                qPos: -16,
-                margin: 400,
-                marginRatio: 0.1,
-                pPos: 100
-            },
-            expectSystem: { fee: 112 }
-        }
-    ],
-    "Test # 6 - Short Position + Long Trade (Reducing) + [MR > IMR] + Proceed": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: -10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: -10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100
-            },
-            expectSystem: { fee: 70 }
-        },
-        {
-            pOracle: 113.636364,
-            price: 100,
-            size: 6,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 400,
-                qPos: -4,
-                margin: 100,
-                marginRatio: 0.1,
-                pPos: 100
-            },
-            expectSystem: { fee: 112 }
-        }
-    ],
+            {
+                pOracle: 113.636364,
+                price: 100,
+                size: 6,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 400,
+                    qPos: -4,
+                    margin: 100,
+                    marginRatio: 0.1,
+                    pPos: 100
+                },
+                expectSystem: { fee: 112 }
+            }
+        ],
     "Test # 7 - Short Position + Long Trade (Closing) + [MR > IMR] + Proceed": [
         {
             pOracle: 100,
@@ -1534,39 +1544,40 @@ const marginTestsWithFee: TestCaseJSON = {
             expectSystem: { fee: 140 }
         }
     ],
-    "Test # 8 - Short Position + Long Trade (Flipping) + [MR > IMR] + Proceed": [
-        {
-            pOracle: 95,
-            price: 95,
-            size: -10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 950,
-                qPos: -10,
-                margin: 237.5,
-                marginRatio: 0.25,
-                pPos: 95
+    "Test # 8 - Short Position + Long Trade (Flipping) + [MR > IMR] + Proceed":
+        [
+            {
+                pOracle: 95,
+                price: 95,
+                size: -10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 950,
+                    qPos: -10,
+                    margin: 237.5,
+                    marginRatio: 0.25,
+                    pPos: 95
+                },
+                expectSystem: { fee: 66.5 }
             },
-            expectSystem: { fee: 66.5 }
-        },
 
-        {
-            pOracle: 98.333333,
-            price: 118,
-            size: 16,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 708,
-                qPos: 6,
-                margin: 177,
-                marginRatio: 0.1,
-                pPos: 118
-            },
-            expectSystem: { fee: 182.56 }
-        }
-    ],
+            {
+                pOracle: 98.333333,
+                price: 118,
+                size: 16,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 708,
+                    qPos: 6,
+                    margin: 177,
+                    marginRatio: 0.1,
+                    pPos: 118
+                },
+                expectSystem: { fee: 182.56 }
+            }
+        ],
     "Test # 9 - Long Position + Long Trade (Increasing) + [MR < MMR (MR Improves)] + Error":
         [
             {
@@ -2791,31 +2802,32 @@ const marginTestsWithFee: TestCaseJSON = {
             expectError: 404
         }
     ],
-    "Test # 58 - Long Position + Short Trade (Reducing) + [MR < 0] + Error - P37": [
-        {
-            pOracle: 100,
-            price: 100,
-            size: 10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1000,
-                qPos: 10,
-                margin: 250,
-                marginRatio: 0.25,
-                pPos: 100
+    "Test # 58 - Long Position + Short Trade (Reducing) + [MR < 0] + Error - P37":
+        [
+            {
+                pOracle: 100,
+                price: 100,
+                size: 10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1000,
+                    qPos: 10,
+                    margin: 250,
+                    marginRatio: 0.25,
+                    pPos: 100
+                },
+                expectSystem: { fee: 70 }
             },
-            expectSystem: { fee: 70 }
-        },
 
-        {
-            pOracle: 60,
-            price: 76.25,
-            size: -6,
-            leverage: 4,
-            expectError: 406
-        }
-    ],
+            {
+                pOracle: 60,
+                price: 76.25,
+                size: -6,
+                leverage: 4,
+                expectError: 406
+            }
+        ],
     "Test # 59 - Long Position + Short Trade (Closing w Loss <= Margin) + [MR < 0] + Proceed":
         [
             {
@@ -2935,56 +2947,58 @@ const marginTestsWithFee: TestCaseJSON = {
                 expectError: 46
             }
         ],
-    "Test # 63 - Short Position + Short Trade (Increasing) + [MR < 0] + Error - P35": [
-        {
-            pOracle: 102,
-            price: 102,
-            size: -10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 1020,
-                qPos: -10,
-                margin: 255,
-                marginRatio: 0.25,
-                pPos: 102
+    "Test # 63 - Short Position + Short Trade (Increasing) + [MR < 0] + Error - P35":
+        [
+            {
+                pOracle: 102,
+                price: 102,
+                size: -10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 1020,
+                    qPos: -10,
+                    margin: 255,
+                    marginRatio: 0.25,
+                    pPos: 102
+                },
+                expectSystem: { fee: 71.4 }
             },
-            expectSystem: { fee: 71.4 }
-        },
 
-        {
-            pOracle: 142,
-            price: 100,
-            size: -6,
-            leverage: 4,
-            expectError: 402
-        }
-    ],
-    "Test # 64 - Short Position + Long Trade (Reducing) + [MR < 0] + Error - P37": [
-        {
-            pOracle: 87,
-            price: 87,
-            size: -10,
-            leverage: 4,
-            expectMaker: {
-                mro: 0.25,
-                oiOpen: 870,
-                qPos: -10,
-                margin: 217.5,
-                marginRatio: 0.25,
-                pPos: 87
+            {
+                pOracle: 142,
+                price: 100,
+                size: -6,
+                leverage: 4,
+                expectError: 402
+            }
+        ],
+    "Test # 64 - Short Position + Long Trade (Reducing) + [MR < 0] + Error - P37":
+        [
+            {
+                pOracle: 87,
+                price: 87,
+                size: -10,
+                leverage: 4,
+                expectMaker: {
+                    mro: 0.25,
+                    oiOpen: 870,
+                    qPos: -10,
+                    margin: 217.5,
+                    marginRatio: 0.25,
+                    pPos: 87
+                },
+                expectSystem: { fee: 60.9 }
             },
-            expectSystem: { fee: 60.9 }
-        },
 
-        {
-            pOracle: 127,
-            price: 100,
-            size: 6,
-            leverage: 4,
-            expectError: 406
-        }
-    ],
+            {
+                pOracle: 127,
+                price: 100,
+                size: 6,
+                leverage: 4,
+                expectError: 406
+            }
+        ],
     "Test # 65 - Short Position + Long Trade (Closing w Loss <= Margin) + [MR < 0] + Proceed":
         [
             {

@@ -1,14 +1,13 @@
-import Wallet from "ethereumjs-wallet";
-import { getTestAccounts } from "./accounts";
+import { createAccount, getTestAccounts } from "./accounts";
 import { network, DeploymentConfigs } from "../../src/DeploymentConfig";
 import {
     createMarket,
     createOrder,
-    getAddressFromSigner,
     getKeyPairFromSeed,
     getProvider,
     getSignerFromSeed,
-    readFile
+    readFile,
+    requestGas
 } from "../../src/utils";
 import { toBigNumber, toBigNumberStr } from "../../src/library";
 import { OnChainCalls, OrderSigner, Trader, Transaction } from "../../src";
@@ -21,11 +20,11 @@ import {
 } from "./expect";
 import { MarketDetails } from "../../src/interfaces";
 import { ERROR_CODES } from "../../src/errors";
-import { SuiExecuteTransactionResponse } from "@mysten/sui.js";
 import BigNumber from "bignumber.js";
 import { config } from "dotenv";
-import { mintAndDeposit } from "./utils";
+import { fundTestAccounts, mintAndDeposit } from "./utils";
 import { TestCaseJSON } from "./interfaces";
+import { SuiTransactionBlockResponse } from "@mysten/sui.js";
 config({ path: ".env" });
 
 const provider = getProvider(network.rpc, network.faucet);
@@ -49,21 +48,26 @@ export async function executeTests(
     const dog = getTestAccounts(provider)[3];
     const liquidator = getTestAccounts(provider)[4];
 
-    let tx: SuiExecuteTransactionResponse;
+    let tx: SuiTransactionBlockResponse;
     let lastOraclePrice: BigNumber;
     let feePoolAddress: string;
     let insurancePoolAddress: string;
 
     const setupTest = async () => {
         lastOraclePrice = new BigNumber(0);
-        feePoolAddress = Wallet.generate().getAddressString();
-        insurancePoolAddress = Wallet.generate().getAddressString();
+        feePoolAddress = createAccount(provider).address;
+        insurancePoolAddress = createAccount(provider).address;
 
-        const marketData = await createMarket(deployment, ownerSigner, provider, {
-            ...marketConfig,
-            feePool: feePoolAddress,
-            insurancePool: insurancePoolAddress
-        });
+        const marketData = await createMarket(
+            deployment,
+            ownerSigner,
+            provider,
+            {
+                ...marketConfig,
+                feePool: feePoolAddress,
+                insurancePool: insurancePoolAddress
+            }
+        );
 
         // init state
         deployment["markets"]["ETH-PERP"]["Objects"] = marketData.marketObjects;
@@ -76,11 +80,11 @@ export async function executeTests(
         onChain = new OnChainCalls(ownerSigner, deployment);
 
         // empty all accounts
-        await onChain.withdrawAllMarginFromBank(alice.signer);
-        await onChain.withdrawAllMarginFromBank(bob.signer);
-        await onChain.withdrawAllMarginFromBank(cat.signer);
-        await onChain.withdrawAllMarginFromBank(dog.signer);
-        await onChain.withdrawAllMarginFromBank(liquidator.signer);
+        await onChain.withdrawAllMarginFromBank(alice.signer, 10000000);
+        await onChain.withdrawAllMarginFromBank(bob.signer, 10000000);
+        await onChain.withdrawAllMarginFromBank(cat.signer, 10000000);
+        await onChain.withdrawAllMarginFromBank(dog.signer, 10000000);
+        await onChain.withdrawAllMarginFromBank(liquidator.signer, 10000000);
 
         // provide maker/taker starting margin in margin bank
         alice.bankAccountId = await mintAndDeposit(
@@ -112,45 +116,38 @@ export async function executeTests(
         before(async () => {
             onChain = new OnChainCalls(ownerSigner, deployment);
 
-            const address = await getAddressFromSigner(onChain.signer);
+            const address = await onChain.signer.getAddress();
+
+            //fund the admin with Sui
+            await requestGas(await onChain.signer.getAddress());
 
             // make owner, the price oracle operator
             const tx1 = await onChain.setPriceOracleOperator({
                 operator: address
             });
-            priceOracleCapID = (
-                Transaction.getObjects(
-                    tx1,
-                    "newObject",
-                    "PriceOracleOperatorCap"
-                )[0] as any
-            ).id as string;
+            priceOracleCapID = Transaction.getCreatedObjectIDs(tx1)[0];
 
             // make admin settlement operator
             const tx2 = await onChain.createSettlementOperator({
                 operator: address
             });
-            settlementCapID = (
-                Transaction.getObjects(tx2, "newObject", "SettlementCap")[0] as any
-            ).id as string;
+            settlementCapID = Transaction.getCreatedObjectIDs(tx2)[0];
 
             // make admin deleveraging operator
             const tx3 = await onChain.setDeleveragingOperator({
                 operator: address
             });
 
-            deleveragingCapID = (
-                Transaction.getObjects(tx3, "newObject", "DeleveragingCap")[0] as any
-            ).id as string;
+            deleveragingCapID = Transaction.getCreatedObjectIDs(tx3)[0];
         });
 
-        Object.keys(testCases).forEach(testName => {
+        Object.keys(testCases).forEach((testName) => {
             describe(testName, () => {
                 before(async () => {
                     await setupTest();
                 });
 
-                testCases[testName].forEach(async testCase => {
+                testCases[testName].forEach(async (testCase) => {
                     testCase.size = testCase.size as any as number;
 
                     const testCaseName =
@@ -161,21 +158,27 @@ export async function executeTests(
                                   testCase.size
                               )}`
                             : testCase.tradeType == "liquidator_bob"
-                            ? `Liquidator opens size:${Math.abs(testCase.size)} price:${
-                                  testCase.price
-                              } leverage:${testCase.leverage}x ${
+                            ? `Liquidator opens size:${Math.abs(
+                                  testCase.size
+                              )} price:${testCase.price} leverage:${
+                                  testCase.leverage
+                              }x ${
                                   testCase.size > 0 ? "Long" : "Short"
                               } against Bob`
                             : testCase.tradeType == "liquidator_cat"
-                            ? `Liquidator opens size:${Math.abs(testCase.size)} price:${
-                                  testCase.price
-                              } leverage:${testCase.leverage}x ${
+                            ? `Liquidator opens size:${Math.abs(
+                                  testCase.size
+                              )} price:${testCase.price} leverage:${
+                                  testCase.leverage
+                              }x ${
                                   testCase.size > 0 ? "Long" : "Short"
                               } against Bob`
                             : testCase.tradeType == "cat_dog"
-                            ? `Cat opens size:${Math.abs(testCase.size)} price:${
-                                  testCase.price
-                              } leverage:${testCase.leverage}x ${
+                            ? `Cat opens size:${Math.abs(
+                                  testCase.size
+                              )} price:${testCase.price} leverage:${
+                                  testCase.leverage
+                              }x ${
                                   testCase.size > 0 ? "Long" : "Short"
                               } against dog`
                             : testCase.tradeType == "deleveraging"
@@ -183,15 +186,19 @@ export async function executeTests(
                                   testCase.pOracle
                               } size:${Math.abs(testCase.size)}`
                             : testCase.isTaker == true
-                            ? `Bob opens size:${Math.abs(testCase.size)} price:${
-                                  testCase.price
-                              } leverage:${testCase.leverage}x ${
+                            ? `Bob opens size:${Math.abs(
+                                  testCase.size
+                              )} price:${testCase.price} leverage:${
+                                  testCase.leverage
+                              }x ${
                                   testCase.size > 0 ? "Long" : "Short"
                               } against Alice`
                             : testCase.size && testCase.size != 0
-                            ? `Alice opens size:${Math.abs(testCase.size)} price:${
-                                  testCase.price
-                              } leverage:${testCase.leverage}x ${
+                            ? `Alice opens size:${Math.abs(
+                                  testCase.size
+                              )} price:${testCase.price} leverage:${
+                                  testCase.leverage
+                              }x ${
                                   testCase.size > 0 ? "Long" : "Short"
                               } against Bob`
                             : testCase.addMargin != undefined
@@ -228,7 +235,8 @@ export async function executeTests(
                             testCase.tradeType != "liquidation" &&
                             testCase.tradeType != "deleveraging"
                         ) {
-                            const { maker, taker } = getMakerTakerOfTrade(testCase);
+                            const { maker, taker } =
+                                getMakerTakerOfTrade(testCase);
 
                             const order = createOrder({
                                 market: onChain.getPerpetualID(),
@@ -243,7 +251,8 @@ export async function executeTests(
                             if (testCase.tradeType == "liquidator_bob") {
                                 await onChain.adjustLeverage(
                                     {
-                                        leverage: testCase.leverage as number
+                                        leverage: testCase.leverage as number,
+                                        gasBudget: 10000000
                                     },
                                     taker.signer
                                 );
@@ -258,7 +267,8 @@ export async function executeTests(
                                         taker.keyPair,
                                         order
                                     )),
-                                    settlementCapID
+                                    settlementCapID,
+                                    gasBudget: 100000000
                                 },
                                 ownerSigner
                             );
@@ -268,10 +278,13 @@ export async function executeTests(
                             tx = await onChain.liquidate(
                                 {
                                     liquidatee: alice.address,
-                                    quantity: toBigNumberStr(Math.abs(testCase.size)),
+                                    quantity: toBigNumberStr(
+                                        Math.abs(testCase.size)
+                                    ),
                                     leverage: toBigNumberStr(
                                         testCase.leverage as any as number
-                                    )
+                                    ),
+                                    gasBudget: 100000000
                                 },
                                 liquidator.signer
                             );
@@ -282,8 +295,11 @@ export async function executeTests(
                                 {
                                     maker: alice.address,
                                     taker: cat.address,
-                                    quantity: toBigNumberStr(Math.abs(testCase.size)),
-                                    deleveragingCapID
+                                    quantity: toBigNumberStr(
+                                        Math.abs(testCase.size)
+                                    ),
+                                    deleveragingCapID,
+                                    gasBudget: 100000000
                                 },
                                 ownerSigner
                             );
@@ -291,21 +307,30 @@ export async function executeTests(
                         // add margin
                         else if (testCase.addMargin != undefined) {
                             tx = await onChain.addMargin(
-                                { amount: testCase.addMargin },
+                                {
+                                    amount: testCase.addMargin,
+                                    gasBudget: 10000000
+                                },
                                 bob.signer
                             );
                         }
                         // remove margin
                         else if (testCase.removeMargin != undefined) {
                             tx = await onChain.removeMargin(
-                                { amount: testCase.removeMargin },
+                                {
+                                    amount: testCase.removeMargin,
+                                    gasBudget: 10000000
+                                },
                                 bob.signer
                             );
                         }
                         // adjust leverage
                         else if (testCase.adjustLeverage != undefined) {
                             tx = await onChain.adjustLeverage(
-                                { leverage: testCase.adjustLeverage },
+                                {
+                                    leverage: testCase.adjustLeverage,
+                                    gasBudget: 10000000
+                                },
                                 bob.signer
                             );
                         }
@@ -376,7 +401,6 @@ export async function executeTests(
             });
         });
     });
-
     // helper method to extract maker/taker of trade
     function getMakerTakerOfTrade(testCase: any) {
         if (testCase.tradeType == "liquidator_bob") {

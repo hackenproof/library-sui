@@ -1,0 +1,13 @@
+[
+    {
+        "packageObjectId": "",
+        "module": "perpetual",
+        "events": [
+            "PerpetualCreationEvent",
+            "SettlementOperatorUpdateEvent",
+            "MinOrderPriceUpdateEvent",
+            "AccountPositionUpdateEvent",
+            "OraclePriceUpdateEvent"
+        ]
+    }
+]
