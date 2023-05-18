@@ -4,10 +4,10 @@ import { DeploymentConfigs } from "../src/DeploymentConfig";
 import {
     readFile,
     getProvider,
-    getAddressFromSigner,
     getSignerFromSeed,
     createOrder,
-    createMarket
+    createMarket,
+    requestGas
 } from "../src/utils";
 import { OnChainCalls, OrderSigner, Transaction } from "../src/classes";
 import { expectTxToFail, expectTxToSucceed } from "./helpers/expect";
@@ -38,6 +38,8 @@ describe("Regular Trade Method", () => {
     let defaultOrder: Order;
 
     before(async () => {
+        await requestGas(ownerAddress);
+
         // deploy market
         deployment["markets"]["ETH-PERP"]["Objects"] = (
             await createMarket(deployment, ownerSigner, provider, {
@@ -46,24 +48,21 @@ describe("Regular Trade Method", () => {
         ).marketObjects;
 
         onChain = new OnChainCalls(ownerSigner, deployment);
-        ownerAddress = await getAddressFromSigner(ownerSigner);
+        ownerAddress = await ownerSigner.getAddress();
 
         // make owner, the price oracle operator
         const tx = await onChain.setPriceOracleOperator({
             operator: ownerAddress
         });
-        priceOracleCapID = (
-            Transaction.getObjects(tx, "newObject", "PriceOracleOperatorCap")[0] as any
-        ).id as string;
+
+        priceOracleCapID = Transaction.getCreatedObjectIDs(tx)[0];
 
         // make admin operator
         const tx2 = await onChain.createSettlementOperator(
             { operator: ownerAddress },
             ownerSigner
         );
-        settlementCapID = (
-            Transaction.getObjects(tx2, "newObject", "SettlementCap")[0] as any
-        ).id as string;
+        settlementCapID = Transaction.getCreatedObjectIDs(tx2)[0];
 
         defaultOrder = createOrder({
             isBuy: true,
@@ -150,8 +149,7 @@ describe("Regular Trade Method", () => {
         const tx = await onChain.createSettlementOperator({
             operator: alice.address
         });
-        const capID = (Transaction.getObjects(tx, "newObject", "SettlementCap")[0] as any)
-            .id as string;
+        const capID = Transaction.getCreatedObjectIDs(tx)[0];
 
         const tx2 = await onChain.removeSettlementOperator({ capID });
         expectTxToSucceed(tx2);
@@ -159,7 +157,8 @@ describe("Regular Trade Method", () => {
         const tx3 = await onChain.trade(
             {
                 ...tradeData,
-                settlementCapID: capID
+                settlementCapID: capID,
+                gasBudget: 90000000
             },
             alice.signer
         );
@@ -177,7 +176,8 @@ describe("Regular Trade Method", () => {
                 { ...defaultOrder, isBuy: true },
                 { takerOrder: { ...defaultOrder, isBuy: true } }
             )),
-            settlementCapID
+            settlementCapID,
+            gasBudget: 90000000
         });
         expectTxToFail(tx);
         expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[48]);
@@ -232,7 +232,8 @@ describe("Regular Trade Method", () => {
 
         const tx = await onChain.trade({
             ...tradeData,
-            settlementCapID
+            settlementCapID,
+            gasBudget: 90000000
         });
 
         expectTxToFail(tx);
@@ -249,7 +250,8 @@ describe("Regular Trade Method", () => {
                 { ...defaultOrder, isBuy: false },
                 { takerOrder: { ...defaultOrder, isBuy: false } }
             )),
-            settlementCapID
+            settlementCapID,
+            gasBudget: 90000000
         });
         expectTxToFail(tx);
         expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[48]);
@@ -274,7 +276,8 @@ describe("Regular Trade Method", () => {
                     }
                 }
             )),
-            settlementCapID
+            settlementCapID,
+            gasBudget: 90000000
         });
 
         expectTxToFail(tx);
@@ -309,7 +312,8 @@ describe("Regular Trade Method", () => {
 
         const tx = await onChain.trade({
             ...tradeData,
-            settlementCapID
+            settlementCapID,
+            gasBudget: 90000000
         });
         expectTxToFail(tx);
         expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[34]);
@@ -340,7 +344,8 @@ describe("Regular Trade Method", () => {
                 makerOrder,
                 { takerOrder }
             )),
-            settlementCapID
+            settlementCapID,
+            gasBudget: 90000000
         });
 
         expectTxToFail(tx);
@@ -394,7 +399,8 @@ describe("Regular Trade Method", () => {
                 makerOrder,
                 { takerOrder }
             )),
-            settlementCapID
+            settlementCapID,
+            gasBudget: 90000000
         });
 
         expectTxToFail(tx);
@@ -449,7 +455,8 @@ describe("Regular Trade Method", () => {
                 makerOrder,
                 { takerOrder }
             )),
-            settlementCapID
+            settlementCapID,
+            gasBudget: 90000000
         });
 
         expectTxToFail(tx);
@@ -483,7 +490,8 @@ describe("Regular Trade Method", () => {
                 makerOrder,
                 { takerOrder }
             )),
-            settlementCapID
+            settlementCapID,
+            gasBudget: 90000000
         });
 
         expectTxToFail(tx);
@@ -518,7 +526,8 @@ describe("Regular Trade Method", () => {
                 makerOrder,
                 { takerOrder }
             )),
-            settlementCapID
+            settlementCapID,
+            gasBudget: 90000000
         });
 
         expectTxToFail(tx);
@@ -558,7 +567,11 @@ describe("Regular Trade Method", () => {
             { takerOrder, quantity: toBigNumber(16) }
         );
 
-        const tx = await onChain.trade({ ...tradeParams, settlementCapID });
+        const tx = await onChain.trade({
+            ...tradeParams,
+            settlementCapID,
+            gasBudget: 90000000
+        });
         expectTxToFail(tx);
         expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[45]);
     });
@@ -596,7 +609,11 @@ describe("Regular Trade Method", () => {
         );
 
         tradeParams.fillQuantity = toBigNumber(25);
-        const tx = await onChain.trade({ ...tradeParams, settlementCapID });
+        const tx = await onChain.trade({
+            ...tradeParams,
+            settlementCapID,
+            gasBudget: 90000000
+        });
         expectTxToFail(tx);
         expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[44]);
     });
@@ -636,7 +653,8 @@ describe("Regular Trade Method", () => {
             takerOrder: takerOrder,
             takerSignature: takerOrderSigned.typedSignature,
             fillQuantity: toBigNumber(5),
-            settlementCapID
+            settlementCapID,
+            gasBudget: 90000000
         });
 
         expectTxToFail(txResponse);
@@ -671,7 +689,8 @@ describe("Regular Trade Method", () => {
         const tx = await onChain.trade({
             ...trade,
             perpID: onChain.getPerpetualID("BTC-PERP"),
-            settlementCapID
+            settlementCapID,
+            gasBudget: 90000000
         });
 
         expectTxToFail(tx);
@@ -722,12 +741,12 @@ describe("Regular Trade Method", () => {
         const TradeExecuted = Transaction.getEvents(tx2, "TradeExecuted")[0];
 
         //taker of the trade was alice
-        expect(TradeExecuted.fields.taker).to.be.equal(alice.address);
+        expect(TradeExecuted.taker).to.be.equal(alice.address);
 
         const orderFill = Transaction.getEvents(tx2, "OrderFill").filter(event => {
-            return event.fields.order.fields.maker == alice.address;
+            return event.order.maker == alice.address;
         })[0];
 
-        expect(orderFill.fields.sigMaker).to.be.equal(bob.address);
+        expect(orderFill.sigMaker).to.be.equal(bob.address);
     });
 });

@@ -15,7 +15,9 @@ const ownerSigner = getSignerFromSeed(DeploymentConfigs.deployer, provider);
 const onChain = new OnChainCalls(ownerSigner, deployment);
 
 async function main() {
-    console.log("Starting debug script");
+    console.log(ownerSigner.getAddress());
+
+    console.log(onChain.getDeployerAddress());
 }
 
 main();

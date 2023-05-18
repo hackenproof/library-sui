@@ -4,7 +4,6 @@ import { DeploymentConfigs } from "../src/DeploymentConfig";
 import {
     readFile,
     getProvider,
-    getAddressFromSigner,
     getSignerFromSeed,
     createOrder,
     createMarket,
@@ -48,24 +47,20 @@ describe("Liquidation Trade Method", () => {
         onChain = new OnChainCalls(ownerSigner, deployment);
 
         // will be using owner as liquidator
-        ownerAddress = await getAddressFromSigner(ownerSigner);
+        ownerAddress = await ownerSigner.getAddress();
 
         // make owner, the price oracle operator
         const tx1 = await onChain.setPriceOracleOperator({
             operator: ownerAddress
         });
-        priceOracleCapID = (
-            Transaction.getObjects(tx1, "newObject", "PriceOracleOperatorCap")[0] as any
-        ).id as string;
+        priceOracleCapID = Transaction.getCreatedObjectIDs(tx1)[0];
 
         // make admin operator
         const tx2 = await onChain.createSettlementOperator(
             { operator: ownerAddress },
             ownerSigner
         );
-        settlementCapID = (
-            Transaction.getObjects(tx2, "newObject", "SettlementCap")[0] as any
-        ).id as string;
+        settlementCapID = Transaction.getCreatedObjectIDs(tx2)[0];
 
         // set oracle price
         const priceTx = await onChain.updateOraclePrice({
@@ -114,7 +109,8 @@ describe("Liquidation Trade Method", () => {
                 liquidatee: alice.address,
                 quantity: toBigNumberStr(1),
                 leverage: toBigNumberStr(1),
-                liquidator: bob.address // liquidator is bob
+                liquidator: bob.address, // liquidator is bob
+                gasBudget: 90000000
             },
             ownerSigner
         ); // caller is owner
@@ -129,7 +125,8 @@ describe("Liquidation Trade Method", () => {
                 liquidatee: DEFAULT.RANDOM_ACCOUNT_ADDRESS, // a random account with no position
                 quantity: toBigNumberStr(1),
                 leverage: toBigNumberStr(1),
-                liquidator: ownerAddress // owner is the liquidator
+                liquidator: ownerAddress, // owner is the liquidator
+                gasBudget: 90000000
             },
             ownerSigner
         );
@@ -144,7 +141,8 @@ describe("Liquidation Trade Method", () => {
                 liquidatee: alice.address,
                 quantity: toBigNumberStr(0.01), // min quantity tradeable is 0.1
                 leverage: toBigNumberStr(1),
-                liquidator: ownerAddress // owner is the liquidator
+                liquidator: ownerAddress, // owner is the liquidator
+                gasBudget: 90000000
             },
             ownerSigner
         );
@@ -159,7 +157,8 @@ describe("Liquidation Trade Method", () => {
                 liquidatee: alice.address,
                 quantity: toBigNumberStr(500000), // max quantity tradeable for limit order is 100000
                 leverage: toBigNumberStr(1),
-                liquidator: ownerAddress // owner is the liquidator
+                liquidator: ownerAddress, // owner is the liquidator
+                gasBudget: 90000000
             },
             ownerSigner
         );
@@ -174,7 +173,8 @@ describe("Liquidation Trade Method", () => {
                 liquidatee: alice.address,
                 quantity: toBigNumberStr(2000), // max quantity tradeable for market order is 1000
                 leverage: toBigNumberStr(1),
-                liquidator: ownerAddress // owner is the liquidator
+                liquidator: ownerAddress, // owner is the liquidator
+                gasBudget: 90000000
             },
             ownerSigner
         );
@@ -217,7 +217,8 @@ describe("Liquidation Trade Method", () => {
                 liquidatee: accounts.maker.address, // has zero sized position
                 quantity: toBigNumberStr(1),
                 leverage: toBigNumberStr(1),
-                liquidator: ownerAddress // owner is the liquidator
+                liquidator: ownerAddress, // owner is the liquidator
+                gasBudget: 90000000
             },
             ownerSigner
         );
@@ -232,7 +233,8 @@ describe("Liquidation Trade Method", () => {
                 liquidatee: alice.address,
                 quantity: toBigNumberStr(1),
                 leverage: toBigNumberStr(1),
-                liquidator: ownerAddress // owner is the liquidator
+                liquidator: ownerAddress, // owner is the liquidator
+                gasBudget: 9000000
             },
             ownerSigner
         );
@@ -254,7 +256,8 @@ describe("Liquidation Trade Method", () => {
                 quantity: toBigNumberStr(2), // alice has only 1 quantity
                 leverage: toBigNumberStr(1),
                 allOrNothing: true,
-                liquidator: ownerAddress // owner is the liquidator
+                liquidator: ownerAddress, // owner is the liquidator
+                gasBudget: 9000000
             },
             ownerSigner
         );
@@ -308,7 +311,8 @@ describe("Liquidation Trade Method", () => {
                 liquidatee: alice.address,
                 quantity: toBigNumberStr(1),
                 leverage: toBigNumberStr(4), // trying to liquidate at 4x
-                liquidator: makerTaker.maker.address // maker is the liquidator
+                liquidator: makerTaker.maker.address, // maker is the liquidator
+                gasBudget: 90000000
             },
             makerTaker.maker.signer
         );
@@ -340,12 +344,12 @@ describe("Liquidation Trade Method", () => {
         const liqPosition = Transaction.getAccountPositionFromEvent(
             txResponse,
             ownerAddress
-        ) as UserPositionExtended;
+        );
 
         const alicePosition = Transaction.getAccountPositionFromEvent(
             txResponse,
             alice.address
-        ) as UserPositionExtended;
+        );
 
         expect(liqPosition.qPos).to.be.equal(toBigNumberStr(1));
         expect(alicePosition.qPos).to.be.equal(toBigNumberStr(0));

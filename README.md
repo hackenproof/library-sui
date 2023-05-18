@@ -39,15 +39,8 @@ derivatives trading on [Sui](https://sui.io/) blockchain.
 
 **Running Tests:**
 
--   Updat .env file with DEPLOY_ON and DEPLOYER_SEED. To run tests against our internal
-    cloud Sui use the following:
-
-    ```
-    DEPLOY_ON = cloud
-    DEPLOYER_SEED = settle image finger column since happy input rebuild betray float magnet produce surge pipe bag language point cover neglect disorder egg sheriff erosion negative
-    ```
-
--   Fund deployer using `yarn faucet --account 0x42696a5734546c3acc9019ef93543609cb5c5c89`
+-   Updat .env file with DEPLOY_ON and DEPLOYER_SEED
+-   Fund deployer using `yarn faucet --account <acct_address>`
 -   Fund testing accounts using `yarn fund:test:accounts`
 -   Deploy the package using `yarn deploy`, Every time any change is made to package, it
     will need to be re-deployed before running tests

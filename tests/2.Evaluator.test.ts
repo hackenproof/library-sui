@@ -6,10 +6,10 @@ import { Trader } from "../src/classes/Trader";
 import {
     readFile,
     getProvider,
-    getAddressFromSigner,
     getSignerFromSeed,
     createMarket,
-    createOrder
+    createOrder,
+    requestGas
 } from "../src/utils";
 import { getTestAccounts } from "./helpers/accounts";
 import { ERROR_CODES, OWNERSHIP_ERROR } from "../src/errors";
@@ -38,27 +38,26 @@ describe("Evaluator", () => {
     let priceOracleCapID: string;
 
     before(async () => {
+        ownerAddress = await ownerSigner.getAddress();
+
+        await requestGas(ownerAddress);
         await fundTestAccounts();
-        ownerAddress = await getAddressFromSigner(ownerSigner);
 
         onChain = new OnChainCalls(ownerSigner, deployment);
+
         // make owner, the price oracle operator
         const tx = await onChain.setPriceOracleOperator({
             operator: ownerAddress
         });
 
-        priceOracleCapID = (
-            Transaction.getObjects(tx, "newObject", "PriceOracleOperatorCap")[0] as any
-        ).id as string;
+        priceOracleCapID = Transaction.getCreatedObjectIDs(tx)[0];
 
         const tx2 = await onChain.createSettlementOperator(
             { operator: ownerAddress },
             ownerSigner
         );
 
-        settlementCapID = (
-            Transaction.getObjects(tx2, "newObject", "SettlementCap")[0] as any
-        ).id as string;
+        settlementCapID = Transaction.getCreatedObjectIDs(tx2)[0];
 
         await mintAndDeposit(onChain, alice.address, 30000000);
         await mintAndDeposit(onChain, bob.address, 30000000);
@@ -74,20 +73,28 @@ describe("Evaluator", () => {
 
     describe("Price", async () => {
         it("should set min price to 0.2", async () => {
-            await onChain.setMinPrice({ minPrice: 0.02 });
+            const tx = await onChain.setMinPrice({ minPrice: 0.02 });
+            expectTxToSucceed(tx);
             const details = await onChain.getPerpDetails(onChain.getPerpetualID());
+
             expect(details.checks["fields"]["minPrice"]).to.be.equal(
                 toBigNumberStr(0.02)
             );
         });
 
         it("should revert as min price can not be set to zero", async () => {
-            const tx = await onChain.setMinPrice({ minPrice: 0 });
+            const tx = await onChain.setMinPrice({
+                minPrice: 0,
+                gasBudget: 9000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[1]);
         });
 
         it("should revert as min price can not be > max price", async () => {
-            const tx = await onChain.setMinPrice({ minPrice: 1_000_000 });
+            const tx = await onChain.setMinPrice({
+                minPrice: 1_000_000,
+                gasBudget: 9000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[2]);
         });
 
@@ -113,7 +120,10 @@ describe("Evaluator", () => {
 
         it("should revert when setting max price < min price", async () => {
             await onChain.setMinPrice({ minPrice: 0.5 });
-            const tx = await onChain.setMaxPrice({ maxPrice: 0.2 });
+            const tx = await onChain.setMaxPrice({
+                maxPrice: 0.2,
+                gasBudget: 9000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[9]);
         });
 
@@ -132,13 +142,14 @@ describe("Evaluator", () => {
         it("should set tick size to 0.1", async () => {
             await onChain.setTickSize({ tickSize: 0.1 });
             const details = await onChain.getPerpDetails(onChain.getPerpetualID());
-            expect((details.checks as any)["fields"]["tickSize"]).to.be.equal(
-                toBigNumberStr(0.1)
-            );
+            expect(details.checks["fields"]["tickSize"]).to.be.equal(toBigNumberStr(0.1));
         });
 
         it("should revert when trying to set tick size as 0", async () => {
-            const tx = await onChain.setTickSize({ tickSize: 0 });
+            const tx = await onChain.setTickSize({
+                tickSize: 0,
+                gasBudget: 9000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[11]);
         });
 
@@ -188,11 +199,13 @@ describe("Evaluator", () => {
             );
             const tx = await onChain.trade({
                 ...tradeParams,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 900000000
             });
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[3]);
         });
+
         it("should revert trade as trade price is > max price", async () => {
             await onChain.setMaxPrice({ maxPrice: 100 });
             const priceTx = await onChain.updateOraclePrice({
@@ -227,11 +240,13 @@ describe("Evaluator", () => {
             );
             const tx = await onChain.trade({
                 ...tradeParams,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 900000000
             });
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[4]);
         });
+
         it("should revert trade as trade price does not confirm to tick size # 1", async () => {
             await onChain.setTickSize({ tickSize: 0.1 });
             const priceTx = await onChain.updateOraclePrice({
@@ -266,7 +281,8 @@ describe("Evaluator", () => {
             );
             const tx = await onChain.trade({
                 ...tradeParams,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 900000000
             });
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[5]);
@@ -306,7 +322,8 @@ describe("Evaluator", () => {
             );
             const tx = await onChain.trade({
                 ...tradeParams,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 900000000
             });
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[5]);
@@ -354,25 +371,29 @@ describe("Evaluator", () => {
         it("should set maximum quantity (limit) as 20000", async () => {
             await onChain.setMaxQtyLimit({ maxQtyLimit: 20000 });
             const details = await onChain.getPerpDetails(onChain.getPerpetualID());
-            expect((details.checks as any)["fields"]["maxQtyLimit"]).to.be.equal(
+            expect(details.checks["fields"]["maxQtyLimit"]).to.be.equal(
                 toBigNumberStr(20000)
             );
         });
         it("should set maximum quantity (market) as 20000", async () => {
             await onChain.setMaxQtyMarket({ maxQtyMarket: 20000 });
             const details = await onChain.getPerpDetails(onChain.getPerpetualID());
-            expect((details.checks as any)["fields"]["maxQtyMarket"]).to.be.equal(
+            expect(details.checks["fields"]["maxQtyMarket"]).to.be.equal(
                 toBigNumberStr(20000)
             );
         });
         it("should revert when trying to set maximum quantity for limit trade < minimum trade quantity", async () => {
-            const tx = await onChain.setMaxQtyLimit({ maxQtyLimit: 0.001 });
+            const tx = await onChain.setMaxQtyLimit({
+                maxQtyLimit: 0.001,
+                gasBudget: 90000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[15]);
         });
 
         it("should revert when trying to set maximum quantity for market trade < minimum trade quantity", async () => {
             const tx = await onChain.setMaxQtyMarket({
-                maxQtyMarket: 0.001
+                maxQtyMarket: 0.001,
+                gasBudget: 90000000
             });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[16]);
         });
@@ -402,7 +423,10 @@ describe("Evaluator", () => {
         });
 
         it("should revert when trying to set minimum quantity  as 0", async () => {
-            const tx = await onChain.setMinQty({ minQty: 0 });
+            const tx = await onChain.setMinQty({
+                minQty: 0,
+                gasBudget: 90000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[18]);
         });
 
@@ -421,13 +445,14 @@ describe("Evaluator", () => {
         it("should set step size to 0.1", async () => {
             await onChain.setStepSize({ stepSize: 0.1 });
             const details = await onChain.getPerpDetails(onChain.getPerpetualID());
-            expect((details.checks as any)["fields"]["stepSize"]).to.be.equal(
-                toBigNumberStr(0.1)
-            );
+            expect(details.checks["fields"]["stepSize"]).to.be.equal(toBigNumberStr(0.1));
         });
 
         it("should revert when trying to set step size as 0", async () => {
-            const tx = await onChain.setStepSize({ stepSize: 0 });
+            const tx = await onChain.setStepSize({
+                stepSize: 0,
+                gasBudget: 90000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[10]);
         });
 
@@ -477,11 +502,13 @@ describe("Evaluator", () => {
             );
             const tx = await onChain.trade({
                 ...tradeParams,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 90000000
             });
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[19]);
         });
+
         it("should revert trade as trade quantity is > max trade quantity (limit)", async () => {
             await onChain.setMaxQtyLimit({ maxQtyLimit: 100 });
             const priceTx = await onChain.updateOraclePrice({
@@ -516,11 +543,13 @@ describe("Evaluator", () => {
             );
             const tx = await onChain.trade({
                 ...tradeParams,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 90000000
             });
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[20]);
         });
+
         it("should revert trade as trade quantity is > max trade quantity (market)", async () => {
             await onChain.setMaxQtyMarket({ maxQtyMarket: 50 });
             const priceTx = await onChain.updateOraclePrice({
@@ -555,11 +584,13 @@ describe("Evaluator", () => {
             );
             const tx = await onChain.trade({
                 ...tradeParams,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 90000000
             });
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[21]);
         });
+
         it("should revert trade as trade quantity does not conform to step size # 1", async () => {
             await onChain.setStepSize({ stepSize: 0.1 });
             const priceTx = await onChain.updateOraclePrice({
@@ -594,11 +625,13 @@ describe("Evaluator", () => {
             );
             const tx = await onChain.trade({
                 ...tradeParams,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 90000000
             });
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[22]);
         });
+
         it("should revert trade as trade quantity does not conform to step size # 2", async () => {
             await onChain.setStepSize({ stepSize: 0.01 });
             const priceTx = await onChain.updateOraclePrice({
@@ -633,11 +666,13 @@ describe("Evaluator", () => {
             );
             const tx = await onChain.trade({
                 ...tradeParams,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 90000000
             });
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[22]);
         });
+
         it("should successfully execute the trade when all quantity checks are met", async () => {
             const priceTx = await onChain.updateOraclePrice({
                 price: toBigNumberStr(10),
@@ -679,30 +714,40 @@ describe("Evaluator", () => {
 
     describe("Market Take Bounds", async () => {
         it("should revert when trying to set market take bound (long) as 0", async () => {
-            const tx = await onChain.setMTBLong({ mtbLong: 0 });
+            const tx = await onChain.setMTBLong({
+                mtbLong: 0,
+                gasBudget: 90000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[12]);
         });
 
         it("should revert when trying to set market take bound (short) as 0", async () => {
-            const tx = await onChain.setMTBShort({ mtbShort: 0 });
+            const tx = await onChain.setMTBShort({
+                mtbShort: 0,
+                gasBudget: 90000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[13]);
         });
 
         it("should revert when trying to set market take bound (short) > 100%", async () => {
-            const tx = await onChain.setMTBShort({ mtbShort: 2 });
+            const tx = await onChain.setMTBShort({
+                mtbShort: 2,
+                gasBudget: 90000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[14]);
         });
 
         it("should set market take bound (long) to 20%", async () => {
-            await onChain.setMTBLong({ mtbLong: 0.2 });
+            await onChain.setMTBLong({ mtbLong: 0.2, gasBudget: 90000000 });
             const details = await onChain.getPerpDetails(onChain.getPerpetualID());
-            expect((details.checks as any)["fields"]["mtbLong"]).to.be.equal(
-                toBigNumberStr(0.2)
-            );
+            expect(details.checks["fields"]["mtbLong"]).to.be.equal(toBigNumberStr(0.2));
         });
 
         it("should revert when trying to set market take bound (long) as 0", async () => {
-            const tx = await onChain.setMTBLong({ mtbLong: 0 });
+            const tx = await onChain.setMTBLong({
+                mtbLong: 0,
+                gasBudget: 90000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[12]);
         });
 
@@ -721,18 +766,22 @@ describe("Evaluator", () => {
         it("should set market take bound (short) to 20%", async () => {
             await onChain.setMTBShort({ mtbShort: 0.2 });
             const details = await onChain.getPerpDetails(onChain.getPerpetualID());
-            expect((details.checks as any)["fields"]["mtbShort"]).to.be.equal(
-                toBigNumberStr(0.2)
-            );
+            expect(details.checks["fields"]["mtbShort"]).to.be.equal(toBigNumberStr(0.2));
         });
 
         it("should revert when trying to set market take bound (short) as 0", async () => {
-            const tx = await onChain.setMTBShort({ mtbShort: 0 });
+            const tx = await onChain.setMTBShort({
+                mtbShort: 0,
+                gasBudget: 90000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[13]);
         });
 
         it("should revert when trying to set market take bound (short) > 100%", async () => {
-            const tx = await onChain.setMTBShort({ mtbShort: 2 });
+            const tx = await onChain.setMTBShort({
+                mtbShort: 2,
+                gasBudget: 90000000
+            });
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[14]);
         });
 
@@ -748,7 +797,7 @@ describe("Evaluator", () => {
             ).to.eventually.be.rejectedWith(expectedError);
         });
         it("should revert when trying to trade at price < short take bound", async () => {
-            await onChain.setMTBShort({ mtbShort: 0.2 });
+            await onChain.setMTBShort({ mtbShort: 0.2, gasBudget: 90000000 });
             const priceTx = await onChain.updateOraclePrice({
                 price: toBigNumberStr(20),
                 updateOPCapID: priceOracleCapID
@@ -782,7 +831,8 @@ describe("Evaluator", () => {
             );
             const tx = await onChain.trade({
                 ...tradeParams,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 90000000
             });
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[24]);
@@ -862,7 +912,8 @@ describe("Evaluator", () => {
             );
             const tx = await onChain.trade({
                 ...tradeParams,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 90000000
             });
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[23]);
@@ -918,9 +969,7 @@ describe("Evaluator", () => {
             await onChain.setMaxAllowedOIOpen({ maxLimit });
             const details = await onChain.getPerpDetails(onChain.getPerpetualID());
             maxLimit.unshift(toBigNumberStr(0));
-            expect((details.checks as any)["fields"]["maxAllowedOIOpen"]).deep.equal(
-                maxLimit
-            );
+            expect(details.checks["fields"]["maxAllowedOIOpen"]).deep.equal(maxLimit);
         });
 
         it("should revert when non-admin account tries to max Allowed OI Open values", async () => {
@@ -984,9 +1033,9 @@ describe("Evaluator", () => {
                 ...tradeParams,
                 settlementCapID
             });
-            const err = Transaction.getError(tx);
             expectTxToSucceed(tx);
         });
+
         it("should open a position at 5x leverage with 300K OI Open as there are no oi open thresholds set for leverages > 3", async () => {
             const maxLimit = [];
             maxLimit.push(toBigNumberStr(1_000_000)); //1x
@@ -1033,9 +1082,9 @@ describe("Evaluator", () => {
                 ...tradeParams,
                 settlementCapID
             });
-            const err = Transaction.getError(tx);
             expectTxToSucceed(tx);
         });
+
         it("should revert when trying to open 300K OI open position at 5x", async () => {
             const maxLimit = [];
             maxLimit.push(toBigNumberStr(1_000_000)); //1x
@@ -1081,11 +1130,13 @@ describe("Evaluator", () => {
             );
             const tx = await onChain.trade({
                 ...tradeParams,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 90000000
             });
             expectTxToFail(tx);
             expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[25]);
         });
+
         it("should revert when trying to adjust leverage as OI Open goes max allowed OI Open for newly selected leverage", async () => {
             const maxLimit = [];
             maxLimit.push(toBigNumberStr(1_000_000)); //1x
@@ -1140,12 +1191,13 @@ describe("Evaluator", () => {
             });
             expectTxToSucceed(tx);
             const tx2 = await onChain.adjustLeverage(
-                { leverage: 9, account: alice.address },
+                { leverage: 9, account: alice.address, gasBudget: 90000000 },
                 alice.signer
             );
             expectTxToFail(tx2);
             expect(Transaction.getError(tx2)).to.be.equal(ERROR_CODES[25]);
         });
+
         it("should revert when trying to increase position when OI open after increasing position is > max allowed oi open", async () => {
             const maxLimit = [];
             maxLimit.push(toBigNumberStr(1_000_000)); //1x
@@ -1224,7 +1276,8 @@ describe("Evaluator", () => {
             );
             const tx2 = await onChain.trade({
                 ...tradeParams2,
-                settlementCapID
+                settlementCapID,
+                gasBudget: 90000000
             });
 
             expectTxToFail(tx2);

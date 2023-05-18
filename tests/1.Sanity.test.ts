@@ -1,12 +1,7 @@
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import { DeploymentConfigs } from "../src/DeploymentConfig";
-import {
-    readFile,
-    getProvider,
-    getAddressFromSigner,
-    getSignerFromSeed
-} from "../src/utils";
+import { readFile, getProvider, getSignerFromSeed, requestGas } from "../src/utils";
 import { OnChainCalls, Transaction } from "../src/classes";
 import { TEST_WALLETS } from "./helpers/accounts";
 import { OWNERSHIP_ERROR } from "../src/errors";
@@ -29,18 +24,19 @@ describe("Sanity Tests", () => {
     // deploy package once
     before(async () => {
         await fundTestAccounts();
-        ownerAddress = await getAddressFromSigner(ownerSigner);
+        ownerAddress = await ownerSigner.getAddress();
         onChain = new OnChainCalls(ownerSigner, deployment);
+        await requestGas(ownerAddress);
     });
 
     it("deployer should have non zero balance", async () => {
-        const coins = await provider.getCoinBalancesOwnedByAddress(ownerAddress);
-        expect(coins.length).to.be.greaterThan(0);
+        const coins = await provider.getCoins({ owner: ownerAddress });
+        expect(coins.data.length).to.be.greaterThan(0);
     });
 
     it("The deployer account must be the owner of ExchangeAdminCap", async () => {
         const details = await onChain.getOnChainObject(onChain.getExchangeAdminCap());
-        expect((details.owner as any).AddressOwner).to.be.equal(ownerAddress);
+        expect((details?.data?.owner as any).AddressOwner).to.be.equal(ownerAddress);
     });
 
     it("should allow admin to create a perpetual", async () => {

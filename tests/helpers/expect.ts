@@ -3,7 +3,7 @@ import chaiAsPromised from "chai-as-promised";
 chai.use(chaiAsPromised);
 export const expect = chai.expect;
 
-import { SuiExecuteTransactionResponse } from "@mysten/sui.js";
+import { SuiTransactionBlockResponse } from "@mysten/sui.js";
 import { TestPositionExpect } from "./interfaces";
 import { getExpectedTestPosition, toExpectedPositionFormat } from "./utils";
 import { Transaction, Balance, UserPositionExtended, OnChainCalls } from "../../src";
@@ -11,12 +11,12 @@ import BigNumber from "bignumber.js";
 import { bigNumber, bnToBaseStr } from "../../src/library";
 import { Account } from "./accounts";
 
-export function expectTxToSucceed(txResponse: SuiExecuteTransactionResponse) {
+export function expectTxToSucceed(txResponse: SuiTransactionBlockResponse) {
     const status = Transaction.getStatus(txResponse);
     expect(status).to.be.equal("success");
 }
 
-export function expectTxToFail(txResponse: SuiExecuteTransactionResponse) {
+export function expectTxToFail(txResponse: SuiTransactionBlockResponse) {
     const status = Transaction.getStatus(txResponse);
     expect(status).to.be.equal("failure");
 }
@@ -56,7 +56,7 @@ export function expectPosition(
 }
 
 export function expectTxToEmitEvent(
-    txResponse: SuiExecuteTransactionResponse,
+    txResponse: SuiTransactionBlockResponse,
     eventName: string,
     eventsCount = 1,
     emission?: any[]
@@ -64,11 +64,11 @@ export function expectTxToEmitEvent(
     const events = Transaction.getEvents(txResponse, eventName);
 
     expect(events?.length).to.equal(eventsCount);
-    expect(events?.[0]).to.not.be.undefined;
 
     if (emission) {
-        const eventObjects = events?.map(event => event.fields);
-        expect(emission).to.deep.equal(eventObjects);
+        for (const itr in events) {
+            expect(emission[itr]).to.deep.equal(events[itr]);
+        }
     }
 }
 
@@ -112,7 +112,7 @@ export async function evaluateAccountPositionExpect(
     account: Account,
     expectedJSON: any,
     oraclePrice: BigNumber,
-    tx: SuiExecuteTransactionResponse
+    tx: SuiTransactionBlockResponse
 ) {
     const position = Transaction.getAccountPositionFromEvent(
         tx,
@@ -132,7 +132,7 @@ export async function evaluateAccountPositionExpect(
                 expectedJSON.pnl != undefined
                     ? Transaction.getAccountPNL(tx, account.address)
                     : undefined,
-            bankBalance: bankAcctDetails.balance
+            bankBalance: bankAcctDetails?.balance
         }
     );
 

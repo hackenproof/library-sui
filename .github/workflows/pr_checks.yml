@@ -13,7 +13,7 @@ jobs:
             - uses: actions/setup-node@v2
               name: Setup Node.js
               with:
-                  node-version: "16.13"
+                  node-version: "18.x"
             - name: Setup yarn
               run: npm install -g yarn
             - run: yarn
@@ -26,21 +26,8 @@ jobs:
             - uses: actions/setup-node@v2
               name: Setup Node.js
               with:
-                  node-version: "16.13"
+                  node-version: "18.x"
             - name: Setup yarn
               run: npm install -g yarn
             - run: yarn
             - run: yarn ci:code-style
-    # build:
-    #     name: Build
-    #     runs-on: self-hosted
-    #     steps:
-    #         - uses: actions/checkout@v2
-    #         - uses: actions/setup-node@v2
-    #           name: Setup Node.js
-    #           with:
-    #               node-version: "16.13"
-    #         - name: Setup yarn
-    #           run: npm install -g yarn
-    #         - run: yarn
-    #         - run: yarn build

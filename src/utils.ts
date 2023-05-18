@@ -48,19 +48,14 @@ export function readFile(filePath: string): any {
         : {};
 }
 
-export function getProvider(
-    rpcURL: string,
-    faucetURL: string
-): JsonRpcProvider {
+export function getProvider(rpcURL: string, faucetURL: string): JsonRpcProvider {
     // return new JsonRpcProvider(rpcURL, { faucetURL: faucetURL });
-    return new JsonRpcProvider(
-        new Connection({ fullnode: rpcURL, faucet: faucetURL })
-    );
+    return new JsonRpcProvider(new Connection({ fullnode: rpcURL, faucet: faucetURL }));
 }
 
 export function getKeyPairFromSeed(
     seed: string,
-    scheme: SignatureScheme = "ED25519"
+    scheme: SignatureScheme = "Secp256k1"
 ): Keypair {
     switch (scheme) {
         case "ED25519":
@@ -79,10 +74,7 @@ export function getSignerFromKeyPair(
     return new RawSigner(keypair, provider);
 }
 
-export function getSignerFromSeed(
-    seed: string,
-    provider: JsonRpcProvider
-): RawSigner {
+export function getSignerFromSeed(seed: string, provider: JsonRpcProvider): RawSigner {
     return getSignerFromKeyPair(getKeyPairFromSeed(seed), provider);
 }
 
@@ -113,8 +105,7 @@ export async function getGenesisMap(
 ): Promise<DeploymentObjectMap> {
     const map: DeploymentObjectMap = {};
 
-    const createdObjects = (txResponse as any).effects
-        .created as OwnedObjectRef[];
+    const createdObjects = (txResponse as any).effects.created as OwnedObjectRef[];
 
     // iterate over each object
     for (const itr in createdObjects) {
@@ -247,12 +238,8 @@ export function createOrder(params: {
         reduceOnly: params.reduceOnly == true,
         postOnly: params.postOnly == true,
         price: params.price ? toBigNumber(params.price) : DEFAULT.ORDER.price,
-        quantity: params.quantity
-            ? toBigNumber(params.quantity)
-            : DEFAULT.ORDER.quantity,
-        leverage: params.leverage
-            ? toBigNumber(params.leverage)
-            : DEFAULT.ORDER.leverage,
+        quantity: params.quantity ? toBigNumber(params.quantity) : DEFAULT.ORDER.quantity,
+        leverage: params.leverage ? toBigNumber(params.leverage) : DEFAULT.ORDER.leverage,
         expiration: params.expiration
             ? bigNumber(params.expiration)
             : DEFAULT.ORDER.expiration,
@@ -262,21 +249,25 @@ export function createOrder(params: {
 
 export function printOrder(order: Order) {
     console.log(
-        "order.isBuy:",
-        order.isBuy,
-        "order.price:",
-        order.price.toFixed(0),
-        "order.quantity:",
-        order.quantity.toFixed(0),
-        "order.leverage:",
-        order.leverage.toFixed(0),
-        "order.reduceOnly:",
-        order.reduceOnly,
-        "order.maker:",
+        "\norder.maker:",
         order.maker,
-        "order.expiration:",
+        "\norder.market:",
+        order.market,
+        "\norder.isBuy:",
+        order.isBuy,
+        "\norder.reduceOnly:",
+        order.reduceOnly,
+        "\norder.postOnly:",
+        order.postOnly,
+        "\norder.price:",
+        order.price.toFixed(0),
+        "\norder.quantity:",
+        order.quantity.toFixed(0),
+        "\norder.leverage:",
+        order.leverage.toFixed(0),
+        "\norder.expiration:",
         order.expiration.toFixed(0),
-        "order.salt:",
+        "\norder.salt:",
         order.salt.toFixed(0)
     );
 }
