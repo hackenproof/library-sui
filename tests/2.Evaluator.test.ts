@@ -1225,7 +1225,7 @@ describe("Evaluator", () => {
                 market: onChain.getPerpetualID()
             });
 
-            const takerOrder = createOrder({
+            let takerOrder = createOrder({
                 maker: bob.address,
                 price: 10,
                 isBuy: true,
