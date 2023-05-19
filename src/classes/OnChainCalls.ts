@@ -15,13 +15,12 @@ import {
 } from "../interfaces";
 import {
     bigNumber,
-    BigNumberable,
     hexToBuffer,
     toBigNumber,
     toBigNumberStr,
     usdcToBaseNumber
 } from "../library";
-
+import { BigNumberable } from "../interfaces/types";
 export class OnChainCalls {
     signer: SignerWithProvider;
     deployment: any;

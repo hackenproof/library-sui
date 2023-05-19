@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
-import { UserPosition, UserPositionExtended } from "../interfaces";
-import { BigNumberable, BIGNUMBER_BASE, toBaseNumber } from "../library";
+import { UserPosition, UserPositionExtended, BigNumberable } from "../interfaces";
+import { BIGNUMBER_BASE, toBaseNumber } from "../library";
 
 export class Balance {
     public mro: BigNumber;

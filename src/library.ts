@@ -1,10 +1,5 @@
 import BigNumber from "bignumber.js";
-
-export type BigNumberable = BigNumber | number | string;
-export type SignedNumber = {
-    sign: boolean;
-    value: string;
-};
+import { BigNumberable, SignedNumber } from "./interfaces/types";
 
 export const BASE_DECIMALS = 9;
 export const BIGNUMBER_BASE = new BigNumber(1).shiftedBy(BASE_DECIMALS);
