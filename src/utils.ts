@@ -165,6 +165,7 @@ export async function getGenesisMap(
 }
 
 export async function publishPackage(
+    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     usingCLI: boolean = false,
     deployer: RawSigner | undefined = undefined
 ): Promise<SuiTransactionBlockResponse> {

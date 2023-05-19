@@ -44,6 +44,7 @@ export class OrderSigner {
         const orderFlags = encodeOrderFlags(order);
 
         const buffer = Buffer.alloc(152);
+
         buffer.set(hexToBuffer(bnToHex(order.price)), 0);
         buffer.set(hexToBuffer(bnToHex(order.quantity)), 16);
         buffer.set(hexToBuffer(bnToHex(order.leverage)), 32);
@@ -53,6 +54,7 @@ export class OrderSigner {
         buffer.set(hexToBuffer(order.market), 112);
         buffer.set(hexToBuffer(bnToHex(orderFlags, 2)), 144);
         buffer.set(Buffer.from("Bluefin", "utf8"), 145);
+
 
         return buffer.toString("hex");
     }
