@@ -55,7 +55,6 @@ export class OrderSigner {
         buffer.set(hexToBuffer(bnToHex(orderFlags, 2)), 144);
         buffer.set(Buffer.from("Bluefin", "utf8"), 145);
 
-
         return buffer.toString("hex");
     }
 

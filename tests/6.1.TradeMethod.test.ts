@@ -752,7 +752,6 @@ describe("Trade", () => {
     });
 
     it("should allow Bob to execute trade as both Alice/Bob signed orders with orderbook only flag False", async () => {
-
         await mintAndDeposit(onChain, alice.address, 2000);
         await mintAndDeposit(onChain, bob.address, 2000);
 
