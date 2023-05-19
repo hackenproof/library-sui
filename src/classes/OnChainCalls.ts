@@ -130,9 +130,7 @@ export class OnChainCalls {
         callArgs.push(args.insurancePoolRatio || toBigNumberStr(0.3));
 
         callArgs.push(
-            args.insurancePool
-                ? args.insurancePool
-                : DEFAULT.INSURANCE_POOL_ADDRESS
+            args.insurancePool ? args.insurancePool : DEFAULT.INSURANCE_POOL_ADDRESS
         );
 
         callArgs.push(args.feePool ? args.feePool : DEFAULT.FEE_POOL_ADDRESS);
@@ -615,18 +613,10 @@ export class OnChainCalls {
         );
 
         callArgs.push(
-            args.fillPrice
-                ? args.fillPrice.toFixed(0)
-                : args.makerOrder.price.toFixed(0)
+            args.fillPrice ? args.fillPrice.toFixed(0) : args.makerOrder.price.toFixed(0)
         );
 
-        return this.signAndCall(
-            caller,
-            "trade",
-            callArgs,
-            "exchange",
-            args.gasBudget
-        );
+        return this.signAndCall(caller, "trade", callArgs, "exchange", args.gasBudget);
     }
 
     public async liquidate(
@@ -937,9 +927,7 @@ export class OnChainCalls {
 
         callArgs.push(args.bankID ? args.bankID : this.getBankID());
         callArgs.push(
-            args.accountAddress
-                ? args.accountAddress
-                : await caller.getAddress()
+            args.accountAddress ? args.accountAddress : await caller.getAddress()
         );
         callArgs.push(args.amount);
         callArgs.push(args.coinID);
@@ -1024,9 +1012,7 @@ export class OnChainCalls {
 
         callArgs.push(args.bankID ? args.bankID : this.getBankID());
         callArgs.push(
-            args.accountAddress
-                ? args.accountAddress
-                : await caller.getAddress()
+            args.accountAddress ? args.accountAddress : await caller.getAddress()
         );
         callArgs.push(args.amount);
 
@@ -1209,9 +1195,7 @@ export class OnChainCalls {
         }
     }
 
-    public async getBankAccountDetailsUsingAddress(
-        address: string
-    ): Promise<BigNumber> {
+    public async getBankAccountDetailsUsingAddress(address: string): Promise<BigNumber> {
         if (this.deployment.bankAccounts[address] === undefined)
             throw `Address: ${address} not found in deployment map`;
 
@@ -1236,7 +1220,7 @@ export class OnChainCalls {
         const tx = new TransactionBlock();
         if (gasBudget) tx.setGasBudget(gasBudget);
 
-        const params = callArgs.map((v) => tx.pure(v));
+        const params = callArgs.map(v => tx.pure(v));
 
         tx.moveCall({
             target: `${this.getPackageID()}::${moduleName}::${method}`,
@@ -1312,8 +1296,7 @@ export class OnChainCalls {
     }
 
     getPriceOracleOperatorCap(): string {
-        return this.deployment["objects"]["PriceOracleOperatorCap"]
-            .id as string;
+        return this.deployment["objects"]["PriceOracleOperatorCap"].id as string;
     }
 
     getPublicSettlementCap(): string {
@@ -1322,8 +1305,7 @@ export class OnChainCalls {
 
     // by default returns the perpetual id of 1st market
     getPerpetualID(market = "ETH-PERP"): string {
-        return this.deployment["markets"][market]["Objects"]["Perpetual"]
-            .id as string;
+        return this.deployment["markets"][market]["Objects"]["Perpetual"].id as string;
     }
 
     getOrdersTableID(): string {

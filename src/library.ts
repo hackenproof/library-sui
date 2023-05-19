@@ -23,17 +23,11 @@ export function bigNumber(val: BigNumberable): BigNumber {
     return new BigNumber(val);
 }
 
-export function toBigNumber(
-    val: BigNumberable,
-    base: number = BASE_DECIMALS
-): BigNumber {
+export function toBigNumber(val: BigNumberable, base: number = BASE_DECIMALS): BigNumber {
     return new BigNumber(val).multipliedBy(toBnBase(base));
 }
 
-export function toBigNumberStr(
-    val: BigNumberable,
-    base: number = BASE_DECIMALS
-): string {
+export function toBigNumberStr(val: BigNumberable, base: number = BASE_DECIMALS): string {
     return toBigNumber(val, base).toFixed(0);
 }
 
@@ -46,9 +40,7 @@ export function usdcToBaseNumber(val: BigNumberable, decimals = 6): number {
 }
 
 export function toBaseNumber(val: BigNumberable, decimals = 3): number {
-    return Number(
-        new BigNumber(val).shiftedBy(-BASE_DECIMALS).toFixed(decimals)
-    );
+    return Number(new BigNumber(val).shiftedBy(-BASE_DECIMALS).toFixed(decimals));
 }
 
 export function bnToHex(bn: BigNumber | number, pad: number = 32): string {
@@ -73,9 +65,7 @@ export function base64ToHex(data: string): string {
 }
 
 export function SignedNumberToBigNumber(number: SignedNumber) {
-    return new BigNumber(
-        number.sign ? number.value : -1 * Number(number.value)
-    );
+    return new BigNumber(number.sign ? number.value : -1 * Number(number.value));
 }
 
 export function SignedNumberToBigNumberStr(number: SignedNumber, decimals = 2) {

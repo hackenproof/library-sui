@@ -103,11 +103,7 @@ export const ERROR_CODES: { [key: string]: string } = {
     "804": "IsolatedADL: allOrNothing is set and taker position is < quantity",
     "900": "New address can not be same as current one"
 };
-export const OWNERSHIP_ERROR = (
-    objId: string,
-    ownerId: string,
-    signerId: string
-) => {
+export const OWNERSHIP_ERROR = (objId: string, ownerId: string, signerId: string) => {
     return new RegExp(
         `Object ${objId} is owned by account address ${ownerId}, but given owner/signer address is ${signerId}`
     );

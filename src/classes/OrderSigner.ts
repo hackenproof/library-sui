@@ -36,10 +36,7 @@ export class OrderSigner {
         // appending 00 at the end of the signature to make it possible
         // to recovere signer address. When verifying signature remove the leading `00`
         // append 01 when using keccak
-        return (
-            Buffer.from(sign).toString("hex") +
-            recovery.toString().padStart(2, "0")
-        );
+        return Buffer.from(sign).toString("hex") + recovery.toString().padStart(2, "0");
     }
 
     public getSerializedOrder(order: Order): string {
@@ -70,11 +67,7 @@ export class OrderSigner {
         return Buffer.from(hash).toString("hex");
     }
 
-    public verifyUsingHash(
-        signature: string,
-        orderHash: string,
-        address: string
-    ) {
+    public verifyUsingHash(signature: string, orderHash: string, address: string) {
         const signatureWithR = hexToBuffer(signature);
         if (signatureWithR.length == 65) {
             const sig = signatureWithR.subarray(0, 64);
@@ -91,10 +84,6 @@ export class OrderSigner {
     }
 
     public verifyUsingOrder(signature: string, order: Order, address: string) {
-        return this.verifyUsingHash(
-            signature,
-            this.getOrderHash(order),
-            address
-        );
+        return this.verifyUsingHash(signature, this.getOrderHash(order), address);
     }
 }
