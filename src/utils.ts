@@ -166,7 +166,7 @@ export async function getGenesisMap(
 
 export async function publishPackage(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
+    // @ts-ignore
     usingCLI: boolean = false,
     deployer: RawSigner | undefined = undefined
 ): Promise<SuiTransactionBlockResponse> {
