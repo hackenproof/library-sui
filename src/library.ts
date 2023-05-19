@@ -72,3 +72,10 @@ export function SignedNumberToBigNumberStr(number: SignedNumber, decimals = 2) {
 export function SignedNumberToBaseNumber(number: SignedNumber, decimals = 3) {
     return toBaseNumber(SignedNumberToBigNumber(number), decimals);
 }
+
+export function bnStrToBaseNumber(
+    val: BigNumberable,
+    base: number = BASE_DECIMALS
+): number {
+    return Number(new BigNumber(val).dividedBy(toBnBase(base)).toFixed());
+}
