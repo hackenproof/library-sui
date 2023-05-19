@@ -1,6 +1,6 @@
 import { Keypair, Secp256k1PublicKey } from "@mysten/sui.js";
 import { Order, SignedOrder } from "../interfaces/order";
-import { bnToHex, hexToBuffer } from "../library";
+import { bnToHex, encodeOrderFlags, hexToBuffer } from "../library";
 import * as secp from "@noble/secp256k1";
 import { sha256 } from "@noble/hashes/sha256";
 import { secp256k1 } from "@noble/curves/secp256k1";
@@ -36,11 +36,17 @@ export class OrderSigner {
         // appending 00 at the end of the signature to make it possible
         // to recovere signer address. When verifying signature remove the leading `00`
         // append 01 when using keccak
-        return Buffer.from(sign).toString("hex") + recovery.toString().padStart(2, "0");
+        return (
+            Buffer.from(sign).toString("hex") +
+            recovery.toString().padStart(2, "0")
+        );
     }
 
     public getSerializedOrder(order: Order): string {
-        const buffer = Buffer.alloc(155);
+        // encode order flags
+        const orderFlags = encodeOrderFlags(order);
+
+        const buffer = Buffer.alloc(152);
         buffer.set(hexToBuffer(bnToHex(order.price)), 0);
         buffer.set(hexToBuffer(bnToHex(order.quantity)), 16);
         buffer.set(hexToBuffer(bnToHex(order.leverage)), 32);
@@ -48,11 +54,8 @@ export class OrderSigner {
         buffer.set(hexToBuffer(bnToHex(order.salt)), 64);
         buffer.set(hexToBuffer(order.maker), 80);
         buffer.set(hexToBuffer(order.market), 112);
-        buffer.set([order.reduceOnly ? 1 : 0], 144);
-        buffer.set([order.isBuy ? 1 : 0], 145);
-        buffer.set([order.postOnly ? 1 : 0], 146);
-        buffer.set([order.orderbookOnly ? 1 : 0], 147);
-        buffer.set(Buffer.from("Bluefin", "utf8"), 148);
+        buffer.set(hexToBuffer(bnToHex(orderFlags, 2)), 144);
+        buffer.set(Buffer.from("Bluefin", "utf8"), 145);
 
         return buffer.toString("hex");
     }
@@ -67,7 +70,11 @@ export class OrderSigner {
         return Buffer.from(hash).toString("hex");
     }
 
-    public verifyUsingHash(signature: string, orderHash: string, address: string) {
+    public verifyUsingHash(
+        signature: string,
+        orderHash: string,
+        address: string
+    ) {
         const signatureWithR = hexToBuffer(signature);
         if (signatureWithR.length == 65) {
             const sig = signatureWithR.subarray(0, 64);
@@ -84,6 +91,10 @@ export class OrderSigner {
     }
 
     public verifyUsingOrder(signature: string, order: Order, address: string) {
-        return this.verifyUsingHash(signature, this.getOrderHash(order), address);
+        return this.verifyUsingHash(
+            signature,
+            this.getOrderHash(order),
+            address
+        );
     }
 }

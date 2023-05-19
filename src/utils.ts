@@ -48,9 +48,14 @@ export function readFile(filePath: string): any {
         : {};
 }
 
-export function getProvider(rpcURL: string, faucetURL: string): JsonRpcProvider {
+export function getProvider(
+    rpcURL: string,
+    faucetURL: string
+): JsonRpcProvider {
     // return new JsonRpcProvider(rpcURL, { faucetURL: faucetURL });
-    return new JsonRpcProvider(new Connection({ fullnode: rpcURL, faucet: faucetURL }));
+    return new JsonRpcProvider(
+        new Connection({ fullnode: rpcURL, faucet: faucetURL })
+    );
 }
 
 export function getKeyPairFromSeed(
@@ -74,7 +79,10 @@ export function getSignerFromKeyPair(
     return new RawSigner(keypair, provider);
 }
 
-export function getSignerFromSeed(seed: string, provider: JsonRpcProvider): RawSigner {
+export function getSignerFromSeed(
+    seed: string,
+    provider: JsonRpcProvider
+): RawSigner {
     return getSignerFromKeyPair(getKeyPairFromSeed(seed), provider);
 }
 
@@ -105,7 +113,8 @@ export async function getGenesisMap(
 ): Promise<DeploymentObjectMap> {
     const map: DeploymentObjectMap = {};
 
-    const createdObjects = (txResponse as any).effects.created as OwnedObjectRef[];
+    const createdObjects = (txResponse as any).effects
+        .created as OwnedObjectRef[];
 
     // iterate over each object
     for (const itr in createdObjects) {
@@ -165,7 +174,6 @@ export async function getGenesisMap(
 }
 
 export async function publishPackage(
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
     usingCLI: boolean = false,
     deployer: RawSigner | undefined = undefined
 ): Promise<SuiTransactionBlockResponse> {
@@ -236,6 +244,7 @@ export function createOrder(params: {
     leverage?: number;
     reduceOnly?: boolean;
     postOnly?: boolean;
+    ioc?: boolean;
     orderbookOnly?: boolean;
     expiration?: number;
     salt?: number;
@@ -246,10 +255,16 @@ export function createOrder(params: {
         isBuy: params.isBuy == true,
         reduceOnly: params.reduceOnly == true,
         postOnly: params.postOnly == true,
-        orderbookOnly: params.orderbookOnly != undefined ? params.orderbookOnly : true, // default to true
+        orderbookOnly:
+            params.orderbookOnly == undefined ? true : params.orderbookOnly,
+        ioc: params.ioc == true,
         price: params.price ? toBigNumber(params.price) : DEFAULT.ORDER.price,
-        quantity: params.quantity ? toBigNumber(params.quantity) : DEFAULT.ORDER.quantity,
-        leverage: params.leverage ? toBigNumber(params.leverage) : DEFAULT.ORDER.leverage,
+        quantity: params.quantity
+            ? toBigNumber(params.quantity)
+            : DEFAULT.ORDER.quantity,
+        leverage: params.leverage
+            ? toBigNumber(params.leverage)
+            : DEFAULT.ORDER.leverage,
         expiration: params.expiration
             ? bigNumber(params.expiration)
             : DEFAULT.ORDER.expiration,
