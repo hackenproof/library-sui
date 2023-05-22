@@ -1,12 +1,7 @@
 import BigNumber from "bignumber.js";
 import { BigNumberable, SignedNumber } from "./interfaces/types";
-
-export const BASE_DECIMALS = 9;
-export const BIGNUMBER_BASE = new BigNumber(1).shiftedBy(BASE_DECIMALS);
-
-export const ADDRESSES = {
-    ZERO: "0x0000000000000000000000000000000000000000000000000000000000000000"
-};
+import { BASE_DECIMALS } from "./constants";
+import _ from "lodash";
 
 const toBnBase = (base: number) => {
     return new BigNumber(1).shiftedBy(base);
@@ -74,3 +69,9 @@ export function bnStrToBaseNumber(
 ): number {
     return Number(new BigNumber(val).dividedBy(toBnBase(base)).toFixed());
 }
+
+export function getValue(object: object, path: string, defaultValue: any) {
+    return _.get(object, path, defaultValue);
+}
+
+export const { isEmpty } = _;

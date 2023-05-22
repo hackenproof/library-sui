@@ -4,7 +4,7 @@ export enum OBJECT_OWNERSHIP_STATUS {
     "SHARED" = "Shared"
 }
 
-export declare enum MARKET_SYMBOLS {
+export enum MARKET_SYMBOLS {
     BTC = "BTC-PERP",
     ETH = "ETH-PERP",
     DOT = "DOT-PERP",
@@ -12,7 +12,7 @@ export declare enum MARKET_SYMBOLS {
     MOVR = "MOVR-PERP",
     SOL = "SOL-PERP"
 }
-export declare enum ORDER_STATUS {
+export enum ORDER_STATUS {
     PENDING = "PENDING",
     OPEN = "OPEN",
     PARTIAL_FILLED = "PARTIAL_FILLED",
@@ -24,26 +24,26 @@ export declare enum ORDER_STATUS {
     STAND_BY_PENDING = "STAND_BY_PENDING",
     STAND_BY = "STAND_BY"
 }
-export declare enum ORDER_TYPE {
+export enum ORDER_TYPE {
     LIMIT = "LIMIT",
     MARKET = "MARKET",
     STOP_LIMIT = "STOP_LIMIT",
     STOP_MARKET = "STOP_MARKET"
 }
-export declare enum ORDER_SIDE {
+export enum ORDER_SIDE {
     BUY = "BUY",
     SELL = "SELL"
 }
-export declare enum TIME_IN_FORCE {
+export enum TIME_IN_FORCE {
     FILL_OR_KILL = "FOK",
     IMMEDIATE_OR_CANCEL = "IOC",
     GOOD_TILL_TIME = "GTT"
 }
-export declare enum MARGIN_TYPE {
+export enum MARGIN_TYPE {
     ISOLATED = "ISOLATED",
     CROSS = "CROSS"
 }
-export declare enum CANCEL_REASON {
+export enum CANCEL_REASON {
     UNDERCOLLATERALIZED = "UNDERCOLLATERALIZED",
     INSUFFICIENT_BALANCE = "INSUFFICIENT_BALANCE",
     USER_CANCELLED = "USER_CANCELLED",
@@ -57,12 +57,12 @@ export declare enum CANCEL_REASON {
     FAILED = "FAILED",
     NETWORK_DOWN = "NETWORK_DOWN"
 }
-export declare enum MARKET_STATUS {
+export enum MARKET_STATUS {
     ACTIVE = "ACTIVE",
     INACTIVE = "INACTIVE",
     TRADES_INACTIVE = "TRADES_INACTIVE"
 }
-export declare enum SOCKET_EVENTS {
+export enum SOCKET_EVENTS {
     GET_LAST_KLINE_WITH_INTERVAL = "{symbol}@kline@{interval}",
     GLOBAL_UPDATES_ROOM = "globalUpdates",
     GlobalUpdatesRoom = "globalUpdates",
@@ -90,7 +90,7 @@ export declare enum SOCKET_EVENTS {
     UserTransferUpdate = "UserTransferUpdate",
     AccountPermissionUpdate = "AccountPermissionUpdate"
 }
-export declare enum ADJUST_MARGIN {
+export enum ADJUST_MARGIN {
     Add = "Add",
     Remove = "Remove"
 }

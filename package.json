@@ -37,7 +37,8 @@
         "socket.io-client": "^4.6.1",
         "ts-binary-serializer": "^2.1.3",
         "yargs": "^17.6.2",
-        "yarn": "^1.22.19"
+        "yarn": "^1.22.19",
+        "lodash": "^4.17.21"
     },
     "devDependencies": {
         "@types/chai": "^4.3.3",
