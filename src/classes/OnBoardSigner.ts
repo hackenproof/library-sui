@@ -23,11 +23,10 @@ export class OnboardingSigner {
 
         if (keyPair && _provider) {
             // Signed Message and Signature
-            const messagehash = sha256(hexToBuffer(message));
-            const sign = await getSignerFromKeyPair(keyPair, _provider).signMessage(
-                messagehash
-            );
-            return sign;
+            const msgHash = sha256(hexToBuffer(message));
+            const signer = await getSignerFromKeyPair(keyPair, _provider);
+            const signedMsg = await signer.signMessage({ message: msgHash });
+            return signedMsg.signature;
         } else {
             throw Error(`keyPair or message not provided`);
         }
