@@ -12,7 +12,8 @@ import { OnChainCalls, OrderSigner, Trader, Transaction } from "../src/classes";
 import { expectTxToFail, expectTxToSucceed } from "./helpers/expect";
 import { getTestAccounts } from "./helpers/accounts";
 import { network } from "../src/DeploymentConfig";
-import { ADDRESSES, toBigNumberStr } from "../src/library";
+import { toBigNumberStr } from "../src/library";
+import { ADDRESSES } from "../src";
 import { ERROR_CODES, OWNERSHIP_ERROR } from "../src/errors";
 import { mintAndDeposit } from "./helpers/utils";
 

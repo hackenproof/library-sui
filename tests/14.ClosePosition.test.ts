@@ -8,7 +8,8 @@ import {
     getSignerFromSeed,
     readFile
 } from "../src/utils";
-import { BASE_DECIMALS, toBigNumber, toBigNumberStr } from "../src/library";
+import { toBigNumber, toBigNumberStr } from "../src/library";
+import { BASE_DECIMALS } from "../src";
 import {
     BankAccountDetails,
     OnChainCalls,
