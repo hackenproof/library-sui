@@ -1,7 +1,7 @@
 {
     "name": "@firefly-exchange/library-sui",
     "description": "Repository containing Bluefin core exchange contracts that allow users to do on-chain derivatives trading on **SUI** blockchain.",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "main": "dist/index",
     "typings": "dist/index",
     "scripts": {
