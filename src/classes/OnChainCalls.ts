@@ -3,7 +3,8 @@ import {
     SignerWithProvider,
     SuiObjectResponse,
     SuiTransactionBlockResponse,
-    TransactionBlock
+    TransactionBlock,
+    SUI_CLOCK_OBJECT_ID
 } from "@mysten/sui.js";
 import BigNumber from "bignumber.js";
 import { DEFAULT } from "../defaults";
@@ -15,12 +16,14 @@ import {
 } from "../interfaces";
 import {
     bigNumber,
+    BigNumberable,
+    encodeOrderFlags,
     hexToBuffer,
     toBigNumber,
     toBigNumberStr,
     usdcToBaseNumber
 } from "../library";
-import { BigNumberable } from "../interfaces/types";
+
 export class OnChainCalls {
     signer: SignerWithProvider;
     deployment: any;
@@ -78,6 +81,31 @@ export class OnChainCalls {
         );
     }
 
+    public async setFundingRateOperator(
+        args: {
+            operator: string;
+            adminID?: string;
+            safeID?: string;
+            gasBudget?: number;
+        },
+        signer?: RawSigner
+    ) {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+        callArgs.push(args.adminID || this.getExchangeAdminCap());
+        callArgs.push(args.safeID || this.getSafeID());
+        callArgs.push(args.operator);
+
+        return this.signAndCall(
+            caller,
+            "set_funding_rate_operator",
+            callArgs,
+            "roles",
+            args.gasBudget
+        );
+    }
+
     public async createPerpetual(
         args: PerpCreationMarketDetails,
         signer?: RawSigner,
@@ -120,10 +148,10 @@ export class OnChainCalls {
 
         callArgs.push(args.makerFee || toBigNumberStr(0.001));
         callArgs.push(args.takerFee || toBigNumberStr(0.0045));
-        // TODO un comment when FR is implemented
-        // callArgs.push(args.maxAllowedFR || toBigNumberStr(0.001));
 
         callArgs.push(args.maxAllowedPriceDiffInOP || toBigNumberStr(1));
+
+        callArgs.push(args.maxAllowedFR || toBigNumberStr(0.001));
 
         callArgs.push(args.insurancePoolRatio || toBigNumberStr(0.3));
 
@@ -132,6 +160,9 @@ export class OnChainCalls {
         );
 
         callArgs.push(args.feePool ? args.feePool : DEFAULT.FEE_POOL_ADDRESS);
+
+        // time stamp in ms
+        callArgs.push(args.startingTime || Date.now());
 
         const caller = signer || this.signer;
 
@@ -538,8 +569,6 @@ export class OnChainCalls {
         },
         signer?: RawSigner
     ) {
-        // TODO, the method has been removed from exchange
-        // remove it
         const caller = signer || this.signer;
         const callArgs = [];
 
@@ -576,6 +605,8 @@ export class OnChainCalls {
         const caller = signer || this.signer;
 
         const callArgs = [];
+        callArgs.push(SUI_CLOCK_OBJECT_ID);
+
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.bankID || this.getBankID());
         callArgs.push(args.safeID || this.getSafeID());
@@ -584,28 +615,22 @@ export class OnChainCalls {
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(this.getOrdersTableID());
 
-        callArgs.push(args.makerOrder.isBuy);
-        callArgs.push(args.makerOrder.postOnly);
-        callArgs.push(args.makerOrder.orderbookOnly);
+        callArgs.push(encodeOrderFlags(args.makerOrder));
         callArgs.push(args.makerOrder.price.toFixed(0));
         callArgs.push(args.makerOrder.quantity.toFixed(0));
         callArgs.push(args.makerOrder.leverage.toFixed(0));
-        callArgs.push(args.makerOrder.reduceOnly);
-        callArgs.push(args.makerOrder.maker);
         callArgs.push(args.makerOrder.expiration.toFixed(0));
         callArgs.push(args.makerOrder.salt.toFixed(0));
+        callArgs.push(args.makerOrder.maker);
         callArgs.push(Array.from(hexToBuffer(args.makerSignature)));
 
-        callArgs.push(args.takerOrder.isBuy);
-        callArgs.push(args.takerOrder.postOnly);
-        callArgs.push(args.takerOrder.orderbookOnly);
+        callArgs.push(encodeOrderFlags(args.takerOrder));
         callArgs.push(args.takerOrder.price.toFixed(0));
         callArgs.push(args.takerOrder.quantity.toFixed(0));
         callArgs.push(args.takerOrder.leverage.toFixed(0));
-        callArgs.push(args.takerOrder.reduceOnly);
-        callArgs.push(args.takerOrder.maker);
         callArgs.push(args.takerOrder.expiration.toFixed(0));
         callArgs.push(args.takerOrder.salt.toFixed(0));
+        callArgs.push(args.takerOrder.maker);
         callArgs.push(Array.from(hexToBuffer(args.takerSignature)));
 
         callArgs.push(
@@ -639,6 +664,7 @@ export class OnChainCalls {
         const caller = signer || this.signer;
 
         const callArgs = [];
+        callArgs.push(SUI_CLOCK_OBJECT_ID);
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(this.getBankID());
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
@@ -674,6 +700,7 @@ export class OnChainCalls {
         const caller = signer || this.signer;
 
         const callArgs = [];
+        callArgs.push(SUI_CLOCK_OBJECT_ID);
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(this.getBankID());
         callArgs.push(args.safeID || this.getSafeID());
@@ -706,7 +733,6 @@ export class OnChainCalls {
         const caller = signer || this.signer;
 
         const callArgs = [];
-
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(this.getBankID());
 
@@ -777,6 +803,36 @@ export class OnChainCalls {
             "adjust_leverage",
             callArgs,
             "exchange",
+            args.gasBudget
+        );
+    }
+
+    public async setFundingRate(
+        args: {
+            rate: BigNumber;
+            safeID?: string;
+            updateFRCapID?: string;
+            perpID?: string;
+            gasBudget?: number;
+        },
+        signer?: RawSigner
+    ): Promise<SuiTransactionBlockResponse> {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+
+        callArgs.push(SUI_CLOCK_OBJECT_ID);
+        callArgs.push(args.safeID || this.getSafeID());
+        callArgs.push(args.updateFRCapID || this.getFROperatorCapID());
+        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(args.rate.absoluteValue().toString());
+        callArgs.push(args.rate.isPositive());
+
+        return this.signAndCall(
+            caller,
+            "set_funding_rate",
+            callArgs,
+            "perpetual",
             args.gasBudget
         );
     }
@@ -1063,6 +1119,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
+        callArgs.push(SUI_CLOCK_OBJECT_ID);
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.price);
 
@@ -1279,6 +1336,10 @@ export class OnChainCalls {
         return this.deployment["objects"]["ExchangeGuardianCap"].id as string;
     }
 
+    getFROperatorCapID(): string {
+        return this.deployment["objects"]["FundingRateCap"].id as string;
+    }
+
     getDeleveragingCapID(): string {
         return this.deployment["objects"]["DeleveragingCap"].id as string;
     }
@@ -1313,9 +1374,7 @@ export class OnChainCalls {
     }
 
     getOrdersTableID(): string {
-        return this.deployment["objects"][
-            `Table<vector<u8>, ${this.getPackageID()}::isolated_trading::OrderStatus>`
-        ].id as string;
+        return this.deployment["objects"]["OrderStatus"].id as string;
     }
 
     getDeployerAddress(): string {

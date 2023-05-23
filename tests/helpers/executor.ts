@@ -57,7 +57,8 @@ export async function executeTests(
         const marketData = await createMarket(deployment, ownerSigner, provider, {
             ...marketConfig,
             feePool: feePoolAddress,
-            insurancePool: insurancePoolAddress
+            insurancePool: insurancePoolAddress,
+            startingTime: Date.now() - 1000
         });
 
         // init state
@@ -110,7 +111,7 @@ export async function executeTests(
             const address = await onChain.signer.getAddress();
 
             //fund the admin with Sui
-            await requestGas(await onChain.signer.getAddress());
+            await requestGas(address);
 
             // make owner, the price oracle operator
             const tx1 = await onChain.setPriceOracleOperator({
@@ -232,7 +233,7 @@ export async function executeTests(
                                 await onChain.adjustLeverage(
                                     {
                                         leverage: testCase.leverage as number,
-                                        gasBudget: 90000000
+                                        gasBudget: 50000000
                                     },
                                     taker.signer
                                 );
@@ -305,7 +306,7 @@ export async function executeTests(
                             tx = await onChain.adjustLeverage(
                                 {
                                     leverage: testCase.adjustLeverage,
-                                    gasBudget: 90000000
+                                    gasBudget: 50000000
                                 },
                                 bob.signer
                             );

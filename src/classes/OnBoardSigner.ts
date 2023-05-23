@@ -1,5 +1,6 @@
 import * as secp from "@noble/secp256k1";
-import { Secp256k1PublicKey, RawSigner } from "@mysten/sui.js";
+import { JsonRpcProvider, Keypair, Secp256k1PublicKey } from "@mysten/sui.js";
+import { getSignerFromKeyPair } from "../utils";
 import { sha256 } from "@noble/hashes/sha256";
 import { hexToBuffer } from "../library";
 
@@ -7,24 +8,34 @@ export class OnboardingSigner {
     /**
      * Creates hash of given message and signs it with given private key or web3 provider
      * @param message string to be sign
-     * @param pKey user's private key
+     * @param keyPair user's key pair
      * @param _provider provider HttpProvider | IpcProvider | WebsocketProvider | AbstractProvider | string
      * @returns signature
      */
     public static async createOnboardSignature(
         message: string,
-        signer: RawSigner
+        keyPair: Keypair,
+        _provider?: JsonRpcProvider
     ): Promise<string> {
-        const messagehash = sha256(hexToBuffer(message));
-        const sign = await signer.signMessage({
-            message: messagehash
-        });
-        return sign.signature;
+        if (!keyPair && !_provider) {
+            throw Error(`Invalid provider`);
+        }
+
+        if (keyPair && _provider) {
+            // Signed Message and Signature
+            const messagehash = sha256(hexToBuffer(message));
+            const sign = await getSignerFromKeyPair(keyPair, _provider).signMessage(
+                messagehash
+            );
+            return sign;
+        } else {
+            throw Error(`keyPair or message not provided`);
+        }
     }
 
     /**
      * Recovers user address from the signature and compares it with given public address
-     * @param signer public address of user
+     * @param address public address of user
      * @param message message to be signed
      * @param signature
      * @returns

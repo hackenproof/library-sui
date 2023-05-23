@@ -18,7 +18,6 @@ import {
     BankAccountMap,
     DeploymentData,
     DeploymentObjectMap,
-    DeploymentObjects,
     MarketDeployment,
     MarketDeploymentData
 } from "../src/interfaces";
@@ -49,7 +48,6 @@ export function readFile(filePath: string): any {
 }
 
 export function getProvider(rpcURL: string, faucetURL: string): JsonRpcProvider {
-    // return new JsonRpcProvider(rpcURL, { faucetURL: faucetURL });
     return new JsonRpcProvider(new Connection({ fullnode: rpcURL, faucet: faucetURL }));
 }
 
@@ -133,21 +131,17 @@ export async function getGenesisMap(
 
         // get data type
         let dataType = "package";
-        if (objectType != "package") {
-            const tableIdx = objectType.lastIndexOf("Table");
-            if (tableIdx >= 0) {
-                dataType = objectType.slice(tableIdx);
-            } else if (objectType.indexOf("TreasuryCap") > 0) {
-                dataType = "TreasuryCap";
-            } else if (objectType.indexOf("TUSDC") > 0) {
-                dataType = "Currency";
-            } else {
-                dataType = objectType.slice(objectType.lastIndexOf("::") + 2);
-            }
 
-            if (dataType.endsWith(">") && dataType.indexOf("<") == -1) {
-                dataType = dataType.slice(0, dataType.length - 1);
-            }
+        if (objectType.indexOf("TreasuryCap") > 0) {
+            dataType = "TreasuryCap";
+        } else if (objectType.indexOf("TUSDC") > 0) {
+            dataType = "Currency";
+        } else if (objectType.lastIndexOf("::") > 0) {
+            dataType = objectType.slice(objectType.lastIndexOf("::") + 2);
+        }
+
+        if (dataType.endsWith(">") && dataType.indexOf("<") == -1) {
+            dataType = dataType.slice(0, dataType.length - 1);
         }
         map[dataType] = {
             id,
@@ -165,8 +159,7 @@ export async function getGenesisMap(
 }
 
 export async function publishPackage(
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-    usingCLI: boolean = false,
+    usingCLI = false,
     deployer: RawSigner | undefined = undefined
 ): Promise<SuiTransactionBlockResponse> {
     const pkgPath = `"${path.join(process.cwd(), `/${packageName}`)}"`;
@@ -190,6 +183,7 @@ export async function createMarket(
         console.error(`Error while deploying market: ${error}`);
         process.exit(1);
     }
+
     const map = await getGenesisMap(provider, txResult);
 
     // get account details for insurance pool, perpetual and fee pool
@@ -227,7 +221,7 @@ export function getDeploymentData(
     };
 }
 
-export function createOrder(params: {
+export function createOrder(params?: {
     market?: string;
     maker?: string;
     isBuy?: boolean;
@@ -236,24 +230,30 @@ export function createOrder(params: {
     leverage?: number;
     reduceOnly?: boolean;
     postOnly?: boolean;
+    ioc?: boolean;
     orderbookOnly?: boolean;
     expiration?: number;
     salt?: number;
 }): Order {
     return {
-        market: params.market || DEFAULT.ORDER.market,
-        maker: params.maker || DEFAULT.ORDER.maker,
-        isBuy: params.isBuy == true,
-        reduceOnly: params.reduceOnly == true,
-        postOnly: params.postOnly == true,
-        orderbookOnly: params.orderbookOnly != undefined ? params.orderbookOnly : true, // default to true
-        price: params.price ? toBigNumber(params.price) : DEFAULT.ORDER.price,
-        quantity: params.quantity ? toBigNumber(params.quantity) : DEFAULT.ORDER.quantity,
-        leverage: params.leverage ? toBigNumber(params.leverage) : DEFAULT.ORDER.leverage,
-        expiration: params.expiration
-            ? bigNumber(params.expiration)
+        market: params?.market || DEFAULT.ORDER.market,
+        maker: params?.maker || DEFAULT.ORDER.maker,
+        isBuy: params?.isBuy == true,
+        reduceOnly: params?.reduceOnly == true,
+        postOnly: params?.postOnly == true,
+        orderbookOnly: params?.orderbookOnly == undefined ? true : params.orderbookOnly,
+        ioc: params?.ioc == true,
+        price: params?.price ? toBigNumber(params.price) : DEFAULT.ORDER.price,
+        quantity: params?.quantity
+            ? toBigNumber(params.quantity)
+            : DEFAULT.ORDER.quantity,
+        leverage: params?.leverage
+            ? toBigNumber(params?.leverage)
+            : DEFAULT.ORDER.leverage,
+        expiration: params?.expiration
+            ? bigNumber(params?.expiration)
             : DEFAULT.ORDER.expiration,
-        salt: params.salt ? bigNumber(params.salt) : bigNumber(Date.now())
+        salt: params?.salt ? bigNumber(params?.salt) : bigNumber(Date.now())
     } as Order;
 }
 
@@ -269,6 +269,10 @@ export function printOrder(order: Order) {
         order.reduceOnly,
         "\norder.postOnly:",
         order.postOnly,
+        "\norder.orderbookOnly:",
+        order.orderbookOnly,
+        "\norder.ioc:",
+        order.ioc,
         "\norder.price:",
         order.price.toFixed(0),
         "\norder.quantity:",
