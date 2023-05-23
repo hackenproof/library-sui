@@ -22,3 +22,13 @@ export interface BankAccountDetails {
     address: string;
     balance: BigNumber;
 }
+
+export interface Coin {
+    coinType: string;
+    coinObjectId: string;
+    version: string;
+    digest: string;
+    balance: number;
+    lockedUntilEpoch: boolean;
+    previousTransaction: string;
+}

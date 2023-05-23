@@ -18,6 +18,7 @@ export const INTEGERS = {
 };
 
 export const BASE_DECIMALS = 9;
+export const USDC_BASE_DECIMALS = 6;
 export const BIGNUMBER_BASE = new BigNumber(1).shiftedBy(BASE_DECIMALS);
 
 export const ADDRESSES = {
