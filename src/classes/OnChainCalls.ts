@@ -851,6 +851,7 @@ export class OnChainCalls {
 
         const callArgs = [];
 
+        callArgs.push(SUI_CLOCK_OBJECT_ID);
         callArgs.push(args.safeID || this.getSafeID());
         callArgs.push(args.updateOPCapID || this.getPriceOracleOperatorCap());
         callArgs.push(args.perpID || this.getPerpetualID());
