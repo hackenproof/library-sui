@@ -31,3 +31,16 @@ jobs:
               run: npm install -g yarn
             - run: yarn
             - run: yarn ci:code-style
+    build:
+        name: build check
+        runs-on: self-hosted
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              name: Setup Node.js
+              with:
+                  node-version: "18.x"
+            - name: Setup yarn
+              run: npm install -g yarn
+            - run: yarn install --immutable
+            - run: yarn build
