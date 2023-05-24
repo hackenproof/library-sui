@@ -40,5 +40,7 @@ jobs:
               name: Setup Node.js
               with:
                   node-version: "18.x"
+            - name: Setup yarn
+              run: npm install -g yarn
             - run: yarn install --immutable
             - run: yarn build
