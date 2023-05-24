@@ -1,6 +1,6 @@
 import { Order } from "./interfaces";
 import { bigNumber, toBigNumber } from "./library";
-import { ADDRESSES } from "./constants";
+import { ADDRESSES } from "./library";
 
 export const DEFAULT = {
     ORDER: {

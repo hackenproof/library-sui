@@ -23,7 +23,7 @@ chai.use(chaiAsPromised);
 const expect = chai.expect;
 const provider = getProvider(network.rpc, network.faucet);
 
-describe("Regular Trade Method", () => {
+describe("Trade", () => {
     const ownerSigner = getSignerFromSeed(DeploymentConfigs.deployer, provider);
     const deployment = readFile(DeploymentConfigs.filePath);
     let onChain: OnChainCalls;
@@ -39,11 +39,13 @@ describe("Regular Trade Method", () => {
 
     before(async () => {
         await requestGas(ownerAddress);
+        await requestGas(bob.address);
 
         // deploy market
         deployment["markets"]["ETH-PERP"]["Objects"] = (
             await createMarket(deployment, ownerSigner, provider, {
-                maxAllowedPriceDiffInOP: toBigNumberStr(1000)
+                maxAllowedPriceDiffInOP: toBigNumberStr(1000),
+                startingTime: Date.now() - 1000
             })
         ).marketObjects;
 
@@ -681,7 +683,11 @@ describe("Regular Trade Method", () => {
 
         // deploying a new market
         deployment["markets"]["BTC-PERP"] = {
-            Objects: (await createMarket(deployment, ownerSigner, provider)).marketObjects
+            Objects: (
+                await createMarket(deployment, ownerSigner, provider, {
+                    startingTime: Date.now() - 1000
+                })
+            ).marketObjects
         };
 
         onChain = new OnChainCalls(ownerSigner, deployment);
@@ -718,19 +724,19 @@ describe("Regular Trade Method", () => {
         );
         expectTxToSucceed(tx);
 
-        defaultOrder.maker = tester.address;
+        const order = { ...defaultOrder, maker: tester.address };
 
         const trade = await Trader.setupNormalTrade(
             provider,
             orderSigner,
             tester.keyPair,
             bob.keyPair,
-            defaultOrder,
+            order,
             {
                 takerOrder: {
-                    ...defaultOrder,
+                    ...order,
                     maker: alice.address,
-                    isBuy: !defaultOrder.isBuy
+                    isBuy: !order.isBuy
                 }
             } // taker order signed by bob for alice
         );
@@ -750,7 +756,7 @@ describe("Regular Trade Method", () => {
         expect(orderFill.sigMaker).to.be.equal(bob.address);
     });
 
-    it("should allow bob to execute trade as both Alice/Bob signed orders with orderbook only flag False", async () => {
+    it("should allow Bob to execute trade as both Alice/Bob signed orders with orderbook only flag False", async () => {
         await mintAndDeposit(onChain, alice.address, 2000);
         await mintAndDeposit(onChain, bob.address, 2000);
 
@@ -887,5 +893,36 @@ describe("Regular Trade Method", () => {
 
         expectTxToFail(tx);
         expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[110]);
+    });
+
+    it("should revert as maker order can not be ioc", async () => {
+        await mintAndDeposit(onChain, alice.address, 2000);
+        await mintAndDeposit(onChain, bob.address, 2000);
+
+        const priceTx = await onChain.updateOraclePrice({
+            price: toBigNumberStr(1),
+            updateOPCapID: priceOracleCapID
+        });
+
+        expectTxToSucceed(priceTx);
+
+        const order = { ...defaultOrder, ioc: true };
+
+        const trade = await Trader.setupNormalTrade(
+            provider,
+            orderSigner,
+            alice.keyPair,
+            bob.keyPair,
+            order
+        );
+
+        const tx = await onChain.trade({
+            ...trade,
+            settlementCapID,
+            gasBudget: 90000000
+        });
+
+        expectTxToFail(tx);
+        expect(Transaction.getError(tx)).to.be.equal(ERROR_CODES[106]);
     });
 });

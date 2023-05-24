@@ -12,7 +12,13 @@ import {
 } from "../src/utils";
 import { getTestAccounts, TEST_WALLETS } from "./helpers/accounts";
 import { DEFAULT } from "../src/defaults";
-import { base64ToBuffer, base64ToHex, bigNumber, hexToBuffer } from "../src/library";
+import {
+    base64ToBuffer,
+    base64ToHex,
+    bigNumber,
+    encodeOrderFlags,
+    hexToBuffer
+} from "../src/library";
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
@@ -237,6 +243,7 @@ describe("Order Signer", () => {
 
     it("should generate off-chain hash exactly equal to on-chain hash", async () => {
         const orderSigner = new OrderSigner(ownerKeyPair);
+
         const hash = orderSigner.getOrderHash(order);
 
         const receipt = await onChain.signAndCall(
@@ -260,7 +267,6 @@ describe("Order Signer", () => {
         expect(orderSerializedEvent).to.not.be.undefined;
 
         const onChainHash = base64ToHex(hashGeneratedEvent?.hash ?? "");
-
         expect(hash).to.be.equal(onChainHash);
     });
 
@@ -330,10 +336,7 @@ describe("Order Signer", () => {
             [
                 order.market,
                 order.maker,
-                order.isBuy,
-                order.reduceOnly,
-                order.postOnly,
-                order.orderbookOnly,
+                encodeOrderFlags(order),
                 order.price,
                 order.quantity,
                 order.leverage,
@@ -403,10 +406,7 @@ describe("Order Signer", () => {
             [
                 order.market,
                 order.maker,
-                order.isBuy,
-                order.reduceOnly,
-                order.postOnly,
-                order.orderbookOnly,
+                encodeOrderFlags(order),
                 order.price,
                 order.quantity,
                 order.leverage,
@@ -466,29 +466,7 @@ describe("Order Signer", () => {
 
         expect(addressGeneratedEvent).to.not.be.undefined;
 
-        const onChainAddress = base64ToHex(addressGeneratedEvent?.address ?? "");
-
-        expect(onChainAddress).to.be.equal(
-            ownerKeyPair.getPublicKey().toSuiAddress().substring(2)
-        );
-    });
-
-    it("should generate off-chain public address exactly equal to on-chain public address", async () => {
-        const receipt = await onChain.signAndCall(
-            ownerSigner,
-            "get_public_address",
-            [Array.from(base64ToBuffer(ownerKeyPair.getPublicKey().toBase64()))],
-            "test"
-        );
-
-        const addressGeneratedEvent = Transaction.getEvents(
-            receipt,
-            "PublicAddressGeneratedEvent"
-        )[0];
-
-        expect(addressGeneratedEvent).to.not.be.undefined;
-
-        const onChainAddress = base64ToHex(addressGeneratedEvent?.address ?? "");
+        const onChainAddress = base64ToHex(addressGeneratedEvent?.addr ?? "");
 
         expect(onChainAddress).to.be.equal(
             ownerKeyPair.getPublicKey().toSuiAddress().substring(2)
