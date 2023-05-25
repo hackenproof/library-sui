@@ -1242,36 +1242,6 @@ export class OnChainCalls {
         return undefined;
     }
 
-    public async getBankAccountDetails(
-        id: string
-    ): Promise<BankAccountDetails | undefined> {
-        const obj = await this.getOnChainObject(id);
-        if (obj) {
-            if ((obj.data?.type as string).indexOf("BankAccount") > 0) {
-                return this._parseAccountDetails(obj);
-            } else {
-                return undefined;
-            }
-        } else {
-            throw `No object found with id: ${id}`;
-        }
-    }
-
-    public async getBankAccountDetailsUsingAddress(address: string): Promise<BigNumber> {
-        if (this.deployment.bankAccounts[address] === undefined)
-            throw `Address: ${address} not found in deployment map`;
-
-        const id = this.deployment.bankAccounts[address];
-
-        const obj = await this.getOnChainObject(id);
-
-        if (obj) {
-            return this._parseAccountDetails(obj).balance;
-        } else {
-            throw `No object found with id: ${id}`;
-        }
-    }
-
     public signAndCall(
         caller: SignerWithProvider,
         method: string,
@@ -1315,7 +1285,23 @@ export class OnChainCalls {
         });
     }
 
-    async getUserPosition(id: string): Promise<UserPosition> {
+    async getUserPosition(user:string, perpetual:string = "ETH-PERP"): Promise<UserPosition> {
+
+        const positionTable = this.getPositionsTableID(perpetual);
+
+        const userPos = await this.signer.provider.getDynamicFieldObject({
+            parentId: positionTable, 
+            name: {
+                type: 'address',
+                value: user || this.signer.getAddress()
+            }
+        })
+
+        return (userPos?.data?.content as any).fields.value.fields;
+    }
+
+
+    async getUserPositionFromID(id: string): Promise<UserPosition> {
         const details = await this.getOnChainObject(id);
         return (details?.data?.content as any).fields.value.fields;
     }
@@ -1324,6 +1310,42 @@ export class OnChainCalls {
         const details = await this.getOnChainObject(id);
         return (details?.data?.content as any).fields;
     }
+
+
+    public async getBankAccountDetailsUsingID(
+        id: string
+    ): Promise<BankAccountDetails | undefined> {
+        const obj = await this.getOnChainObject(id);
+        if (obj) {
+            if ((obj.data?.type as string).indexOf("BankAccount") > 0) {
+                return this._parseAccountDetails(obj);
+            } else {
+                return undefined;
+            }
+        } else {
+            throw `No object found with id: ${id}`;
+        }
+    }
+
+    public async getUserBankBalance(user?: string): Promise<BigNumber> {
+        
+        try {
+            const userBalance = await this.signer.provider.getDynamicFieldObject({
+                parentId: this.getBankTableID(), 
+                name: {
+                    type: 'address',
+                    value: user || this.signer.getAddress()
+                }
+            })
+
+            return new BigNumber((userBalance.data as any).content.fields.value.fields.balance);
+
+        } catch(e){
+            return new BigNumber(0);
+        }
+
+    }
+
 
     getBankID(): string {
         return this.deployment["objects"]["Bank"].id as string;
@@ -1376,6 +1398,14 @@ export class OnChainCalls {
 
     getOrdersTableID(): string {
         return this.deployment["objects"]["OrderStatus"].id as string;
+    }
+
+    getPositionsTableID(market = "ETH-PERP"): string {
+        return this.deployment["markets"][market]["Objects"]["PositionsTable"].id as string;
+    }
+
+    getBankTableID(): string {
+        return this.deployment["objects"]["BankTable"].id as string;
     }
 
     getDeployerAddress(): string {
