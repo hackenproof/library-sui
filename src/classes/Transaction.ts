@@ -1,4 +1,4 @@
-import { SuiTransactionBlockResponse, getExecutionStatusError } from "@mysten/sui.js";
+import { SuiTransactionBlockResponse } from "@mysten/sui.js";
 import { UserPositionExtended } from "../interfaces";
 import { ERROR_CODES } from "../errors";
 import BigNumber from "bignumber.js";

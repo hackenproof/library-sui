@@ -45,7 +45,7 @@ export function readFile(filePath: string): any {
         : {};
 }
 
-export function getProvider(rpcURL: string, faucetURL: string): JsonRpcProvider {
+export function getProvider(rpcURL: string, faucetURL?: string): JsonRpcProvider {
     return new JsonRpcProvider(new Connection({ fullnode: rpcURL, faucet: faucetURL }));
 }
 
@@ -183,41 +183,41 @@ export async function createMarket(
     }
 
     const map = await getGenesisMap(provider, txResult);
-    
+
     // getting positions table id
     const perpDetails = await provider.getObject({
-        id:map["Perpetual"]["id"],
-        options:{
-            showContent:true
+        id: map["Perpetual"]["id"],
+        options: {
+            showContent: true
         }
     });
 
     map["PositionsTable"] = {
-        owner:OBJECT_OWNERSHIP_STATUS.SHARED,
-        id:(perpDetails.data as any).content.fields.positions.fields.id.id,
+        owner: OBJECT_OWNERSHIP_STATUS.SHARED,
+        id: (perpDetails.data as any).content.fields.positions.fields.id.id,
         dataType: (perpDetails.data as any).content.fields.positions.type
-    } 
+    };
 
-    return map
-
+    return map;
 }
 
-export async function getBankTable(provider:JsonRpcProvider, objects:DeploymentObjectMap): Promise<DeploymentObjects>{
+export async function getBankTable(
+    provider: JsonRpcProvider,
+    objects: DeploymentObjectMap
+): Promise<DeploymentObjects> {
+    // get bank details
+    const bankDetails = await provider.getObject({
+        id: objects["Bank"]["id"],
+        options: {
+            showContent: true
+        }
+    });
 
-        // get bank details
-        const bankDetails = await provider.getObject({
-            id:objects["Bank"]["id"],
-            options:{
-                showContent:true
-            }
-        });
-
-        return {
-            owner:OBJECT_OWNERSHIP_STATUS.SHARED,
-            id:(bankDetails.data as any).content.fields.accounts.fields.id.id,
-            dataType: (bankDetails.data as any).content.fields.accounts.type
-        } 
-
+    return {
+        owner: OBJECT_OWNERSHIP_STATUS.SHARED,
+        id: (bankDetails.data as any).content.fields.accounts.fields.id.id,
+        dataType: (bankDetails.data as any).content.fields.accounts.type
+    };
 }
 
 export function getPrivateKey(keypair: Keypair) {
@@ -227,12 +227,12 @@ export function getPrivateKey(keypair: Keypair) {
 export function packDeploymentData(
     deployer: string,
     objects: DeploymentObjectMap,
-    markets?: MarketDeploymentData,
+    markets?: MarketDeploymentData
 ): DeploymentData {
     return {
         deployer,
         objects,
-        markets: markets || ({} as any),
+        markets: markets || ({} as any)
     };
 }
 

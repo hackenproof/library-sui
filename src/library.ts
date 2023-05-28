@@ -1,5 +1,4 @@
 import BigNumber from "bignumber.js";
-import { number, string } from "yargs";
 import { Order, OrderFlags } from "./interfaces";
 
 export type BigNumberable = BigNumber | number | string;

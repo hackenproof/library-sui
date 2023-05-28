@@ -22,3 +22,4 @@ coverage/*
 
 *.terraform.lock.hcl
 
+.eslintcache

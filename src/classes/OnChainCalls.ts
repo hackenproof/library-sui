@@ -841,7 +841,6 @@ export class OnChainCalls {
             args.gasBudget
         );
     }
-    
 
     public async setFundingRate(
         args: {
@@ -1321,21 +1320,19 @@ export class OnChainCalls {
         });
     }
 
-    async getUserPosition(user:string, perpetual:string = "ETH-PERP"): Promise<UserPosition> {
-
+    async getUserPosition(user: string, perpetual = "ETH-PERP"): Promise<UserPosition> {
         const positionTable = this.getPositionsTableID(perpetual);
 
         const userPos = await this.signer.provider.getDynamicFieldObject({
-            parentId: positionTable, 
+            parentId: positionTable,
             name: {
-                type: 'address',
+                type: "address",
                 value: user || this.signer.getAddress()
             }
-        })
+        });
 
         return (userPos?.data?.content as any).fields.value.fields;
     }
-
 
     async getUserPositionFromID(id: string): Promise<UserPosition> {
         const details = await this.getOnChainObject(id);
@@ -1346,7 +1343,6 @@ export class OnChainCalls {
         const details = await this.getOnChainObject(id);
         return (details?.data?.content as any).fields;
     }
-
 
     public async getBankAccountDetailsUsingID(
         id: string
@@ -1364,24 +1360,22 @@ export class OnChainCalls {
     }
 
     public async getUserBankBalance(user?: string): Promise<BigNumber> {
-        
         try {
             const userBalance = await this.signer.provider.getDynamicFieldObject({
-                parentId: this.getBankTableID(), 
+                parentId: this.getBankTableID(),
                 name: {
-                    type: 'address',
+                    type: "address",
                     value: user || this.signer.getAddress()
                 }
-            })
+            });
 
-            return new BigNumber((userBalance.data as any).content.fields.value.fields.balance);
-
-        } catch(e){
+            return new BigNumber(
+                (userBalance.data as any).content.fields.value.fields.balance
+            );
+        } catch (e) {
             return new BigNumber(0);
         }
-
     }
-
 
     getBankID(): string {
         return this.deployment["objects"]["Bank"].id as string;
@@ -1437,7 +1431,8 @@ export class OnChainCalls {
     }
 
     getPositionsTableID(market = "ETH-PERP"): string {
-        return this.deployment["markets"][market]["Objects"]["PositionsTable"].id as string;
+        return this.deployment["markets"][market]["Objects"]["PositionsTable"]
+            .id as string;
     }
 
     getBankTableID(): string {
