@@ -17,7 +17,7 @@ export interface Order {
     salt: BigNumber;
 }
 
-export interface StoredOrder {    
+export interface StoredOrder {
     // identification
     hash: string;
     // needed by order matching engine
@@ -37,13 +37,13 @@ export interface StoredOrder {
     typedSignature: string;
     byteCode: string;
     groupId?: number;
-  
+
     // flag indicating if the order was open at any
     // point in its lifetime on orderbook
     // undefined/false implies the order is never opened
     // on orderbook
     open?: boolean;
-  }
+}
 
 export interface OrderFlags {
     isBuy: boolean;

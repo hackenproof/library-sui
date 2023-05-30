@@ -74,27 +74,6 @@ export function getSignerFromSeed(seed: string, provider: JsonRpcProvider): RawS
     return getSignerFromKeyPair(getKeyPairFromSeed(seed), provider);
 }
 
-export async function requestGas(address: string) {
-    const url = network.faucet;
-    try {
-        const data = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                FixedAmountRequest: {
-                    recipient: address
-                }
-            })
-        });
-        return data;
-    } catch (e: any) {
-        console.log("Error while requesting gas", e.message);
-    }
-    return false;
-}
-
 export async function getGenesisMap(
     provider: JsonRpcProvider,
     txResponse: SuiTransactionBlockResponse

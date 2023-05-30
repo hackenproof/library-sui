@@ -4,7 +4,6 @@ export enum OBJECT_OWNERSHIP_STATUS {
     "SHARED" = "Shared"
 }
 
-
 export enum ORDER_TYPE {
     LIMIT = "LIMIT",
     MARKET = "MARKET",
