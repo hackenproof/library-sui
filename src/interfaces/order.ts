@@ -27,8 +27,11 @@ export interface StoredOrder {
     amount: BigNumber;
     amountLeft: BigNumber;
     triggerPrice: BigNumber;
+    leverage: BigNumber;
+
     maker: string;
     expiration: number;
+    salt: number;
     timeInForce: TIME_IN_FORCE;
     postOnly: boolean;
     reduceOnly: boolean;

@@ -12,19 +12,20 @@ import {
     Ed25519Keypair,
     Connection
 } from "@mysten/sui.js";
-import { OBJECT_OWNERSHIP_STATUS } from "../src/enums";
+import { OBJECT_OWNERSHIP_STATUS, TIME_IN_FORCE } from "../src/enums";
 import {
     DeploymentData,
     DeploymentObjectMap,
     DeploymentObjects,
-    MarketDeploymentData
+    MarketDeploymentData,
+    StoredOrder
 } from "../src/interfaces";
 import { toBigNumber, bigNumber } from "./library";
 import { Order } from "../src/interfaces";
 import { DEFAULT } from "./defaults";
 import { config } from "dotenv";
 import { Client, OnChainCalls, Transaction } from "./classes";
-import { network, packageName } from "./DeploymentConfig";
+import { packageName } from "./DeploymentConfig";
 import { MarketDetails } from "./interfaces/market";
 
 import { execSync } from "child_process";
@@ -278,4 +279,31 @@ export function printOrder(order: Order) {
         "\norder.salt:",
         order.salt.toFixed(0)
     );
+}
+
+/**
+ * Consumes an order of type StoredOrder and returns a SuiOrder that can be sent to on-chain for settlement
+ * @param order StoredOrder to be transformed
+ * @param perpetualID market/perpetual address
+ * @param orderbookOnly (optional) true by default as all orders going through our exchange have orderbook only true
+ */
+export function storedOrderToSui(
+    order: StoredOrder,
+    perpetualID: string,
+    orderbookOnly = true
+): Order {
+    return {
+        market: perpetualID,
+        maker: order.maker,
+        isBuy: order.isBuy,
+        reduceOnly: order.reduceOnly,
+        postOnly: order.postOnly,
+        orderbookOnly,
+        ioc: order.timeInForce == TIME_IN_FORCE.IMMEDIATE_OR_CANCEL,
+        quantity: order.amount,
+        price: order.price,
+        leverage: order.leverage,
+        expiration: bigNumber(order.expiration),
+        salt: bigNumber(order.salt)
+    };
 }
