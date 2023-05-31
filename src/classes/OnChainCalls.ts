@@ -1249,7 +1249,7 @@ export class OnChainCalls {
             return 0;
         } else {
             const bal = coins.data.reduce(
-                (total: number, coin: any) => total + +coin.balance,
+                (total: number, coin: any) => total + coin.balance,
                 0
             );
             return usdcToBaseNumber(bal);
