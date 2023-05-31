@@ -807,6 +807,41 @@ export class OnChainCalls {
         );
     }
 
+    public async cancelOrder(
+        args: {
+            order: Order;
+            signature: string;
+            subAccountsMapID?: string;
+            gasBudget?: number;
+        },
+        signer?: RawSigner
+    ): Promise<SuiTransactionBlockResponse> {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+
+        callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
+        callArgs.push(this.getOrdersTableID());
+
+        callArgs.push(args.order.market);
+        callArgs.push(encodeOrderFlags(args.order));
+        callArgs.push(args.order.price.toFixed(0));
+        callArgs.push(args.order.quantity.toFixed(0));
+        callArgs.push(args.order.leverage.toFixed(0));
+        callArgs.push(args.order.expiration.toFixed(0));
+        callArgs.push(args.order.salt.toFixed(0));
+        callArgs.push(args.order.maker);
+        callArgs.push(Array.from(hexToBuffer(args.signature)));
+
+        return this.signAndCall(
+            caller,
+            "cancel_order",
+            callArgs,
+            "order",
+            args.gasBudget
+        );
+    }
+
     public async setFundingRate(
         args: {
             rate: BigNumber;
@@ -1242,36 +1277,6 @@ export class OnChainCalls {
         return undefined;
     }
 
-    public async getBankAccountDetails(
-        id: string
-    ): Promise<BankAccountDetails | undefined> {
-        const obj = await this.getOnChainObject(id);
-        if (obj) {
-            if ((obj.data?.type as string).indexOf("BankAccount") > 0) {
-                return this._parseAccountDetails(obj);
-            } else {
-                return undefined;
-            }
-        } else {
-            throw `No object found with id: ${id}`;
-        }
-    }
-
-    public async getBankAccountDetailsUsingAddress(address: string): Promise<BigNumber> {
-        if (this.deployment.bankAccounts[address] === undefined)
-            throw `Address: ${address} not found in deployment map`;
-
-        const id = this.deployment.bankAccounts[address];
-
-        const obj = await this.getOnChainObject(id);
-
-        if (obj) {
-            return this._parseAccountDetails(obj).balance;
-        } else {
-            throw `No object found with id: ${id}`;
-        }
-    }
-
     public signAndCall(
         caller: SignerWithProvider,
         method: string,
@@ -1315,7 +1320,21 @@ export class OnChainCalls {
         });
     }
 
-    async getUserPosition(id: string): Promise<UserPosition> {
+    async getUserPosition(user: string, perpetual = "ETH-PERP"): Promise<UserPosition> {
+        const positionTable = this.getPositionsTableID(perpetual);
+
+        const userPos = await this.signer.provider.getDynamicFieldObject({
+            parentId: positionTable,
+            name: {
+                type: "address",
+                value: user || this.signer.getAddress()
+            }
+        });
+
+        return (userPos?.data?.content as any).fields.value.fields;
+    }
+
+    async getUserPositionFromID(id: string): Promise<UserPosition> {
         const details = await this.getOnChainObject(id);
         return (details?.data?.content as any).fields.value.fields;
     }
@@ -1323,6 +1342,39 @@ export class OnChainCalls {
     async getPerpDetails(id: string): Promise<any> {
         const details = await this.getOnChainObject(id);
         return (details?.data?.content as any).fields;
+    }
+
+    public async getBankAccountDetailsUsingID(
+        id: string
+    ): Promise<BankAccountDetails | undefined> {
+        const obj = await this.getOnChainObject(id);
+        if (obj) {
+            if ((obj.data?.type as string).indexOf("BankAccount") > 0) {
+                return this._parseAccountDetails(obj);
+            } else {
+                return undefined;
+            }
+        } else {
+            throw `No object found with id: ${id}`;
+        }
+    }
+
+    public async getUserBankBalance(user?: string): Promise<BigNumber> {
+        try {
+            const userBalance = await this.signer.provider.getDynamicFieldObject({
+                parentId: this.getBankTableID(),
+                name: {
+                    type: "address",
+                    value: user || this.signer.getAddress()
+                }
+            });
+
+            return new BigNumber(
+                (userBalance.data as any).content.fields.value.fields.balance
+            );
+        } catch (e) {
+            return new BigNumber(0);
+        }
     }
 
     getBankID(): string {
@@ -1376,6 +1428,15 @@ export class OnChainCalls {
 
     getOrdersTableID(): string {
         return this.deployment["objects"]["OrderStatus"].id as string;
+    }
+
+    getPositionsTableID(market = "ETH-PERP"): string {
+        return this.deployment["markets"][market]["Objects"]["PositionsTable"]
+            .id as string;
+    }
+
+    getBankTableID(): string {
+        return this.deployment["objects"]["BankTable"].id as string;
     }
 
     getDeployerAddress(): string {

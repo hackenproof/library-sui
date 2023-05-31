@@ -30,10 +30,12 @@ export enum ORDER_TYPE {
     STOP_LIMIT = "STOP_LIMIT",
     STOP_MARKET = "STOP_MARKET"
 }
+
 export enum ORDER_SIDE {
     BUY = "BUY",
     SELL = "SELL"
 }
+
 export enum TIME_IN_FORCE {
     FILL_OR_KILL = "FOK",
     IMMEDIATE_OR_CANCEL = "IOC",

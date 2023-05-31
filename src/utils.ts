@@ -10,15 +10,13 @@ import {
     Secp256k1Keypair,
     SignatureScheme,
     Ed25519Keypair,
-    SignerWithProvider,
     Connection
 } from "@mysten/sui.js";
 import { OBJECT_OWNERSHIP_STATUS } from "../src/enums";
 import {
-    BankAccountMap,
     DeploymentData,
     DeploymentObjectMap,
-    MarketDeployment,
+    DeploymentObjects,
     MarketDeploymentData
 } from "../src/interfaces";
 import { toBigNumber, bigNumber } from "./library";
@@ -47,7 +45,7 @@ export function readFile(filePath: string): any {
         : {};
 }
 
-export function getProvider(rpcURL: string, faucetURL: string): JsonRpcProvider {
+export function getProvider(rpcURL: string, faucetURL?: string): JsonRpcProvider {
     return new JsonRpcProvider(new Connection({ fullnode: rpcURL, faucet: faucetURL }));
 }
 
@@ -74,27 +72,6 @@ export function getSignerFromKeyPair(
 
 export function getSignerFromSeed(seed: string, provider: JsonRpcProvider): RawSigner {
     return getSignerFromKeyPair(getKeyPairFromSeed(seed), provider);
-}
-
-export async function requestGas(address: string) {
-    const url = network.faucet;
-    try {
-        const data = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                FixedAmountRequest: {
-                    recipient: address
-                }
-            })
-        });
-        return data;
-    } catch (e: any) {
-        console.log("Error while requesting gas", e.message);
-    }
-    return false;
 }
 
 export async function getGenesisMap(
@@ -175,7 +152,7 @@ export async function createMarket(
     deployer: RawSigner,
     provider: JsonRpcProvider,
     marketConfig?: MarketDetails
-): Promise<MarketDeployment> {
+): Promise<DeploymentObjectMap> {
     const onChain = new OnChainCalls(deployer, deployment);
     const txResult = await onChain.createPerpetual({ ...marketConfig });
     const error = Transaction.getError(txResult);
@@ -186,20 +163,39 @@ export async function createMarket(
 
     const map = await getGenesisMap(provider, txResult);
 
-    // get account details for insurance pool, perpetual and fee pool
-    const bankAccounts: BankAccountMap = {};
-    const createdObjects = Transaction.getCreatedObjectIDs(txResult);
-
-    for (const id of createdObjects) {
-        const acctDetails = await onChain.getBankAccountDetails(id);
-        if (acctDetails != undefined) {
-            bankAccounts[acctDetails.address] = id;
+    // getting positions table id
+    const perpDetails = await provider.getObject({
+        id: map["Perpetual"]["id"],
+        options: {
+            showContent: true
         }
-    }
+    });
+
+    map["PositionsTable"] = {
+        owner: OBJECT_OWNERSHIP_STATUS.SHARED,
+        id: (perpDetails.data as any).content.fields.positions.fields.id.id,
+        dataType: (perpDetails.data as any).content.fields.positions.type
+    };
+
+    return map;
+}
+
+export async function getBankTable(
+    provider: JsonRpcProvider,
+    objects: DeploymentObjectMap
+): Promise<DeploymentObjects> {
+    // get bank details
+    const bankDetails = await provider.getObject({
+        id: objects["Bank"]["id"],
+        options: {
+            showContent: true
+        }
+    });
 
     return {
-        marketObjects: map,
-        bankAccounts: bankAccounts
+        owner: OBJECT_OWNERSHIP_STATUS.SHARED,
+        id: (bankDetails.data as any).content.fields.accounts.fields.id.id,
+        dataType: (bankDetails.data as any).content.fields.accounts.type
     };
 }
 
@@ -207,17 +203,15 @@ export function getPrivateKey(keypair: Keypair) {
     return (keypair as any).keypair.secretKey;
 }
 
-export function getDeploymentData(
+export function packDeploymentData(
     deployer: string,
     objects: DeploymentObjectMap,
-    markets?: MarketDeploymentData,
-    bankAccounts?: BankAccountMap
+    markets?: MarketDeploymentData
 ): DeploymentData {
     return {
         deployer,
         objects,
-        markets: markets || ({} as any),
-        bankAccounts: bankAccounts || {}
+        markets: markets || ({} as any)
     };
 }
 
