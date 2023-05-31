@@ -24,6 +24,7 @@ export enum ORDER_STATUS {
     STAND_BY_PENDING = "STAND_BY_PENDING",
     STAND_BY = "STAND_BY"
 }
+
 export enum ORDER_TYPE {
     LIMIT = "LIMIT",
     MARKET = "MARKET",
@@ -94,5 +95,9 @@ export enum SOCKET_EVENTS {
 }
 export enum ADJUST_MARGIN {
     Add = "Add",
-    Remove = "Remove"
+    Remove = "Remove",
+    IMMEDIATE_OR_CANCEL = "IOC",
+    GOOD_TILL_TIME = "GTT"
 }
+
+
