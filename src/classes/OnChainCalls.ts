@@ -26,6 +26,7 @@ import {
 
 export class OnChainCalls {
     signer: SignerWithProvider;
+    settlementCap: string;
     deployment: any;
 
     constructor(_signer: SignerWithProvider, _deployment: any) {
@@ -587,11 +588,11 @@ export class OnChainCalls {
 
     public async trade(
         args: {
-            settlementCapID: string;
             makerOrder: Order;
             makerSignature: string;
             takerOrder: Order;
             takerSignature: string;
+            settlementCapID?: string;
             fillPrice?: BigNumber;
             fillQuantity?: BigNumber;
             perpID?: string;
@@ -610,7 +611,7 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.bankID || this.getBankID());
         callArgs.push(args.safeID || this.getSafeID());
-        callArgs.push(args.settlementCapID);
+        callArgs.push(args.settlementCapID || this.settlementCap);
 
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(this.getOrdersTableID());
@@ -1306,6 +1307,14 @@ export class OnChainCalls {
     }
 
     // ===================================== //
+    //          SETTER METHODS
+    // ===================================== //
+
+    setSettlementCap(id: string) {
+        this.settlementCap = id;
+    }
+
+    // ===================================== //
     //          GETTER METHODS
     // ===================================== //
 
@@ -1320,14 +1329,34 @@ export class OnChainCalls {
         });
     }
 
-    async getUserPosition(user: string, perpetual = "ETH-PERP"): Promise<UserPosition> {
+    async getOwnedObjects(objType: string, ownerAddr?: string): Promise<string[]> {
+        const owner = ownerAddr || (await this.signer.getAddress());
+        const ownedObjIds: string[] = [];
+
+        // get all owned object by the user, along with its type
+        const objects = await this.signer.provider.getOwnedObjects({
+            owner,
+            options: { showType: true }
+        });
+
+        for (const obj of objects.data) {
+            // if the type matches, push the id of object
+            if ((obj.data?.type as any).indexOf(objType) >= 0) {
+                ownedObjIds.push(obj.data?.objectId as any as string);
+            }
+        }
+
+        return ownedObjIds;
+    }
+
+    async getUserPosition(perpetual: string, user?: string): Promise<UserPosition> {
         const positionTable = this.getPositionsTableID(perpetual);
 
         const userPos = await this.signer.provider.getDynamicFieldObject({
             parentId: positionTable,
             name: {
                 type: "address",
-                value: user || this.signer.getAddress()
+                value: user || (await this.signer.getAddress())
             }
         });
 
@@ -1365,7 +1394,7 @@ export class OnChainCalls {
                 parentId: this.getBankTableID(),
                 name: {
                     type: "address",
-                    value: user || this.signer.getAddress()
+                    value: user || (await this.signer.getAddress())
                 }
             });
 
