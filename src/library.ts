@@ -1,17 +1,11 @@
 import BigNumber from "bignumber.js";
 import { Order, OrderFlags } from "./interfaces";
+import { BASE_DECIMALS, USDC_BASE_DECIMALS } from "./constants";
 
 export type BigNumberable = BigNumber | number | string;
 export type SignedNumber = {
     sign: boolean;
     value: string;
-};
-
-export const BASE_DECIMALS = 9;
-export const BIGNUMBER_BASE = new BigNumber(1).shiftedBy(BASE_DECIMALS);
-
-export const ADDRESSES = {
-    ZERO: "0x0000000000000000000000000000000000000000000000000000000000000000"
 };
 
 const toBnBase = (base: number) => {
@@ -30,12 +24,15 @@ export function toBigNumberStr(val: BigNumberable, base: number = BASE_DECIMALS)
     return toBigNumber(val, base).toFixed(0);
 }
 
-export function bnToBaseStr(val: BigNumberable, decimals = 6): string {
+export function bnToBaseStr(val: BigNumberable, decimals = USDC_BASE_DECIMALS): string {
     return bigNumber(val).shiftedBy(-BASE_DECIMALS).toFixed(decimals);
 }
 
-export function usdcToBaseNumber(val: BigNumberable, decimals = 6): number {
-    return Number(new BigNumber(val).shiftedBy(-6).toFixed(decimals));
+export function usdcToBaseNumber(
+    val: BigNumberable,
+    decimals = USDC_BASE_DECIMALS
+): number {
+    return Number(new BigNumber(val).shiftedBy(-USDC_BASE_DECIMALS).toFixed(decimals));
 }
 
 export function toBaseNumber(val: BigNumberable, decimals = 3): number {

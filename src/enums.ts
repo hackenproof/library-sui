@@ -25,3 +25,76 @@ export enum MARGIN_TYPE {
     ISOLATED = "ISOLATED",
     CROSS = "CROSS" // atm exchange only supports isolated margin
 }
+
+export enum MARKET_SYMBOLS {
+    BTC = "BTC-PERP",
+    ETH = "ETH-PERP",
+    DOT = "DOT-PERP",
+    GLMR = "GLMR-PERP",
+    MOVR = "MOVR-PERP",
+    SOL = "SOL-PERP"
+}
+export enum ORDER_STATUS {
+    PENDING = "PENDING",
+    OPEN = "OPEN",
+    PARTIAL_FILLED = "PARTIAL_FILLED",
+    FILLED = "FILLED",
+    CANCELLING = "CANCELLING",
+    CANCELLED = "CANCELLED",
+    REJECTED = "REJECTED",
+    EXPIRED = "EXPIRED",
+    STAND_BY_PENDING = "STAND_BY_PENDING",
+    STAND_BY = "STAND_BY"
+}
+
+export enum CANCEL_REASON {
+    UNDERCOLLATERALIZED = "UNDERCOLLATERALIZED",
+    INSUFFICIENT_BALANCE = "INSUFFICIENT_BALANCE",
+    USER_CANCELLED = "USER_CANCELLED",
+    EXCEEDS_MARKET_BOUND = "EXCEEDS_MARKET_BOUND",
+    COULD_NOT_FILL = "COULD_NOT_FILL",
+    EXPIRED = "EXPIRED",
+    USER_CANCELLED_ON_CHAIN = "USER_CANCELLED_ON_CHAIN",
+    SYSTEM_CANCELLED = "SYSTEM_CANCELLED",
+    SELF_TRADE = "SELF_TRADE",
+    POST_ONLY_FAIL = "POST_ONLY_FAIL",
+    FAILED = "FAILED",
+    NETWORK_DOWN = "NETWORK_DOWN"
+}
+export enum MARKET_STATUS {
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE",
+    TRADES_INACTIVE = "TRADES_INACTIVE"
+}
+export enum SOCKET_EVENTS {
+    GET_LAST_KLINE_WITH_INTERVAL = "{symbol}@kline@{interval}",
+    GLOBAL_UPDATES_ROOM = "globalUpdates",
+    GlobalUpdatesRoom = "globalUpdates",
+    MarketDataUpdateKey = "MarketDataUpdate",
+    RecentTradesKey = "RecentTrades",
+    OrderbookUpdateKey = "OrderbookUpdate",
+    AdjustMarginKey = "AdjustMargin",
+    MarketHealthKey = "MarketHealth",
+    ExchangeHealthKey = "ExchangeHealth",
+    TickerUpdate = "TickerUpdate",
+    OraclePriceUpdate = "OraclePriceUpdate",
+    MarketStateUpdate = "MarketStateUpdate",
+    MarketStatusUpdate = "MarketStatusUpdate",
+    Market24hrChangeUpdate = "Market24hrChangeUpdate",
+    FundingRateUpdated = "FundingRateUpdated",
+    NetworkGasFeeUpdate = "NetworkGasFeeUpdate",
+    UserUpdatesRoom = "userUpdates",
+    OrderUpdateKey = "OrderUpdate",
+    OrderCancelledKey = "OrderCancelled",
+    PositionUpdateKey = "PositionUpdate",
+    UserTradeKey = "UserTrade",
+    UserTransaction = "UserTransaction",
+    AccountDataUpdateKey = "AccountDataUpdate",
+    UserFundingUpdate = "UserFundingUpdate",
+    UserTransferUpdate = "UserTransferUpdate",
+    AccountPermissionUpdate = "AccountPermissionUpdate"
+}
+export enum ADJUST_MARGIN {
+    Add = "Add",
+    Remove = "Remove"
+}

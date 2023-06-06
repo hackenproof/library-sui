@@ -23,6 +23,7 @@ import {
     toBigNumberStr,
     usdcToBaseNumber
 } from "../library";
+import { USDC_BASE_DECIMALS } from "../constants";
 
 export class OnChainCalls {
     signer: SignerWithProvider;
@@ -1208,7 +1209,7 @@ export class OnChainCalls {
 
         callArgs.push(args?.treasuryCapID || this.getTreasuryCapID());
 
-        callArgs.push(args?.amount || toBigNumberStr(1_000_000_000, 6));
+        callArgs.push(args?.amount || toBigNumberStr(1_000_000_000, USDC_BASE_DECIMALS));
 
         callArgs.push(args?.to || (await caller.getAddress()));
 
@@ -1271,7 +1272,9 @@ export class OnChainCalls {
         const coins = await this.getUSDCCoins(args, signer);
 
         for (const coin of coins.data) {
-            if (bigNumber(coin.balance).gte(toBigNumber(args.amount, 6))) {
+            if (
+                bigNumber(coin.balance).gte(toBigNumber(args.amount, USDC_BASE_DECIMALS))
+            ) {
                 return coin;
             }
         }

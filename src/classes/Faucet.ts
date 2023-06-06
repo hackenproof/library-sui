@@ -1,4 +1,5 @@
 import { network } from "../DeploymentConfig";
+import { USDC_BASE_DECIMALS } from "../constants";
 import { toBigNumberStr } from "../library";
 import { OnChainCalls } from "./OnChainCalls";
 import { Transaction } from "./Transaction";
@@ -44,7 +45,7 @@ export class Faucet {
         amount?: number | string
     ) {
         const tx = await onChain.mintUSDC({
-            amount: toBigNumberStr(amount || 10_000, 6),
+            amount: toBigNumberStr(amount || 10_000, USDC_BASE_DECIMALS),
             to: address,
             gasBudget: 500000
         });
@@ -78,7 +79,7 @@ export class Faucet {
             // mint coins for owner
             if (amt > ownerBalance) {
                 await onChain.mintUSDC({
-                    amount: toBigNumberStr(1_000_000_000, 6)
+                    amount: toBigNumberStr(1_000_000_000, USDC_BASE_DECIMALS)
                 });
             }
 
@@ -91,7 +92,7 @@ export class Faucet {
         // transferring from owners usdc coin to receiver
         const tx = await onChain.depositToBank({
             coinID: coin.coinObjectId,
-            amount: toBigNumberStr(amt, 6),
+            amount: toBigNumberStr(amt, USDC_BASE_DECIMALS),
             accountAddress: address
         });
 
