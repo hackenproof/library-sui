@@ -16,7 +16,6 @@ import {
 } from "../interfaces";
 import {
     bigNumber,
-    BigNumberable,
     encodeOrderFlags,
     hexToBuffer,
     toBigNumber,
@@ -24,7 +23,7 @@ import {
     usdcToBaseNumber
 } from "../library";
 import { USDC_BASE_DECIMALS } from "../constants";
-
+import { BigNumberable } from "../types";
 export class OnChainCalls {
     signer: SignerWithProvider;
     settlementCap: string;

@@ -1,12 +1,7 @@
 import BigNumber from "bignumber.js";
 import { Order, OrderFlags } from "./interfaces";
 import { BASE_DECIMALS, USDC_BASE_DECIMALS } from "./constants";
-
-export type BigNumberable = BigNumber | number | string;
-export type SignedNumber = {
-    sign: boolean;
-    value: string;
-};
+import { SignedNumber, BigNumberable } from "./types";
 
 const toBnBase = (base: number) => {
     return new BigNumber(1).shiftedBy(base);
