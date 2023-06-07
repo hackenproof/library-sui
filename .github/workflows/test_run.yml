@@ -13,6 +13,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: fireflyprotocol/bluefin-exchange-contracts-sui
+          token: ${{ secrets.PROD_SUBMODULE_PAT }}
           path: local/sui/submodules/bluefin-exchange-contracts-sui
 
       - name: Checkout pull request
