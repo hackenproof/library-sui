@@ -16,9 +16,7 @@ jobs:
           token: ${{ secrets.PROD_SUBMODULE_PAT }}
           path: local/sui/submodules/bluefin-exchange-contracts-sui
 
-  clone-pull-request:
-    runs-on: self-hosted
-    steps:
+
       - name: Checkout pull request
         uses: actions/checkout@v3
         with:
@@ -29,12 +27,9 @@ jobs:
           echo "Current Directory: $PWD"
           echo "Directory Hierarchy:"
           ls -R
-  run-tests:
-    runs-on: self-hosted
-    needs: [clone-pull-request,clone-bluefin-repo]
-    steps:      
+     
       - name: Run Tests
-        working-directory: local/sui/submodules/bluefin-exchange-contract-sui
+        working-directory: ./local/sui/submodules/bluefin-exchange-contract-sui
         run: |
           echo "DEPLOY_ON = cloud" > .env &&
           echo "DEPLOYER_SEED = mixture forest spike snow armor frown enforce busy shove gaze swim term" >> .env &&
