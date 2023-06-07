@@ -21,7 +21,9 @@ jobs:
         with:
           repository: fireflyprotocol/library-sui
           path: local/sui/submodules/bluefin-exchange-contracts-sui/submodules/library-sui
-      - name: XDTesting Print Directory Structure
-        uses: FiorelaCiroku/XDTesting-Print-Directory-Structure@v1.0.2
-  
+      - name: List Directory Hierarchy
+        run: |
+          echo "Current Directory: $PWD"
+          echo "Directory Hierarchy:"
+          ls -R
 
