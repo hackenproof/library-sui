@@ -22,14 +22,14 @@ jobs:
           repository: fireflyprotocol/library-sui
           path: local/sui/submodules/bluefin-exchange-contracts-sui/submodules/library-sui
       - name: List Directory Hierarchy
-        needs: [Checkout pull request, Checkout main repository] 
+        id: list-directory-hierarchy
         run: |
           echo "Current Directory: $PWD"
           echo "Directory Hierarchy:"
           ls -R
       - name: Run Tests
+        needs: [list-directory-hierarchy]
         working-directory: local/sui/submodules/bluefin-exchange-contract-sui
-        needs: [List Directory Hierarchy]
         run: |
           echo "DEPLOY_ON = cloud" > .env
           echo "DEPLOYER_SEED = mixture forest spike snow armor frown enforce busy shove gaze swim term" >> .env
@@ -38,5 +38,6 @@ jobs:
           yarn build
           yarn faucet --account 0x4fc4058ca0162142be16524a794a82f2c184aaa4951b371c8da946541040ea6e
           yarn deploy
+          yarn test
 
 
