@@ -1,18 +1,22 @@
 name: build test
 
 on:
-    push:
-        branches: [ibadia/library-test]
+  push:
+    branches: [ibadia/library-test]
 
 jobs:
-    clone-bluefin-repo:
-        - name: Checkout tools repo
-            uses: actions/checkout@v3
-            with:
-                repository: fireflyprotocol/bluefin-exchange-contracts-sui
-                path: local/sui/submodules/bluefin-exchange-contracts-sui
-        - name: Checkout pull request
-            uses: actions/checkout@v3
-            with:
-                path: local/sui/submodules/bluefin-exchange-contracts-sui/submodules/library-sui
-        
+  clone-bluefin-repo:
+    name: Checkout tools repo
+    runs-on: self-hosted
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v3
+        with:
+          repository: fireflyprotocol/bluefin-exchange-contracts-sui
+          path: local/sui/submodules/bluefin-exchange-contracts-sui
+
+      - name: Checkout pull request
+        uses: actions/checkout@v3
+        with:
+          repository: fireflyprotocol/library-sui
+          path: local/sui/submodules/bluefin-exchange-contracts-sui/submodules/library-sui
