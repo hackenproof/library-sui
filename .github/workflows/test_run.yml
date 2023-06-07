@@ -17,6 +17,7 @@ jobs:
           path: local/sui/submodules/bluefin-exchange-contracts-sui
 
   clone-pull-request:
+    runs-on: self-hosted
     steps:
       - name: Checkout pull request
         uses: actions/checkout@v3
@@ -29,6 +30,7 @@ jobs:
           echo "Directory Hierarchy:"
           ls -R
   run-tests:
+    runs-on: self-hosted
     needs: [clone-pull-request,clone-bluefin-repo]
     steps:      
       - name: Run Tests
