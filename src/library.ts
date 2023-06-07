@@ -2,6 +2,7 @@ import BigNumber from "bignumber.js";
 import { Order, OrderFlags } from "./interfaces";
 import { BASE_DECIMALS, USDC_BASE_DECIMALS } from "./constants";
 import { SignedNumber, BigNumberable } from "./types";
+import _ from "lodash";
 
 const toBnBase = (base: number) => {
     return new BigNumber(1).shiftedBy(base);
@@ -102,4 +103,10 @@ export function encodeOrderFlags(order: Order): number {
     if (order.orderbookOnly) value += 16;
 
     return value;
+}
+
+export const { isEmpty } = _;
+
+export function getValue(object: object, path: string, defaultValue: any) {
+    return _.get(object, path, defaultValue);
 }

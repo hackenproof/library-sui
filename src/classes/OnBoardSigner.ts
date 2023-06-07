@@ -1,6 +1,5 @@
 import * as secp from "@noble/secp256k1";
-import { JsonRpcProvider, Keypair, Secp256k1PublicKey } from "@mysten/sui.js";
-import { getSignerFromKeyPair } from "../utils";
+import { RawSigner, Secp256k1PublicKey } from "@mysten/sui.js";
 import { sha256 } from "@noble/hashes/sha256";
 import { hexToBuffer } from "../library";
 
@@ -8,28 +7,19 @@ export class OnboardingSigner {
     /**
      * Creates hash of given message and signs it with given private key or web3 provider
      * @param message string to be sign
-     * @param keyPair user's key pair
-     * @param _provider provider HttpProvider | IpcProvider | WebsocketProvider | AbstractProvider | string
+     * @param signer RawSigner
      * @returns signature
      */
     public static async createOnboardSignature(
         message: string,
-        keyPair: Keypair,
-        _provider?: JsonRpcProvider
+        signer: RawSigner
     ): Promise<string> {
-        if (!keyPair && !_provider) {
-            throw Error(`Invalid provider`);
+        if (!signer) {
+            throw Error(`Invalid signer`);
         }
-
-        if (keyPair && _provider) {
-            // Signed Message and Signature
-            const msgHash = sha256(hexToBuffer(message));
-            const signer = await getSignerFromKeyPair(keyPair, _provider);
-            const signedMsg = await signer.signMessage({ message: msgHash });
-            return signedMsg.signature;
-        } else {
-            throw Error(`keyPair or message not provided`);
-        }
+        const msgHash = sha256(hexToBuffer(message));
+        const signedMsg = await signer.signMessage({ message: msgHash });
+        return signedMsg.signature;
     }
 
     /**
