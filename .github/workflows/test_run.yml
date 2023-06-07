@@ -29,7 +29,7 @@ jobs:
           ls -R
      
       - name: Run Tests
-        working-directory: ./local/sui/submodules/bluefin-exchange-contract-sui
+        working-directory: local/sui/submodules/bluefin-exchange-contracts-sui
         run: |
           echo "DEPLOY_ON = cloud" > .env &&
           echo "DEPLOYER_SEED = mixture forest spike snow armor frown enforce busy shove gaze swim term" >> .env &&
