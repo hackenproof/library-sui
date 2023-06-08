@@ -33,12 +33,18 @@ jobs:
           node-version: 18.x
       - name: Install yarn
         run: npm install -g yarn
+      - name: running docker
+        working-directory: local/sui
+        run: | 
+          docker build --tag sui . &&
+          docker container run -p 9000:9000 -p 5003:5003 -p 8084:8084/udp -p 9184:9184 -dit sui
+        
       - name: Building library
         working-directory: local/sui/submodules/bluefin-exchange-contracts-sui/submodules/library-sui
         run: |
             npm install -g typescript
             yarn install
-            yarn build 
+            yarn build
       - name: Run Tests
         working-directory: local/sui/submodules/bluefin-exchange-contracts-sui
         run: |
