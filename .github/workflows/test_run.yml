@@ -36,6 +36,7 @@ jobs:
       - name: Building library
         working-directory: local/sui/submodules/bluefin-exchange-contracts-sui/submodules/library-sui
         run: |
+            npm install -g typescript
             yarn build 
       - name: Run Tests
         working-directory: local/sui/submodules/bluefin-exchange-contracts-sui
