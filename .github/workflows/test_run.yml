@@ -31,6 +31,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
+      - name: Running Docker plz
+        uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          working-directory: 'local/sui/'
+          version: "2.14.2"
       - name: Run install
         uses: borales/actions-yarn@v4
         with:
