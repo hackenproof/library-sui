@@ -25,7 +25,7 @@ import { Order } from "../src/interfaces";
 import { DEFAULT } from "./defaults";
 import { config } from "dotenv";
 import { Client, OnChainCalls, Transaction } from "./classes";
-import { packageName } from "./DeploymentConfig";
+import { network, packageName } from "./DeploymentConfig";
 import { MarketDetails } from "./interfaces/market";
 
 import { execSync } from "child_process";
@@ -306,4 +306,25 @@ export function storedOrderToSui(
         expiration: bigNumber(order.expiration),
         salt: bigNumber(order.salt)
     };
+}
+
+export async function requestGas(address: string) {
+    const url = network.faucet;
+    try {
+        const data = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                FixedAmountRequest: {
+                    recipient: address
+                }
+            })
+        });
+        return data;
+    } catch (e: any) {
+        console.log("Error while requesting gas", e.message);
+    }
+    return false;
 }
