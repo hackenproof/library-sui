@@ -31,6 +31,18 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
+      - name: Run install
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install
+      - name: Run build
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build
+      - name: fund accound
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: yarn faucet --account 0x4fc4058ca0162142be16524a794a82f2c184aaa4951b371c8da946541040ea6e
       - name: Run Tests
         working-directory: local/sui/submodules/bluefin-exchange-contracts-sui
         run: |
