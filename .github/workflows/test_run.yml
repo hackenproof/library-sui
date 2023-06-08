@@ -36,6 +36,7 @@ jobs:
       - name: running docker
         working-directory: local/sui
         run: | 
+          echo "Current Directory: $PWD"
           docker build --tag sui . &&
           docker container run -p 9000:9000 -p 5003:5003 -p 8084:8084/udp -p 9184:9184 -dit sui
         
