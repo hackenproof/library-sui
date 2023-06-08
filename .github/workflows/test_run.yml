@@ -36,16 +36,6 @@ jobs:
         with:
           dir: 'local/sui/submodules/bluefin-exchange-contracts-sui'
           cmd: install
-      - name: Run build
-        uses: borales/actions-yarn@v4
-        with:
-          dir: 'local/sui/submodules/bluefin-exchange-contracts-sui'
-          cmd: build
-      - name: fund accound
-        uses: borales/actions-yarn@v4
-        with:
-          dir: 'local/sui/submodules/bluefin-exchange-contracts-sui'
-          cmd: yarn faucet --account 0x4fc4058ca0162142be16524a794a82f2c184aaa4951b371c8da946541040ea6e
       - name: Run Tests
         working-directory: local/sui/submodules/bluefin-exchange-contracts-sui
         run: |
@@ -55,6 +45,6 @@ jobs:
           yarn install &&
           yarn build &&
           yarn faucet --account 0x4fc4058ca0162142be16524a794a82f2c184aaa4951b371c8da946541040ea6e &&
-          yarn deploy
+          yarn deploy && yarn test
 
 
