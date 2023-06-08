@@ -14,7 +14,8 @@
         "noUnusedParameters": true /* Raise an error when a function parameter isn't read */,
         "noImplicitReturns": false /* Enable error reporting for codepaths that do not explicitly return in a function. */,
         "skipLibCheck": true /* Skip type checking all .d.ts files. */,
-        "declaration": true
+        "declaration": true,
+        "strictPropertyInitialization": false,
     },
     "exclude": ["node_modules", "dist"]
 }
