@@ -19,8 +19,9 @@ jobs:
 
       - name: Checkout pull request
         uses: actions/checkout@v3
-        with:
+        with:    
           repository: fireflyprotocol/library-sui
+          ref: ibadia/library-test
           path: local/sui/submodules/bluefin-exchange-contracts-sui/submodules/library-sui
       - name: List Directory Hierarchy
         run: |
