@@ -43,8 +43,6 @@ jobs:
         working-directory: local/sui/submodules/bluefin-exchange-contracts-sui
         run: |
           echo "Current Directory: $PWD" &&
-          echo "Directory Hierarchy:" &&
-          ls -R &&
           echo "DEPLOY_ON = cloud" > .env &&
           echo "DEPLOYER_SEED = mixture forest spike snow armor frown enforce busy shove gaze swim term" >> .env &&
           cat .env &&
