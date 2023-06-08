@@ -26,7 +26,7 @@ import { USDC_BASE_DECIMALS } from "../constants";
 import { BigNumberable } from "../types";
 export class OnChainCalls {
     signer: SignerWithProvider;
-    settlementCap: string;
+    settlementCap: string = "";
     deployment: any;
 
     constructor(_signer: SignerWithProvider, _deployment: any) {
