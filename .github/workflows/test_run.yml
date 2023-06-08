@@ -31,20 +31,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
-      - name: Install yarn
-        run: npm install -g yarn
-      - name: Running Docker plz
-        uses: KengoTODA/actions-setup-docker-compose@v1
-        with:
-          version: "2.14.2"
-      - name: Run install
-        uses: borales/actions-yarn@v4
-        with:
-          dir: 'local/sui/submodules/bluefin-exchange-contracts-sui'
-          cmd: install
       - name: Run Tests
         working-directory: local/sui/submodules/bluefin-exchange-contracts-sui
         run: |
+          echo "Current Directory: $PWD" &&
+          echo "Directory Hierarchy:" &&
+          ls -R &&
           echo "DEPLOY_ON = cloud" > .env &&
           echo "DEPLOYER_SEED = mixture forest spike snow armor frown enforce busy shove gaze swim term" >> .env &&
           cat .env &&
