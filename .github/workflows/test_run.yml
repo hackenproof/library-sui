@@ -43,7 +43,6 @@ jobs:
           echo "DEPLOYER_SEED = mixture forest spike snow armor frown enforce busy shove gaze swim term" >> .env &&
           cat .env &&
           yarn install &&
-          yarn build &&
           yarn faucet --account 0x4fc4058ca0162142be16524a794a82f2c184aaa4951b371c8da946541040ea6e &&
           yarn deploy && yarn test
 
