@@ -118,15 +118,15 @@ export class OnChainCalls {
 
         callArgs.push(this.getBankID());
 
-        callArgs.push(args.name || "ETH-PERP");
+        callArgs.push(args.symbol || "ETH-PERP");
 
-        callArgs.push(args.minPrice || toBigNumberStr(0.1));
-        callArgs.push(args.maxPrice || toBigNumberStr(100000));
+        callArgs.push(args.minOrderPrice || toBigNumberStr(0.1));
+        callArgs.push(args.maxOrderPrice || toBigNumberStr(100000));
         callArgs.push(args.tickSize || toBigNumberStr(0.001));
-        callArgs.push(args.minQty || toBigNumberStr(0.1));
+        callArgs.push(args.minTradeQty || toBigNumberStr(0.1));
 
-        callArgs.push(args.maxQtyLimit || toBigNumberStr(100000));
-        callArgs.push(args.maxQtyMarket || toBigNumberStr(1000));
+        callArgs.push(args.maxTradeQtyLimit || toBigNumberStr(100000));
+        callArgs.push(args.maxTradeQtyMarket || toBigNumberStr(1000));
         callArgs.push(args.stepSize || toBigNumberStr(0.1));
         callArgs.push(args.mtbLong || toBigNumberStr(0.2));
         callArgs.push(args.mtbShort || toBigNumberStr(0.2));
@@ -144,15 +144,15 @@ export class OnChainCalls {
                 toBigNumberStr(100_000) //10x
             ]
         );
-        callArgs.push(args.initialMarginRequired || toBigNumberStr(0.1));
-        callArgs.push(args.maintenanceMarginRequired || toBigNumberStr(0.05));
+        callArgs.push(args.imr || toBigNumberStr(0.1));
+        callArgs.push(args.mmr || toBigNumberStr(0.05));
 
-        callArgs.push(args.makerFee || toBigNumberStr(0.001));
-        callArgs.push(args.takerFee || toBigNumberStr(0.0045));
+        callArgs.push(args.defaultMakerFee || toBigNumberStr(0.001));
+        callArgs.push(args.defaultTakerFee || toBigNumberStr(0.0045));
 
         callArgs.push(args.maxAllowedPriceDiffInOP || toBigNumberStr(1));
 
-        callArgs.push(args.maxAllowedFR || toBigNumberStr(0.001));
+        callArgs.push(args.maxFundingRate || toBigNumberStr(0.001));
 
         callArgs.push(args.insurancePoolRatio || toBigNumberStr(0.3));
 
@@ -163,7 +163,7 @@ export class OnChainCalls {
         callArgs.push(args.feePool ? args.feePool : DEFAULT.FEE_POOL_ADDRESS);
 
         // time stamp in ms
-        callArgs.push(args.startingTime || Date.now());
+        callArgs.push(args.tradingStartTime || Date.now());
 
         const caller = signer || this.signer;
 
@@ -565,7 +565,7 @@ export class OnChainCalls {
         args: {
             adminID?: string;
             perpID?: string;
-            maxAllowedFR: number;
+            maxFundingRate: number;
             gasBudget?: number;
         },
         signer?: RawSigner
@@ -575,7 +575,7 @@ export class OnChainCalls {
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
         callArgs.push(args.perpID || this.getPerpetualID());
-        callArgs.push(toBigNumberStr(args.maxAllowedFR));
+        callArgs.push(toBigNumberStr(args.maxFundingRate));
 
         return this.signAndCall(
             caller,
@@ -1362,6 +1362,7 @@ export class OnChainCalls {
             }
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return (userPos?.data?.content as any).fields.value.fields;
     }
 

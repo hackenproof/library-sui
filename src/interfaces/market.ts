@@ -1,17 +1,26 @@
 export interface MarketDetails {
-    name?: string;
+    // perpetual naming details
+    symbol?: string;
+    quoteAssetSymbol?: string;
+    quoteAssetName?: string;
+    baseAssetSymbol?: string;
+    baseAssetName?: string;
+
+    // default user leverage
+    defaultLeverage?: string;
+
     // min price at which asset can be traded
-    minPrice?: string;
+    minOrderPrice?: string;
     // max price at which asset can be traded
-    maxPrice?: string;
+    maxOrderPrice?: string;
     // the smallest decimal unit supported by asset for price
     tickSize?: string;
     // minimum quantity of asset that can be traded
-    minQty?: string;
+    minTradeQty?: string;
     // maximum quantity of asset that can be traded for limit order
-    maxQtyLimit?: string;
+    maxTradeQtyLimit?: string;
     // maximum quantity of asset that can be traded for market order
-    maxQtyMarket?: string;
+    maxTradeQtyMarket?: string;
     // the smallest decimal unit supported by asset for quantity
     stepSize?: string;
     //  market take bound for long side ( 10% == 100000000000000000)
@@ -20,18 +29,18 @@ export interface MarketDetails {
     mtbShort?: string;
     // array of maxAllowed values for leverage (0 index will contain dummy value, later indexes will represent leverage)
     maxAllowedOIOpen?: string[];
-    // initialMarginRequired: the initial margin collateralization percentage
-    initialMarginRequired?: string;
-    // maintenanceMarginRequired: the minimum collateralization percentage
-    maintenanceMarginRequired?: string;
+    // imr: the initial margin collateralization percentage
+    imr?: string;
+    // mmr: the minimum collateralization percentage
+    mmr?: string;
     // default maker order fee for this Perpetual
-    makerFee?: string;
+    defaultMakerFee?: string;
     // default taker order fee for this Perpetual
-    takerFee?: string;
+    defaultTakerFee?: string;
     // maximum allowed difference in consecutive Oracle Price updates
     maxAllowedPriceDiffInOP?: string;
     // max allowed funding rate
-    maxAllowedFR?: string;
+    maxFundingRate?: string;
     // portion of liquidation premium to be transferred to insurance pool
     insurancePoolRatio?: string;
     // address of insurance pool
@@ -39,7 +48,7 @@ export interface MarketDetails {
     // address of fee pool
     feePool?: string;
     // time at which trading will start on perpetual
-    startingTime?: number;
+    tradingStartTime?: number;
 }
 
 export interface PerpCreationMarketDetails extends MarketDetails {

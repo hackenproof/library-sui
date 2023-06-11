@@ -81,12 +81,12 @@
         "ETH-PERP": {
             "Config": {
                 "name": "ETH-PERP",
-                "minPrice": "100000000",
-                "maxPrice": "100000000000000",
+                "minOrderPricePrice": "100000000",
+                "maxOrderPrice": "100000000000000",
                 "tickSize": "1000000",
-                "minQty": "10000000",
-                "maxQtyLimit": "100000000000000",
-                "maxQtyMarket": "1000000000000",
+                "minTradeQty": "10000000",
+                "maxTradeQtyLimit": "100000000000000",
+                "maxTradeQtyMarket": "1000000000000",
                 "stepSize": "10000000",
                 "mtbLong": "200000000",
                 "mtbShort": "200000000",

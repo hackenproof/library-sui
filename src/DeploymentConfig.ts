@@ -7,6 +7,7 @@ config({ path: ".env" });
 export const market = process.env.MARKET;
 
 export const network = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...(Networks as any)[process.env.DEPLOY_ON as any],
     name: process.env.DEPLOY_ON
 } as Network;
@@ -19,13 +20,13 @@ export const DeploymentConfigs: DeploymentConfig = {
     deployer: process.env.DEPLOYER_SEED || "",
     markets: [
         {
-            name: "ETH-PERP",
-            minPrice: toBigNumberStr(0.1),
-            maxPrice: toBigNumberStr(100000),
+            symbol: "ETH-PERP",
+            minOrderPrice: toBigNumberStr(0.1),
+            maxOrderPrice: toBigNumberStr(100000),
             tickSize: toBigNumberStr(0.001),
-            minQty: toBigNumberStr(0.01),
-            maxQtyLimit: toBigNumberStr(100000),
-            maxQtyMarket: toBigNumberStr(1000),
+            minTradeQty: toBigNumberStr(0.01),
+            maxTradeQtyLimit: toBigNumberStr(100000),
+            maxTradeQtyMarket: toBigNumberStr(1000),
             stepSize: toBigNumberStr(0.01),
             mtbLong: toBigNumberStr(0.2),
             mtbShort: toBigNumberStr(0.2),
@@ -51,11 +52,11 @@ export const DeploymentConfigs: DeploymentConfig = {
                 toBigNumberStr(200000),
                 toBigNumberStr(200000)
             ],
-            initialMarginRequired: toBigNumberStr(0.475),
-            maintenanceMarginRequired: toBigNumberStr(0.3),
-            makerFee: toBigNumberStr(0.001),
-            takerFee: toBigNumberStr(0.0045),
-            maxAllowedFR: toBigNumberStr(0.001),
+            imr: toBigNumberStr(0.475),
+            mmr: toBigNumberStr(0.3),
+            defaultMakerFee: toBigNumberStr(0.001),
+            defaultTakerFee: toBigNumberStr(0.0045),
+            maxFundingRate: toBigNumberStr(0.001),
             maxAllowedPriceDiffInOP: toBigNumberStr(1),
             insurancePoolRatio: toBigNumberStr(0.3),
             insurancePool:
@@ -63,13 +64,13 @@ export const DeploymentConfigs: DeploymentConfig = {
             feePool: "0x05ada716962dec8788b53ddad34827ffe46acfe16bfe9d7d064838fcda285073"
         },
         {
-            name: "BTC-PERP",
-            minPrice: toBigNumberStr(0.1),
-            maxPrice: toBigNumberStr(100000),
+            symbol: "BTC-PERP",
+            minOrderPrice: toBigNumberStr(0.1),
+            maxOrderPrice: toBigNumberStr(100000),
             tickSize: toBigNumberStr(0.001),
-            minQty: toBigNumberStr(0.01),
-            maxQtyLimit: toBigNumberStr(100000),
-            maxQtyMarket: toBigNumberStr(1000),
+            minTradeQty: toBigNumberStr(0.01),
+            maxTradeQtyLimit: toBigNumberStr(100000),
+            maxTradeQtyMarket: toBigNumberStr(1000),
             stepSize: toBigNumberStr(0.01),
             mtbLong: toBigNumberStr(0.2),
             mtbShort: toBigNumberStr(0.2),
@@ -95,12 +96,12 @@ export const DeploymentConfigs: DeploymentConfig = {
                 toBigNumberStr(200000),
                 toBigNumberStr(200000)
             ],
-            initialMarginRequired: toBigNumberStr(0.475),
-            maintenanceMarginRequired: toBigNumberStr(0.3),
-            makerFee: toBigNumberStr(0.001),
-            takerFee: toBigNumberStr(0.0045),
+            imr: toBigNumberStr(0.475),
+            mmr: toBigNumberStr(0.3),
+            defaultMakerFee: toBigNumberStr(0.001),
+            defaultTakerFee: toBigNumberStr(0.0045),
             maxAllowedPriceDiffInOP: toBigNumberStr(1),
-            maxAllowedFR: toBigNumberStr(0.001),
+            maxFundingRate: toBigNumberStr(0.001),
             insurancePoolRatio: toBigNumberStr(0.3),
             insurancePool:
                 "0x90c55f2a388a0e31ebca93cbf87fdd08e9716be082ca8a3c479bb14bcb5e1b88",

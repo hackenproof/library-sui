@@ -1,3 +1,8 @@
 {
-    "cSpell.words": ["Keypair", "secp"]
+    "cSpell.words": [
+        "collateralization",
+        "Keypair",
+        "PERP",
+        "secp"
+    ]
 }
