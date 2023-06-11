@@ -144,8 +144,8 @@ export class OnChainCalls {
                 toBigNumberStr(100_000) //10x
             ]
         );
-        callArgs.push(args.imr || toBigNumberStr(0.1));
-        callArgs.push(args.mmr || toBigNumberStr(0.05));
+        callArgs.push(args.initialMarginReq || toBigNumberStr(0.1));
+        callArgs.push(args.maintenanceMarginReq || toBigNumberStr(0.05));
 
         callArgs.push(args.defaultMakerFee || toBigNumberStr(0.001));
         callArgs.push(args.defaultTakerFee || toBigNumberStr(0.0045));

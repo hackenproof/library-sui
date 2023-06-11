@@ -30,9 +30,9 @@ export interface MarketDetails {
     // array of maxAllowed values for leverage (0 index will contain dummy value, later indexes will represent leverage)
     maxAllowedOIOpen?: string[];
     // imr: the initial margin collateralization percentage
-    imr?: string;
+    initialMarginReq?: string;
     // mmr: the minimum collateralization percentage
-    mmr?: string;
+    maintenanceMarginReq?: string;
     // default maker order fee for this Perpetual
     defaultMakerFee?: string;
     // default taker order fee for this Perpetual

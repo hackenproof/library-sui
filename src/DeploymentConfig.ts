@@ -21,6 +21,11 @@ export const DeploymentConfigs: DeploymentConfig = {
     markets: [
         {
             symbol: "ETH-PERP",
+            quoteAssetSymbol: "USDC",
+            quoteAssetName: "Circle USD",
+            baseAssetSymbol: "ETH",
+            baseAssetName: "Ethereum",
+            defaultLeverage: "3000000000000000000",
             minOrderPrice: toBigNumberStr(0.1),
             maxOrderPrice: toBigNumberStr(100000),
             tickSize: toBigNumberStr(0.001),
@@ -52,8 +57,8 @@ export const DeploymentConfigs: DeploymentConfig = {
                 toBigNumberStr(200000),
                 toBigNumberStr(200000)
             ],
-            imr: toBigNumberStr(0.475),
-            mmr: toBigNumberStr(0.3),
+            initialMarginReq: toBigNumberStr(0.475),
+            maintenanceMarginReq: toBigNumberStr(0.3),
             defaultMakerFee: toBigNumberStr(0.001),
             defaultTakerFee: toBigNumberStr(0.0045),
             maxFundingRate: toBigNumberStr(0.001),
@@ -65,6 +70,11 @@ export const DeploymentConfigs: DeploymentConfig = {
         },
         {
             symbol: "BTC-PERP",
+            quoteAssetSymbol: "USDC",
+            quoteAssetName: "Circle USD",
+            baseAssetSymbol: "BTC",
+            baseAssetName: "Bitcoin",
+            defaultLeverage: "3000000000000000000",
             minOrderPrice: toBigNumberStr(0.1),
             maxOrderPrice: toBigNumberStr(100000),
             tickSize: toBigNumberStr(0.001),
@@ -96,8 +106,8 @@ export const DeploymentConfigs: DeploymentConfig = {
                 toBigNumberStr(200000),
                 toBigNumberStr(200000)
             ],
-            imr: toBigNumberStr(0.475),
-            mmr: toBigNumberStr(0.3),
+            initialMarginReq: toBigNumberStr(0.475),
+            maintenanceMarginReq: toBigNumberStr(0.3),
             defaultMakerFee: toBigNumberStr(0.001),
             defaultTakerFee: toBigNumberStr(0.0045),
             maxAllowedPriceDiffInOP: toBigNumberStr(1),
