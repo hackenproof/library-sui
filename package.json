@@ -1,7 +1,7 @@
 {
     "name": "@firefly-exchange/library-sui",
     "description": "Sui library housing helper methods, classes to interact with Bluefin protocol deployed on Sui",
-    "version": "0.1.19",
+    "version": "0.1.20",
     "main": "index",
     "typings": "dist/index",
     "scripts": {
@@ -37,6 +37,8 @@
     "devDependencies": {
         "@types/chai": "^4.3.3",
         "@types/chai-as-promised": "^7.1.5",
+        "@types/dotenv-parse-variables": "^2.0.1",
+        "@types/lodash": "^4.14.195",
         "@types/expect": "^24.3.0",
         "@types/mocha": "^10.0.0",
         "@typescript-eslint/eslint-plugin": "^5.0.0",

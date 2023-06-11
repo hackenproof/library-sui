@@ -26,12 +26,13 @@ import { USDC_BASE_DECIMALS } from "../constants";
 import { BigNumberable } from "../types";
 export class OnChainCalls {
     signer: SignerWithProvider;
-    settlementCap: string;
+    settlementCap: string | undefined;
     deployment: any;
 
-    constructor(_signer: SignerWithProvider, _deployment: any) {
+    constructor(_signer: SignerWithProvider, _deployment: any, settlementCap?: string) {
         this.signer = _signer;
         this.deployment = _deployment;
+        this.settlementCap = settlementCap;
     }
 
     public async setExchangeAdmin(
