@@ -2,6 +2,13 @@
 /* eslint-disable no-shadow */
 import BigNumber from "bignumber.js";
 
+import {
+    JsonRpcProvider,
+    Keypair,
+    RawSigner,
+    SuiTransactionBlockResponse
+} from "@mysten/sui.js";
+
 import { Socket } from "socket.io-client";
 
 import { DefaultEventsMap } from "@socket.io/component-emitter";
@@ -50,3 +57,5 @@ export type MinifiedCandleStick = [
 ];
 
 export type DAPIKlineResponse = Array<MinifiedCandleStick>;
+
+export { JsonRpcProvider, Keypair, RawSigner, BigNumber, SuiTransactionBlockResponse };
