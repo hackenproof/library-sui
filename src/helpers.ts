@@ -10,9 +10,11 @@ async function loadWallets() {
     TEST_WALLETS = value.default;
 }
 
-loadWallets().then(() => {
-    console.log("test wallets loaded");
-}).catch(console.error);
+loadWallets()
+    .then(() => {
+        console.log("test wallets loaded");
+    })
+    .catch(console.error);
 
 export interface Account {
     signer: RawSigner;
