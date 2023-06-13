@@ -2,6 +2,7 @@ import { JsonRpcProvider, Keypair, RawSigner } from "@mysten/sui.js";
 import { Client } from "./classes";
 import { wallet } from "./interfaces";
 import { getKeyPairFromSeed, getSignerFromSeed } from "./utils";
+import { log } from "./common";
 
 export let TEST_WALLETS: wallet[] = [];
 
@@ -12,9 +13,13 @@ async function loadWallets() {
 
 loadWallets()
     .then(() => {
-        console.log("test wallets loaded");
+        log.info("TEST_WALLETS loaded successfully");
     })
-    .catch(console.error);
+    .catch(e => {
+        log.error(
+            `TEST_WALLETS could not be loaded! Error is ${JSON.stringify(e, null, 2)}`
+        );
+    });
 
 export interface Account {
     signer: RawSigner;
