@@ -3,11 +3,16 @@ import { Client } from "./classes";
 import { wallet } from "./interfaces";
 import { getKeyPairFromSeed, getSignerFromSeed } from "./utils";
 
-export let TEST_WALLETS: wallet[];
+export let TEST_WALLETS: wallet[] = [];
 
-import("./accounts.json").then(value => {
+async function loadWallets() {
+    const value = await import("./accounts.json");
     TEST_WALLETS = value.default;
-});
+}
+
+loadWallets().then(() => {
+    console.log("test wallets loaded");
+}).catch(console.error);
 
 export interface Account {
     signer: RawSigner;
