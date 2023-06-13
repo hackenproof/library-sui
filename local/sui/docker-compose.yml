@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+    sui:
+        image: sui
+        ports:
+            - "9000:9000"
+            - "5003:5003"
+            - "8084:8084"
+            - "9184:9184"
+        restart: unless-stopped

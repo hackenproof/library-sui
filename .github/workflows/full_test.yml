@@ -1,0 +1,57 @@
+name: build test
+
+on:
+    pull_request:
+        branches: [main]
+
+jobs:
+    clone-bluefin-repo:
+        name: Running Full Test
+        runs-on: self-hosted
+        steps:
+            - name: setup docker
+              uses: KengoTODA/actions-setup-docker-compose@v1
+              with:
+                  version: "2.14.2"
+            - name: Checkout main repository
+              uses: actions/checkout@v3
+              with:
+                  repository: fireflyprotocol/bluefin-exchange-contracts-sui
+                  token: ${{ secrets.PROD_SUBMODULE_PAT }}
+                  path: bluefin-exchange-contracts-sui
+
+            - name: Checkout pull request
+              uses: actions/checkout@v3
+              with:
+                  repository: fireflyprotocol/library-sui
+                  path: bluefin-exchange-contracts-sui/submodules/library-sui
+            - name: List Directory Hierarchy
+              run: |
+                  echo "Current Directory: $PWD"
+            - name: Set Node.js 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
+            - name: Install yarn
+              run: npm install -g yarn && npm install ts-mocha
+            - name: Building library
+              working-directory: bluefin-exchange-contracts-sui/submodules/library-sui
+              run: |
+                  npm install -g typescript
+                  yarn install
+                  yarn build
+                  cp deployment.example.json ../../deployment.json
+            - name: Run Tests
+              working-directory: bluefin-exchange-contracts-sui
+              run: |
+                  echo "Current Directory: $PWD" &&
+                  echo "DEPLOY_ON = cloud" > .env &&
+                  echo "DEPLOYER_SEED = rain ready pride fade lizard shrimp figure exact eyebrow humble denial joy" >> .env &&
+                  cat .env &&
+                  yarn install &&
+                  yarn faucet --account 0xe4b5cec514f087885e8d2ee99184ba200f09c8735f147af6b564f91782204fa9 &&
+                  yarn fund:test:accounts
+                  yarn run ts-mocha --no-timeout tests/1.Sanity.test.ts
+                  yarn run ts-mocha --no-timeout tests/2.Evaluator.test.ts
+                  yarn run ts-mocha --no-timeout tests/3.PriceOracle.test.ts
+                  yarn run ts-mocha --no-timeout tests/5.OrderSignature.test.ts

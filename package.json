@@ -1,7 +1,7 @@
 {
     "name": "@firefly-exchange/library-sui",
     "description": "Sui library housing helper methods, classes to interact with Bluefin protocol deployed on Sui",
-    "version": "0.1.21",
+    "version": "0.1.22",
     "main": "index",
     "typings": "dist/index",
     "scripts": {
@@ -11,7 +11,9 @@
         "format-all": "yarn prettier --write .",
         "format-staged": "git-format-staged -f \"prettier '{}'\" '**/*.js' '**/*.json' '**/*.ts' ",
         "ci:code-formatting": "yarn prettier --check .",
-        "ci:code-style": "yarn eslint ."
+        "ci:code-style": "yarn eslint .",
+        "setup:sui": "docker-compose -f local/sui/docker-compose.yml up -d",
+        "teardown:sui": "docker-compose -f  local/sui/docker-compose.yml down"
     },
     "directories": {
         "test": "tests"
