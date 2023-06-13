@@ -5,7 +5,7 @@ import { getKeyPairFromSeed, getSignerFromSeed } from "./utils";
 
 export let TEST_WALLETS: wallet[];
 
-import('./accounts.json').then(value => {
+import("./accounts.json").then(value => {
     TEST_WALLETS = value.default;
 });
 
