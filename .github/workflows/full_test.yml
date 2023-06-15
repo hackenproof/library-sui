@@ -55,3 +55,4 @@ jobs:
                   yarn run ts-mocha --no-timeout tests/2.Evaluator.test.ts
                   yarn run ts-mocha --no-timeout tests/3.PriceOracle.test.ts
                   yarn run ts-mocha --no-timeout tests/5.OrderSignature.test.ts
+                  yarn run ts-mocha --no-timeout tests/6.1.TradeMethod.test.ts

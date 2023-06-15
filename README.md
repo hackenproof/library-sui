@@ -31,3 +31,20 @@ blockchain
 
 -   Install dependencies using `yarn`
 -   Build using `yarn build`
+
+## HOW TO CONTRIBUTE (IMPORTANT):
+
+-   If you want to make any changes to the library-sui, you create a new branch from main
+    and make changes there
+-   Then you make a pull request to merge your changes to main
+-   Then some checks will run and if all checks passed your changes will be merged.
+    HOWEVER there is one catch
+-   If BUILD fails on PR checks and there is no error in your code then do the following:
+-   GET THE LATEST deployment.json file and update the contents of deployment.example.json
+    with that
+
+### But Why?
+
+-   What is happening that this code used sui deployed on cloud (bluefin). And sui cloud
+    is restarted sometimes. When it is restarted all contracts deployed there are lost,
+    then some contracts are redeployed hence it implies new deployment.json file made.
