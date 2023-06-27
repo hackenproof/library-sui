@@ -1,5 +1,3 @@
-import path from "path";
-
 import {
     RawSigner,
     Keypair,
@@ -24,17 +22,11 @@ import { toBigNumber, bigNumber } from "./library";
 import { Order } from "../src/interfaces";
 import { DEFAULT } from "./defaults";
 import { config } from "dotenv";
-import { Client, OnChainCalls, Transaction } from "./classes";
-import { network, packageName } from "./DeploymentConfig";
+import { OnChainCalls, Transaction } from "./classes";
+import { network } from "./DeploymentConfig";
 import { MarketDetails } from "./interfaces/market";
-
-import { execSync } from "child_process";
 import fs from "fs";
 config({ path: ".env" });
-
-export function execCommand(command: string) {
-    return execSync(command, { encoding: "utf-8" });
-}
 
 export function writeFile(filePath: string, jsonData: any) {
     fs.writeFileSync(filePath, JSON.stringify(jsonData));
@@ -134,18 +126,6 @@ export async function getGenesisMap(
     }
 
     return map;
-}
-
-export async function publishPackage(
-    usingCLI = false,
-    deployer: RawSigner | undefined = undefined
-): Promise<SuiTransactionBlockResponse> {
-    const pkgPath = `"${path.join(process.cwd(), `/${packageName}`)}"`;
-    if (usingCLI) {
-        return Client.publishPackage(pkgPath);
-    } else {
-        return Client.publishPackageUsingSDK(deployer as RawSigner, pkgPath);
-    }
 }
 
 export async function createMarket(
