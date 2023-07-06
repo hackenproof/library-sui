@@ -61,6 +61,11 @@ export enum CANCEL_REASON {
     FAILED = "FAILED",
     NETWORK_DOWN = "NETWORK_DOWN"
 }
+
+export enum NETWORK_NAME {
+    sui = "sui"
+}
+
 export enum MARKET_STATUS {
     ACTIVE = "ACTIVE",
     INACTIVE = "INACTIVE",

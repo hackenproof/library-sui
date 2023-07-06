@@ -30,7 +30,7 @@ export class OrderSigner {
 
         const [sign, recovery] = this.signOrderOverride.call(
             signer,
-            new TextEncoder().encode(this.getSerializedOrder(order))
+            new TextEncoder().encode(OrderSigner.getSerializedOrder(order))
         );
 
         // appending 00 at the end of the signature to make it possible
@@ -39,7 +39,7 @@ export class OrderSigner {
         return Buffer.from(sign).toString("hex") + recovery.toString().padStart(2, "0");
     }
 
-    public getSerializedOrder(order: Order): string {
+    public static getSerializedOrder(order: Order): string {
         // encode order flags
         const orderFlags = encodeOrderFlags(order);
 
@@ -57,17 +57,16 @@ export class OrderSigner {
         return buffer.toString("hex");
     }
 
-    public getOrderHash(order: Order | string): string {
+    public static getOrderHash(order: Order | string): string {
         // if serialized order is not provided
         if (typeof order !== "string") {
-            order = this.getSerializedOrder(order);
+            order = OrderSigner.getSerializedOrder(order);
         }
-
         const hash = sha256(hexToBuffer(order));
         return Buffer.from(hash).toString("hex");
     }
 
-    public verifyUsingHash(signature: string, orderHash: string, address: string) {
+    public static verifyUsingHash(signature: string, orderHash: string, address: string) {
         const signatureWithR = hexToBuffer(signature);
         if (signatureWithR.length == 65) {
             const sig = signatureWithR.subarray(0, 64);
@@ -83,7 +82,7 @@ export class OrderSigner {
         return false;
     }
 
-    public verifyUsingOrder(signature: string, order: Order, address: string) {
-        return this.verifyUsingHash(signature, this.getOrderHash(order), address);
+    public static verifyUsingOrder(signature: string, order: Order, address: string) {
+        return this.verifyUsingHash(signature, OrderSigner.getOrderHash(order), address);
     }
 }
