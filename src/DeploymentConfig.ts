@@ -2,6 +2,7 @@ import { config } from "dotenv";
 import { toBigNumberStr } from "./library";
 import * as Networks from "../networks.json";
 import { Network, DeploymentConfig } from "./interfaces";
+import { processTradingStartTime } from "./helpers";
 
 config({ path: ".env" });
 export const market = process.env.MARKET;
@@ -57,16 +58,17 @@ export const DeploymentConfigs: DeploymentConfig = {
                 toBigNumberStr(200000),
                 toBigNumberStr(200000)
             ],
-            initialMarginReq: toBigNumberStr(0.475),
-            maintenanceMarginReq: toBigNumberStr(0.3),
-            defaultMakerFee: toBigNumberStr(0.001),
-            defaultTakerFee: toBigNumberStr(0.0045),
+            initialMarginReq: toBigNumberStr(0.045),
+            maintenanceMarginReq: toBigNumberStr(0.03),
+            defaultMakerFee: toBigNumberStr(0.0015),
+            defaultTakerFee: toBigNumberStr(0.0055),
             maxFundingRate: toBigNumberStr(0.001),
             maxAllowedPriceDiffInOP: toBigNumberStr(1),
             insurancePoolRatio: toBigNumberStr(0.3),
             insurancePool:
                 "0x90c55f2a388a0e31ebca93cbf87fdd08e9716be082ca8a3c479bb14bcb5e1b88",
-            feePool: "0x05ada716962dec8788b53ddad34827ffe46acfe16bfe9d7d064838fcda285073"
+            feePool: "0x05ada716962dec8788b53ddad34827ffe46acfe16bfe9d7d064838fcda285073",
+            tradingStartTime: processTradingStartTime(0, process.env.ENV)
         },
         {
             symbol: "BTC-PERP",
@@ -106,16 +108,17 @@ export const DeploymentConfigs: DeploymentConfig = {
                 toBigNumberStr(200000),
                 toBigNumberStr(200000)
             ],
-            initialMarginReq: toBigNumberStr(0.475),
-            maintenanceMarginReq: toBigNumberStr(0.3),
-            defaultMakerFee: toBigNumberStr(0.001),
-            defaultTakerFee: toBigNumberStr(0.0045),
+            initialMarginReq: toBigNumberStr(0.045),
+            maintenanceMarginReq: toBigNumberStr(0.03),
+            defaultMakerFee: toBigNumberStr(0.0015),
+            defaultTakerFee: toBigNumberStr(0.0055),
             maxAllowedPriceDiffInOP: toBigNumberStr(1),
             maxFundingRate: toBigNumberStr(0.001),
             insurancePoolRatio: toBigNumberStr(0.3),
             insurancePool:
                 "0x90c55f2a388a0e31ebca93cbf87fdd08e9716be082ca8a3c479bb14bcb5e1b88",
-            feePool: "0x05ada716962dec8788b53ddad34827ffe46acfe16bfe9d7d064838fcda285073"
+            feePool: "0x05ada716962dec8788b53ddad34827ffe46acfe16bfe9d7d064838fcda285073",
+            tradingStartTime: processTradingStartTime(0, process.env.ENV)
         }
     ]
 };

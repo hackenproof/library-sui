@@ -61,3 +61,37 @@ export function getTestAccounts(provider: JsonRpcProvider): Account[] {
     }
     return accounts;
 }
+
+export function processTradingStartTime(tradingStartTime: number | string, env: string): number {
+    const threshold = 180000; // threshold is set to 3 min as contracts take this much time to deploy
+    const ms_in_an_hour = 3600 * 1000;
+
+    if (env == "DEV") {
+        return tradingStartTime == 0 || tradingStartTime == ""
+            ? Math.floor(Date.now()) + threshold
+            : Number(tradingStartTime);
+    } else {
+        if (tradingStartTime == 0 || tradingStartTime == "") {
+            const nextPossibleHourTime =
+                Math.floor(Math.floor(Date.now()) / ms_in_an_hour) * ms_in_an_hour + ms_in_an_hour;
+            // check for corner cases
+            if (
+                nextPossibleHourTime - Math.floor(Date.now()) >
+                threshold
+            ) {
+                return nextPossibleHourTime;
+            } else {
+                return nextPossibleHourTime + 3600000;
+            }
+        } else {
+            if (
+                Number(tradingStartTime) % ms_in_an_hour == 0 &&
+                Number(tradingStartTime) > Math.floor(Date.now())
+            ) {
+                return Number(tradingStartTime);
+            } else {
+                throw "tradingStartTime must be in hourly units/future time";
+            }
+        }
+    }
+}

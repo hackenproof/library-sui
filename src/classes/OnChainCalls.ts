@@ -437,6 +437,59 @@ export class OnChainCalls {
         );
     }
 
+    public async setMaintenanceMarginRequired(
+        args: {
+            adminID?: string;
+            perpID?: string;
+            mmr:string;
+            gasBudget?: number;
+        },
+        signer?: RawSigner
+    ): Promise<SuiTransactionBlockResponse> {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+
+        callArgs.push(args.adminID || this.getExchangeAdminCap());
+        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(args.mmr);
+
+        return this.signAndCall(
+            caller,
+            "set_maintenance_margin_required",
+            callArgs,
+            "perpetual",
+            args.gasBudget
+        );
+    }
+
+
+    public async setInitialMarginRequired(
+        args: {
+            adminID?: string;
+            perpID?: string;
+            imr:string;
+            gasBudget?: number;
+        },
+        signer?: RawSigner
+    ): Promise<SuiTransactionBlockResponse> {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+
+        callArgs.push(args.adminID || this.getExchangeAdminCap());
+        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(args.imr);
+
+        return this.signAndCall(
+            caller,
+            "set_initial_margin_required",
+            callArgs,
+            "perpetual",
+            args.gasBudget
+        );
+    }
+
     public async createSettlementOperator(
         args: {
             operator: string;

@@ -6,7 +6,8 @@ import {
     JsonRpcProvider,
     Keypair,
     RawSigner,
-    SuiTransactionBlockResponse
+    SuiTransactionBlockResponse,
+    TransactionBlock
 } from "@mysten/sui.js";
 
 import { Socket } from "socket.io-client";
@@ -58,4 +59,4 @@ export type MinifiedCandleStick = [
 
 export type DAPIKlineResponse = Array<MinifiedCandleStick>;
 
-export { JsonRpcProvider, Keypair, RawSigner, BigNumber, SuiTransactionBlockResponse };
+export { JsonRpcProvider, Keypair, RawSigner, BigNumber, SuiTransactionBlockResponse, TransactionBlock };
