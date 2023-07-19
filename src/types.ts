@@ -59,4 +59,11 @@ export type MinifiedCandleStick = [
 
 export type DAPIKlineResponse = Array<MinifiedCandleStick>;
 
-export { JsonRpcProvider, Keypair, RawSigner, BigNumber, SuiTransactionBlockResponse, TransactionBlock };
+export {
+    JsonRpcProvider,
+    Keypair,
+    RawSigner,
+    BigNumber,
+    SuiTransactionBlockResponse,
+    TransactionBlock
+};

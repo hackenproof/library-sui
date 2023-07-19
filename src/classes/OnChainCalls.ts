@@ -25,11 +25,15 @@ import {
 import { USDC_BASE_DECIMALS } from "../constants";
 import { BigNumberable } from "../types";
 export class OnChainCalls {
-    signer: SignerWithProvider;
+    signer: SignerWithProvider | any;
     settlementCap: string | undefined;
     deployment: any;
 
-    constructor(_signer: SignerWithProvider, _deployment: any, settlementCap?: string) {
+    constructor(
+        _signer: SignerWithProvider | any,
+        _deployment: any,
+        settlementCap?: string
+    ) {
         this.signer = _signer;
         this.deployment = _deployment;
         this.settlementCap = settlementCap;
@@ -441,7 +445,7 @@ export class OnChainCalls {
         args: {
             adminID?: string;
             perpID?: string;
-            mmr:string;
+            mmr: string;
             gasBudget?: number;
         },
         signer?: RawSigner
@@ -463,12 +467,11 @@ export class OnChainCalls {
         );
     }
 
-
     public async setInitialMarginRequired(
         args: {
             adminID?: string;
             perpID?: string;
-            imr:string;
+            imr: string;
             gasBudget?: number;
         },
         signer?: RawSigner

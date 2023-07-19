@@ -62,7 +62,10 @@ export function getTestAccounts(provider: JsonRpcProvider): Account[] {
     return accounts;
 }
 
-export function processTradingStartTime(tradingStartTime: number | string, env: string): number {
+export function processTradingStartTime(
+    tradingStartTime: number | string,
+    env: string
+): number {
     const threshold = 180000; // threshold is set to 3 min as contracts take this much time to deploy
     const ms_in_an_hour = 3600 * 1000;
 
@@ -73,12 +76,10 @@ export function processTradingStartTime(tradingStartTime: number | string, env: 
     } else {
         if (tradingStartTime == 0 || tradingStartTime == "") {
             const nextPossibleHourTime =
-                Math.floor(Math.floor(Date.now()) / ms_in_an_hour) * ms_in_an_hour + ms_in_an_hour;
+                Math.floor(Math.floor(Date.now()) / ms_in_an_hour) * ms_in_an_hour +
+                ms_in_an_hour;
             // check for corner cases
-            if (
-                nextPossibleHourTime - Math.floor(Date.now()) >
-                threshold
-            ) {
+            if (nextPossibleHourTime - Math.floor(Date.now()) > threshold) {
                 return nextPossibleHourTime;
             } else {
                 return nextPossibleHourTime + 3600000;
