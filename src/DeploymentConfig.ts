@@ -15,6 +15,7 @@ export const network = {
 
 export const packageName = "bluefin_foundation";
 
+
 export const DeploymentConfigs: DeploymentConfig = {
     filePath: "./deployment.json", // Todo will create separate files for separate networks
     network: network,

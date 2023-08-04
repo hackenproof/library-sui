@@ -28,6 +28,7 @@ import { MarketDetails } from "./interfaces/market";
 import fs from "fs";
 config({ path: ".env" });
 
+
 export function writeFile(filePath: string, jsonData: any) {
     fs.writeFileSync(filePath, JSON.stringify(jsonData));
 }
@@ -132,7 +133,8 @@ export async function createMarket(
     deployment: DeploymentData,
     deployer: RawSigner,
     provider: JsonRpcProvider,
-    marketConfig?: MarketDetails
+    marketConfig?: MarketDetails,
+    priceInfoObjId?: string
 ): Promise<DeploymentObjectMap> {
     const onChain = new OnChainCalls(deployer, deployment);
     const txResult = await onChain.createPerpetual({ ...marketConfig });
@@ -152,10 +154,30 @@ export async function createMarket(
         }
     });
 
+    /*
+    For getting oracle price we need priceInfoObjId, 
+    we decided to keep the priceInfoObjId and its details in deployment.json file
+    When calling from bluefin_foundation when building contracts we give priceInfoObjId
+    whicn is then saved in deployment.json file.
+    */
+
+    const priceInfoDetails = await provider.getObject({
+        id: priceInfoObjId,
+        options: {
+            showContent: true
+        }
+    });
+
     map["PositionsTable"] = {
         owner: OBJECT_OWNERSHIP_STATUS.SHARED,
         id: (perpDetails.data as any).content.fields.positions.fields.id.id,
         dataType: (perpDetails.data as any).content.fields.positions.type
+    };
+
+    map["PriceOracle"] = {
+        owner: OBJECT_OWNERSHIP_STATUS.SHARED,
+        id: priceInfoObjId,
+        dataType: (priceInfoDetails.data as any).content.fields.price_info.type
     };
 
     return map;
