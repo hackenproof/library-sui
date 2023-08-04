@@ -97,7 +97,8 @@ export enum SOCKET_EVENTS {
     AccountDataUpdateKey = "AccountDataUpdate",
     UserFundingUpdate = "UserFundingUpdate",
     UserTransferUpdate = "UserTransferUpdate",
-    AccountPermissionUpdate = "AccountPermissionUpdate"
+    AccountPermissionUpdate = "AccountPermissionUpdate",
+    RpcUrlResolved = "RpcUrlResolved"
 }
 export enum ADJUST_MARGIN {
     Add = "Add",

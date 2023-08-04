@@ -20,8 +20,8 @@ export function toBigNumberStr(val: BigNumberable, base: number = BASE_DECIMALS)
     return toBigNumber(val, base).toFixed(0);
 }
 
-export function bnToBaseStr(val: BigNumberable, decimals = USDC_BASE_DECIMALS): string {
-    return bigNumber(val).shiftedBy(-BASE_DECIMALS).toFixed(decimals);
+export function bnToBaseStr(val: BigNumberable, decimals = USDC_BASE_DECIMALS, base = BASE_DECIMALS): string {
+    return bigNumber(val).shiftedBy(-base).toFixed(decimals);
 }
 
 export function usdcToBaseNumber(
@@ -31,8 +31,8 @@ export function usdcToBaseNumber(
     return Number(new BigNumber(val).shiftedBy(-USDC_BASE_DECIMALS).toFixed(decimals));
 }
 
-export function toBaseNumber(val: BigNumberable, decimals = 3): number {
-    return Number(new BigNumber(val).shiftedBy(-BASE_DECIMALS).toFixed(decimals));
+export function toBaseNumber(val: BigNumberable, decimals = 3, base = BASE_DECIMALS): number {
+    return Number(new BigNumber(val).shiftedBy(-base).toFixed(decimals));
 }
 
 export function bnToHex(bn: BigNumber | number, pad = 32): string {

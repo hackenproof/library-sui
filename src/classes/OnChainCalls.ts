@@ -655,7 +655,7 @@ export class OnChainCalls {
             gasBudget?: number;
         },
         signer?: RawSigner,
-        market="ETH-PERP"
+        market = "ETH-PERP"
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -692,8 +692,8 @@ export class OnChainCalls {
             args.fillQuantity
                 ? args.fillQuantity.toFixed(0)
                 : args.makerOrder.quantity.lte(args.takerOrder.quantity)
-                ? args.makerOrder.quantity.toFixed(0)
-                : args.takerOrder.quantity.toFixed(0)
+                    ? args.makerOrder.quantity.toFixed(0)
+                    : args.takerOrder.quantity.toFixed(0)
         );
 
         callArgs.push(
@@ -947,7 +947,7 @@ export class OnChainCalls {
         callArgs.push(args.updateOPCapID || this.getPriceOracleOperatorCap());
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.price);
-        
+
         return this.signAndCall(
             caller,
             "set_oracle_price",
@@ -1347,9 +1347,9 @@ export class OnChainCalls {
         if (gasBudget) tx.setGasBudget(gasBudget);
 
         const params = callArgs.map(v => tx.pure(v));
-        
-        if (packageId==undefined){
-            packageId=this.getPackageID();
+
+        if (packageId == undefined) {
+            packageId = this.getPackageID();
         }
 
         tx.moveCall({
@@ -1555,7 +1555,7 @@ export class OnChainCalls {
     Note that this function will only work on Pyth fake contract and can only be used for testing
     */
 
-    public createPythObjectOnTest(signer?: RawSigner){
+    public createPythObjectOnTest(signer?: RawSigner) {
         const caller = signer || this.signer;
 
         const callArgs = [];
@@ -1566,11 +1566,11 @@ export class OnChainCalls {
             "create_price_obj",
             callArgs,
             "price_info",
-        );    
+        );
     }
 
     //ONLY FOR TEST , this function calles FAKE pyth contract to set oracle price for testing
-    public setPythObjectPriceOnTest(price: string, confidence: string,signer?: RawSigner){
+    public setPythObjectPriceOnTest(price: string, confidence: string, signer?: RawSigner) {
         const caller = signer || this.signer;
 
         const callArgs = [];
@@ -1586,12 +1586,12 @@ export class OnChainCalls {
             "price_info",
             undefined,
             this.getPythPackageId()
-        );     
+        );
     }
 
-    public getPythPackageId(){
+    public getPythPackageId() {
         return this.deployment["objects"]["packagePyth"].id as string;
-        
+
     }
 
     // ===================================== //

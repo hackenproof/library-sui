@@ -97,8 +97,8 @@ export async function getGenesisMap(
             objDetails?.owner == OBJECT_OWNERSHIP_STATUS.IMMUTABLE
                 ? OBJECT_OWNERSHIP_STATUS.IMMUTABLE
                 : Object.keys(objDetails?.owner as any).indexOf("Shared") >= 0
-                ? OBJECT_OWNERSHIP_STATUS.SHARED
-                : OBJECT_OWNERSHIP_STATUS.OWNED;
+                    ? OBJECT_OWNERSHIP_STATUS.SHARED
+                    : OBJECT_OWNERSHIP_STATUS.OWNED;
 
         // get data type
         let dataType = "package";
