@@ -1179,13 +1179,14 @@ export class OnChainCalls {
 
     public async withdrawAllMarginFromBank(
         signer?: RawSigner,
-        gasBudget?: number
+        gasBudget?: number,
+        bankID?: string
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
         const callArgs = [];
 
-        callArgs.push(this.getBankID());
+        callArgs.push(bankID || this.getBankID());
         callArgs.push(await caller.getAddress());
 
         return this.signAndCall(
@@ -1451,10 +1452,10 @@ export class OnChainCalls {
         }
     }
 
-    public async getUserBankBalance(user?: string): Promise<BigNumber> {
+    public async getUserBankBalance(user?: string, bankID?: string): Promise<BigNumber> {
         try {
             const userBalance = await this.signer.provider.getDynamicFieldObject({
-                parentId: this.getBankTableID(),
+                parentId: bankID || this.getBankTableID(),
                 name: {
                     type: "address",
                     value: user || (await this.signer.getAddress())
