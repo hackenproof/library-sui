@@ -166,6 +166,10 @@ export class OnChainCalls {
         // time stamp in ms
         callArgs.push(args.tradingStartTime || Date.now());
 
+
+        //Price Info Feed id converted from Hex String to just string
+        callArgs.push(args.priceInfoFeedId);
+
         const caller = signer || this.signer;
 
         return this.signAndCall(
@@ -947,7 +951,7 @@ export class OnChainCalls {
         callArgs.push(args.updateOPCapID || this.getPriceOracleOperatorCap());
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.price);
-
+        
         return this.signAndCall(
             caller,
             "set_oracle_price",
@@ -1348,6 +1352,10 @@ export class OnChainCalls {
         if (gasBudget) tx.setGasBudget(gasBudget);
 
         const params = callArgs.map(v => tx.pure(v));
+        
+        if (packageId==undefined){
+            packageId=this.getPackageID();
+        }
 
         if (packageId == undefined) {
             packageId = this.getPackageID();

@@ -49,6 +49,8 @@ export interface MarketDetails {
     feePool?: string;
     // time at which trading will start on perpetual
     tradingStartTime?: number;
+
+    priceInfoFeedId?: string;
 }
 
 export interface PerpCreationMarketDetails extends MarketDetails {
