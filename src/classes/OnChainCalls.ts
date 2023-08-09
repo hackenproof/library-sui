@@ -719,7 +719,8 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: RawSigner,
+        market="ETH-PERP"
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -734,6 +735,9 @@ export class OnChainCalls {
         callArgs.push(args.quantity);
         callArgs.push(args.leverage);
         callArgs.push(args.allOrNothing == true);
+
+        callArgs.push(this.getPriceOracleObjectId(market));
+
 
         return this.signAndCall(
             caller,
@@ -788,7 +792,8 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: RawSigner,
+        market="ETH-PERP"
     ) {
         const caller = signer || this.signer;
 
@@ -799,6 +804,9 @@ export class OnChainCalls {
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(args.account || (await caller.getAddress()));
         callArgs.push(toBigNumberStr(args.amount));
+        
+        callArgs.push(this.getPriceOracleObjectId(market));
+
 
         return this.signAndCall(
             caller,
@@ -846,7 +854,8 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: RawSigner,
+        market="ETH-PERP"
     ) {
         const caller = signer || this.signer;
 
@@ -857,6 +866,9 @@ export class OnChainCalls {
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(args.account || (await caller.getAddress()));
         callArgs.push(toBigNumberStr(args.leverage));
+
+        callArgs.push(this.getPriceOracleObjectId(market));
+
 
         return this.signAndCall(
             caller,
