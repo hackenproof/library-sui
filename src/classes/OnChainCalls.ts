@@ -1357,10 +1357,6 @@ export class OnChainCalls {
             packageId=this.getPackageID();
         }
 
-        if (packageId == undefined) {
-            packageId = this.getPackageID();
-        }
-
         tx.moveCall({
             target: `${packageId}::${moduleName}::${method}`,
             arguments: params
@@ -1579,7 +1575,7 @@ export class OnChainCalls {
     }
 
     //ONLY FOR TEST , this function calles FAKE pyth contract to set oracle price for testing
-    public setPythObjectPriceOnTest(price: string, confidence: string, signer?: RawSigner) {
+    public setPythObjectPriceOnTest(price: string, confidence: string, priceInfoFeedId: string, pythPackageId: string, signer?: RawSigner) {
         const caller = signer || this.signer;
 
         const callArgs = [];
@@ -1587,6 +1583,7 @@ export class OnChainCalls {
         callArgs.push(SUI_CLOCK_OBJECT_ID);
         callArgs.push(price);
         callArgs.push(confidence);
+        callArgs.push(priceInfoFeedId);
 
         return this.signAndCall(
             caller,
@@ -1594,14 +1591,10 @@ export class OnChainCalls {
             callArgs,
             "price_info",
             undefined,
-            this.getPythPackageId()
+            pythPackageId
         );
     }
 
-    public getPythPackageId() {
-        return this.deployment["objects"]["packagePyth"].id as string;
-
-    }
 
     // ===================================== //
     //          HELPER METHODS
