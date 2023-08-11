@@ -169,7 +169,7 @@ export class OnChainCalls {
 
 
         //Price Info Feed id converted from Hex String to just string
-        callArgs.push(args.priceInfoFeedId);
+        callArgs.push(hexToString(args.priceInfoFeedId));
 
         const caller = signer || this.signer;
 
