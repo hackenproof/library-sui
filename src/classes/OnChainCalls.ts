@@ -18,6 +18,7 @@ import {
     bigNumber,
     encodeOrderFlags,
     hexToBuffer,
+    hexToString,
     toBigNumber,
     toBigNumberStr,
     usdcToBaseNumber
@@ -1357,10 +1358,6 @@ export class OnChainCalls {
             packageId=this.getPackageID();
         }
 
-        if (packageId == undefined) {
-            packageId = this.getPackageID();
-        }
-
         tx.moveCall({
             target: `${packageId}::${moduleName}::${method}`,
             arguments: params
@@ -1578,15 +1575,20 @@ export class OnChainCalls {
         );
     }
 
-    //ONLY FOR TEST , this function calles FAKE pyth contract to set oracle price for testing
-    public setPythObjectPriceOnTest(price: string, confidence: string, signer?: RawSigner) {
+
+    /*
+    @dev updates oracle price on pyth contract.
+    Note that this function will only work on our own deployed Fake Pyth contract
+    */
+    public setOraclePrice(price: string, confidence: string, priceInfoFeedId: string, pythPackageId: string, signer?: RawSigner, market="ETH-PERP") {
         const caller = signer || this.signer;
 
         const callArgs = [];
-        callArgs.push(this.getPriceOracleObjectId());
+        callArgs.push(this.getPriceOracleObjectId(market));
         callArgs.push(SUI_CLOCK_OBJECT_ID);
         callArgs.push(price);
         callArgs.push(confidence);
+        callArgs.push(hexToString(priceInfoFeedId));
 
         return this.signAndCall(
             caller,
@@ -1594,14 +1596,10 @@ export class OnChainCalls {
             callArgs,
             "price_info",
             undefined,
-            this.getPythPackageId()
+            pythPackageId
         );
     }
 
-    public getPythPackageId() {
-        return this.deployment["objects"]["packagePyth"].id as string;
-
-    }
 
     // ===================================== //
     //          HELPER METHODS
