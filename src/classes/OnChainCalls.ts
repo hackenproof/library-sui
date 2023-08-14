@@ -659,9 +659,10 @@ export class OnChainCalls {
             bankID?: string;
             subAccountsMapID?: string;
             gasBudget?: number;
+            market?: string
         },
         signer?: RawSigner,
-        market = "ETH-PERP"
+
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -700,15 +701,15 @@ export class OnChainCalls {
             args.fillQuantity
                 ? args.fillQuantity.toFixed(0)
                 : args.makerOrder.quantity.lte(args.takerOrder.quantity)
-                ? args.makerOrder.quantity.toFixed(0)
-                : args.takerOrder.quantity.toFixed(0)
+                    ? args.makerOrder.quantity.toFixed(0)
+                    : args.takerOrder.quantity.toFixed(0)
         );
 
         callArgs.push(
             args.fillPrice ? args.fillPrice.toFixed(0) : args.makerOrder.price.toFixed(0)
         );
 
-        callArgs.push(this.getPriceOracleObjectId(market));
+        callArgs.push(this.getPriceOracleObjectId(args.market));
         return this.signAndCall(caller, "trade", callArgs, "exchange", args.gasBudget);
     }
 
