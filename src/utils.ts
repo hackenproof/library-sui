@@ -2,32 +2,20 @@ import {
     RawSigner,
     Keypair,
     JsonRpcProvider,
-    getSuiObjectData,
-    SuiTransactionBlockResponse,
-    OwnedObjectRef,
     Secp256k1Keypair,
     SignatureScheme,
     Ed25519Keypair,
     Connection
 } from "@mysten/sui.js";
-import { OBJECT_OWNERSHIP_STATUS, TIME_IN_FORCE } from "../src/enums";
-import {
-    DeploymentData,
-    DeploymentObjectMap,
-    DeploymentObjects,
-    MarketDeploymentData,
-    StoredOrder
-} from "../src/interfaces";
+import { TIME_IN_FORCE } from "../src/enums";
+import { StoredOrder } from "../src/interfaces";
 import { toBigNumber, bigNumber } from "./library";
 import { Order } from "../src/interfaces";
 import { DEFAULT } from "./defaults";
 import { config } from "dotenv";
-import { OnChainCalls, Transaction } from "./classes";
 import { network } from "./DeploymentConfig";
-import { MarketDetails } from "./interfaces/market";
 import fs from "fs";
 config({ path: ".env" });
-
 
 export function writeFile(filePath: string, jsonData: any) {
     fs.writeFileSync(filePath, JSON.stringify(jsonData));
@@ -64,158 +52,12 @@ export function getSignerFromKeyPair(
     return new RawSigner(keypair, provider);
 }
 
-export function getSignerFromSeed(seed: string, provider: JsonRpcProvider): RawSigner {
-    return getSignerFromKeyPair(getKeyPairFromSeed(seed), provider);
-}
-
-export async function getGenesisMap(
+export function getSignerFromSeed(
+    seed: string,
     provider: JsonRpcProvider,
-    txResponse: SuiTransactionBlockResponse
-): Promise<DeploymentObjectMap> {
-    const map: DeploymentObjectMap = {};
-
-    const createdObjects = (txResponse as any).effects.created as OwnedObjectRef[];
-
-    // iterate over each object
-    for (const itr in createdObjects) {
-        const obj = createdObjects[itr];
-
-        // get object id
-        const id = obj.reference.objectId;
-
-        const suiObjectResponse = await provider.getObject({
-            id: obj.reference.objectId,
-            options: { showType: true, showOwner: true, showContent: true }
-        });
-
-        const objDetails = getSuiObjectData(suiObjectResponse);
-
-        // get object type
-        const objectType = objDetails?.type as string;
-        // get object owner
-        const owner =
-            objDetails?.owner == OBJECT_OWNERSHIP_STATUS.IMMUTABLE
-                ? OBJECT_OWNERSHIP_STATUS.IMMUTABLE
-                : Object.keys(objDetails?.owner as any).indexOf("Shared") >= 0
-                    ? OBJECT_OWNERSHIP_STATUS.SHARED
-                    : OBJECT_OWNERSHIP_STATUS.OWNED;
-
-        // get data type
-        let dataType = "package";
-
-        if (objectType.indexOf("TreasuryCap") > 0) {
-            dataType = "TreasuryCap";
-        } else if (objectType.indexOf("TUSDC") > 0) {
-            dataType = "Currency";
-        } else if (objectType.lastIndexOf("::") > 0) {
-            dataType = objectType.slice(objectType.lastIndexOf("::") + 2);
-        }
-
-        if (dataType.endsWith(">") && dataType.indexOf("<") == -1) {
-            dataType = dataType.slice(0, dataType.length - 1);
-        }
-        map[dataType] = {
-            id,
-            owner,
-            dataType: dataType
-        };
-    }
-
-    // if the test currency was deployed, update its data type
-    if (map["Currency"]) {
-        map["Currency"].dataType = map["package"].id + "::tusdc::TUSDC";
-    }
-
-    return map;
-}
-
-export async function createMarket(
-    deployment: DeploymentData,
-    deployer: RawSigner,
-    provider: JsonRpcProvider,
-    marketConfig?: MarketDetails,
-    priceInfoObjId?: string
-): Promise<DeploymentObjectMap> {
-    const onChain = new OnChainCalls(deployer, deployment);
-    const txResult = await onChain.createPerpetual({ ...marketConfig });
-    const error = Transaction.getError(txResult);
-    if (error) {
-        console.error(`Error while deploying market: ${error}`);
-        process.exit(1);
-    }
-
-    const map = await getGenesisMap(provider, txResult);
-
-    // getting positions table id
-    const perpDetails = await provider.getObject({
-        id: map["Perpetual"]["id"],
-        options: {
-            showContent: true
-        }
-    });
-
-    /*
-    For getting oracle price we need priceInfoObjId, 
-    we decided to keep the priceInfoObjId and its details in deployment.json file
-    When calling from bluefin_foundation when building contracts we give priceInfoObjId
-    whicn is then saved in deployment.json file.
-    */
-
-    const priceInfoDetails = await provider.getObject({
-        id: priceInfoObjId,
-        options: {
-            showContent: true
-        }
-    });
-
-    map["PositionsTable"] = {
-        owner: OBJECT_OWNERSHIP_STATUS.SHARED,
-        id: (perpDetails.data as any).content.fields.positions.fields.id.id,
-        dataType: (perpDetails.data as any).content.fields.positions.type
-    };
-
-    map["PriceOracle"] = {
-        owner: OBJECT_OWNERSHIP_STATUS.SHARED,
-        id: priceInfoObjId,
-        dataType: (priceInfoDetails.data as any).content.fields.price_info.type
-    };
-
-    return map;
-}
-
-export async function getBankTable(
-    provider: JsonRpcProvider,
-    objects: DeploymentObjectMap
-): Promise<DeploymentObjects> {
-    // get bank details
-    const bankDetails = await provider.getObject({
-        id: objects["Bank"]["id"],
-        options: {
-            showContent: true
-        }
-    });
-
-    return {
-        owner: OBJECT_OWNERSHIP_STATUS.SHARED,
-        id: (bankDetails.data as any).content.fields.accounts.fields.id.id,
-        dataType: (bankDetails.data as any).content.fields.accounts.type
-    };
-}
-
-export function getPrivateKey(keypair: Keypair) {
-    return (keypair as any).keypair.secretKey;
-}
-
-export function packDeploymentData(
-    deployer: string,
-    objects: DeploymentObjectMap,
-    markets?: MarketDeploymentData
-): DeploymentData {
-    return {
-        deployer,
-        objects,
-        markets: markets || ({} as any)
-    };
+    scheme: SignatureScheme = "Secp256k1"
+): RawSigner {
+    return getSignerFromKeyPair(getKeyPairFromSeed(seed, scheme), provider);
 }
 
 export function createOrder(params?: {

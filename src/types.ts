@@ -7,7 +7,9 @@ import {
     Keypair,
     RawSigner,
     SuiTransactionBlockResponse,
-    TransactionBlock
+    TransactionBlock,
+    OwnedObjectRef,
+    getSuiObjectData
 } from "@mysten/sui.js";
 
 import { Socket } from "socket.io-client";
@@ -65,5 +67,12 @@ export {
     RawSigner,
     BigNumber,
     SuiTransactionBlockResponse,
-    TransactionBlock
+    TransactionBlock,
+    OwnedObjectRef,
+    getSuiObjectData
+};
+
+export type SigPK = {
+    signature: string;
+    publicKey: string;
 };

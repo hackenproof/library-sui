@@ -1,42 +1,153 @@
-import { Keypair, Secp256k1PublicKey } from "@mysten/sui.js";
+import {
+    bcs,
+    fromSerializedSignature,
+    IntentScope,
+    Keypair,
+    messageWithIntent
+} from "@mysten/sui.js";
 import { Order, SignedOrder } from "../interfaces/order";
-import { bnToHex, encodeOrderFlags, hexToBuffer } from "../library";
-import * as secp from "@noble/secp256k1";
+import { base64ToUint8, bnToHex, encodeOrderFlags, hexToBuffer } from "../library";
 import { sha256 } from "@noble/hashes/sha256";
 import { secp256k1 } from "@noble/curves/secp256k1";
+import { ed25519 } from "@noble/curves/ed25519";
+import { WalletContextState } from "@suiet/wallet-kit";
+import { blake2b } from "@noble/hashes/blake2b";
+import { SigPK } from "../types";
+import { SIGNER_TYPES } from "../enums";
 
 export class OrderSigner {
     constructor(private keypair: Keypair) {}
 
-    public getSignedOrder(order: Order): SignedOrder {
-        const typedSignature = this.signOrder(order);
+    public getSignedOrder(order: Order, keyPair?: Keypair): SignedOrder {
+        const typedSignature = this.signOrder(order, keyPair);
         return {
             ...order,
             typedSignature
         };
     }
 
-    private signOrderOverride(data: Uint8Array): [Uint8Array, number] {
-        const msgHash = sha256(data);
-        const sig = secp256k1.sign(msgHash, (this as any).keypair.secretKey, {
-            lowS: true
-        });
+    signOrder(order: Order, keyPair?: Keypair): string {
+        const signer = keyPair || this.keypair;
 
-        return [sig.toCompactRawBytes(), sig.recovery || 0];
+        let signature: string;
+
+        // serialize order
+        const msgData = new TextEncoder().encode(OrderSigner.getSerializedOrder(order));
+        // take sha256 hash of order
+        const msgHash = sha256(msgData);
+
+        const keyScheme = signer.getKeyScheme();
+        if (keyScheme == "Secp256k1") {
+            // sign the raw data
+            signature =
+                Buffer.from(signer.signData(msgData)).toString("hex") +
+                SIGNER_TYPES.KP_SECP256;
+        } else if (keyScheme == "ED25519") {
+            // in case of ed25519 we sign the hashed msg
+            signature =
+                Buffer.from(signer.signData(msgHash)).toString("hex") +
+                SIGNER_TYPES.KP_ED25519;
+        } else {
+            throw "Invalid wallet type";
+        }
+
+        return signature;
     }
 
-    signOrder(order: Order, keypair?: Keypair): string {
-        const signer = keypair || this.keypair;
+    /**
+     * Signs the order using the provided wallet context
+     * @param order order to be signed
+     * @param wallet wallet context
+     * @returns signature and public key
+     */
+    static async signOrderUsingWallet(
+        order: Order,
+        wallet: WalletContextState
+    ): Promise<SigPK> {
+        // serialize order
+        const msgData = new TextEncoder().encode(OrderSigner.getSerializedOrder(order));
 
-        const [sign, recovery] = this.signOrderOverride.call(
-            signer,
-            new TextEncoder().encode(OrderSigner.getSerializedOrder(order))
-        );
+        // take sha256 hash of order
+        const msgHash = sha256(msgData);
 
-        // appending 00 at the end of the signature to make it possible
-        // to recovere signer address. When verifying signature remove the leading `00`
-        // append 01 when using keccak
-        return Buffer.from(sign).toString("hex") + recovery.toString().padStart(2, "0");
+        // sign data
+        const sigOutput = await wallet.signMessage({ message: msgHash });
+
+        // segregate public key from signature
+        const sigPublicKey = fromSerializedSignature(sigOutput.signature);
+
+        // return signature in hex - appending 2 at the end so that when verifying off-chain and on-chain
+        // we know that this sig was generated using sui ui wallet
+        return {
+            signature:
+                Buffer.from(sigPublicKey.signature).toString("hex") +
+                SIGNER_TYPES.UI_ED25519,
+            publicKey: sigPublicKey.pubKey.toString()
+        };
+    }
+
+    /**
+     * Verifies if the given signature is correct or not using the raw order
+     * @param order the order used to create the signature
+     * @param signature the generated signature in hex string
+     * @param publicKey signer's public key in base64 str
+     * @returns True if the signature is valid
+     */
+    public static verifySignatureUsingOrder(
+        order: Order,
+        signature: string,
+        publicKey: string
+    ) {
+        const serializedOrder = OrderSigner.getSerializedOrder(order);
+        const encodedOrder = new TextEncoder().encode(serializedOrder);
+        const orderHash = sha256(encodedOrder);
+
+        // if last index of string is zero, the signature is generated using secp wallet
+        const char = signature.slice(-1);
+        if (char == "0") {
+            // remove last character/index from signture
+            signature = signature.slice(0, -1);
+            const sig_r_s = secp256k1.Signature.fromCompact(signature);
+            const sig_r_s_b1 = sig_r_s.addRecoveryBit(0x1);
+            const recovered_pk_1 = sig_r_s_b1
+                .recoverPublicKey(orderHash)
+                .toRawBytes(true)
+                .toString();
+
+            const sig_r_s_b0 = sig_r_s.addRecoveryBit(0x0);
+            const recovered_pk_0 = sig_r_s_b0
+                .recoverPublicKey(orderHash)
+                .toRawBytes(true)
+                .toString();
+
+            const pkBytes = base64ToUint8(publicKey);
+            return (
+                pkBytes.toString() === recovered_pk_1 ||
+                pkBytes.toString() === recovered_pk_0
+            );
+        }
+        // last index 1 implies ed25519 wallet
+        else if (char == "1") {
+            // remove last character/index from signture
+            signature = signature.slice(0, -1);
+            const pkBytes = base64ToUint8(publicKey);
+            return ed25519.verify(signature, orderHash, pkBytes);
+        }
+
+        // last index 1 implies ed25519 wallet
+        else if (char == "2") {
+            // remove last character/index from signture
+            signature = signature.slice(0, -1);
+            const pkBytes = base64ToUint8(publicKey);
+
+            const intentMsg = messageWithIntent(
+                IntentScope.PersonalMessage,
+                bcs.ser(["vector", "u8"], orderHash).toBytes()
+            );
+            const signedData = blake2b(intentMsg, { dkLen: 32 });
+
+            return ed25519.verify(signature, signedData, pkBytes);
+        }
     }
 
     public static getSerializedOrder(order: Order): string {
@@ -66,23 +177,8 @@ export class OrderSigner {
         return Buffer.from(hash).toString("hex");
     }
 
-    public static verifyUsingHash(signature: string, orderHash: string, address: string) {
-        const signatureWithR = hexToBuffer(signature);
-        if (signatureWithR.length == 65) {
-            const sig = signatureWithR.subarray(0, 64);
-            const rByte = signatureWithR[64];
-            const hash = hexToBuffer(orderHash);
-
-            const publicKey = secp.recoverPublicKey(hash, sig, rByte, true);
-
-            const secp256k1PK = new Secp256k1PublicKey(publicKey);
-
-            return secp256k1PK.toSuiAddress() === address;
-        }
-        return false;
-    }
-
-    public static verifyUsingOrder(signature: string, order: Order, address: string) {
-        return this.verifyUsingHash(signature, OrderSigner.getOrderHash(order), address);
+    public getPublicKeyStr(keypair?: Keypair) {
+        const signer = keypair || this.keypair;
+        return signer.getPublicKey().toString();
     }
 }

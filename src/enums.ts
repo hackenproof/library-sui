@@ -104,3 +104,9 @@ export enum ADJUST_MARGIN {
     Add = "Add",
     Remove = "Remove"
 }
+
+export enum SIGNER_TYPES {
+    KP_SECP256 = "0",
+    KP_ED25519 = "1",
+    UI_ED25519 = "2"
+}

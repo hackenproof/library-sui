@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import { Order, OrderFlags } from "./interfaces";
 import { BASE_DECIMALS, USDC_BASE_DECIMALS } from "./constants";
-import { SignedNumber, BigNumberable } from "./types";
+import { SignedNumber, BigNumberable, SigPK } from "./types";
 import _ from "lodash";
 
 const toBnBase = (base: number) => {
@@ -20,7 +20,11 @@ export function toBigNumberStr(val: BigNumberable, base: number = BASE_DECIMALS)
     return toBigNumber(val, base).toFixed(0);
 }
 
-export function bnToBaseStr(val: BigNumberable, decimals = USDC_BASE_DECIMALS, base = BASE_DECIMALS): string {
+export function bnToBaseStr(
+    val: BigNumberable,
+    decimals = USDC_BASE_DECIMALS,
+    base = BASE_DECIMALS
+): string {
     return bigNumber(val).shiftedBy(-base).toFixed(decimals);
 }
 
@@ -31,7 +35,11 @@ export function usdcToBaseNumber(
     return Number(new BigNumber(val).shiftedBy(-USDC_BASE_DECIMALS).toFixed(decimals));
 }
 
-export function toBaseNumber(val: BigNumberable, decimals = 3, base = BASE_DECIMALS): number {
+export function toBaseNumber(
+    val: BigNumberable,
+    decimals = 3,
+    base = BASE_DECIMALS
+): number {
     return Number(new BigNumber(val).shiftedBy(-base).toFixed(decimals));
 }
 
@@ -55,6 +63,14 @@ export function base64ToBuffer(data: string): Buffer {
 }
 export function base64ToHex(data: string): string {
     return Buffer.from(data, "base64").toString("hex");
+}
+
+export function base64ToUint8(data: string): Uint8Array {
+    return Uint8Array.from(atob(data), c => c.charCodeAt(0));
+}
+
+export function hexStrToUint8(data: string): Uint8Array {
+    return Uint8Array.from(data.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || []);
 }
 
 export function SignedNumberToBigNumber(number: SignedNumber) {
@@ -105,12 +121,12 @@ export function encodeOrderFlags(order: Order): number {
     return value;
 }
 
-export function hexToString(hex: any): string{
-    let str = '';
+export function hexToString(hex: any): string {
+    let str = "";
     for (let i = 0; i < hex.length; i += 2) {
-      const hexValue = hex.substr(i, 2);
-      const decimalValue = parseInt(hexValue, 16);
-      str += String.fromCharCode(decimalValue);
+        const hexValue = hex.substr(i, 2);
+        const decimalValue = parseInt(hexValue, 16);
+        str += String.fromCharCode(decimalValue);
     }
     return str;
 }
@@ -119,4 +135,17 @@ export const { isEmpty } = _;
 
 export function getValue(object: object, path: string, defaultValue: any) {
     return _.get(object, path, defaultValue);
+}
+
+
+/**
+ * Returns parsed { signature, publicKey} from a string containing signature followed by public key
+ * @param signature string containing sigature and public key
+ * @returns SigPK
+ */
+export function parseSigPK(signature:string): SigPK {
+    return {
+        signature: signature.slice(0, 129),
+        publicKey: signature.slice(129)
+    }
 }

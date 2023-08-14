@@ -15,7 +15,6 @@ export const network = {
 
 export const packageName = "bluefin_foundation";
 
-
 export const DeploymentConfigs: DeploymentConfig = {
     filePath: "./deployment.json", // Todo will create separate files for separate networks
     network: network,
@@ -69,7 +68,7 @@ export const DeploymentConfigs: DeploymentConfig = {
             insurancePool:
                 "0x90c55f2a388a0e31ebca93cbf87fdd08e9716be082ca8a3c479bb14bcb5e1b88",
             feePool: "0x05ada716962dec8788b53ddad34827ffe46acfe16bfe9d7d064838fcda285073",
-            tradingStartTime: processTradingStartTime(0, process.env.ENV)
+            tradingStartTime: processTradingStartTime(0, process.env.ENV || "DEV")
         },
         {
             symbol: "BTC-PERP",
@@ -119,7 +118,7 @@ export const DeploymentConfigs: DeploymentConfig = {
             insurancePool:
                 "0x90c55f2a388a0e31ebca93cbf87fdd08e9716be082ca8a3c479bb14bcb5e1b88",
             feePool: "0x05ada716962dec8788b53ddad34827ffe46acfe16bfe9d7d064838fcda285073",
-            tradingStartTime: processTradingStartTime(0, process.env.ENV)
+            tradingStartTime: processTradingStartTime(0, process.env.ENV || "DEV")
         }
     ]
 };

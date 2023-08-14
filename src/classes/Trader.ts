@@ -29,11 +29,16 @@ export class Trader {
         const makerSignature = orderSigner.signOrder(makerOrder, maker);
         const takerSignature = orderSigner.signOrder(takerOrder, taker);
 
+        const makerPublicKey = orderSigner.getPublicKeyStr(maker);
+        const takerPublicKey = orderSigner.getPublicKeyStr(taker);
+
         return {
             makerOrder,
             makerSignature,
+            makerPublicKey,
             takerOrder,
             takerSignature,
+            takerPublicKey,
             fillQuantity:
                 options?.quantity ||
                 BigNumber.min(makerOrder.quantity, takerOrder.quantity),

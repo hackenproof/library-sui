@@ -15,9 +15,10 @@ import {
     BankAccountDetails
 } from "../interfaces";
 import {
+    base64ToUint8,
     bigNumber,
     encodeOrderFlags,
-    hexToBuffer,
+    hexStrToUint8,
     hexToString,
     toBigNumber,
     toBigNumberStr,
@@ -36,7 +37,6 @@ export class OnChainCalls {
         this.deployment = _deployment;
         this.settlementCap = settlementCap;
     }
-
 
     public async setExchangeAdmin(
         args: {
@@ -166,7 +166,6 @@ export class OnChainCalls {
 
         // time stamp in ms
         callArgs.push(args.tradingStartTime || Date.now());
-
 
         //Price Info Feed id converted from Hex String to just string
         callArgs.push(args.priceInfoFeedId);
@@ -648,8 +647,10 @@ export class OnChainCalls {
         args: {
             makerOrder: Order;
             makerSignature: string;
+            makerPublicKey: string;
             takerOrder: Order;
             takerSignature: string;
+            takerPublicKey: string;
             settlementCapID?: string;
             fillPrice?: BigNumber;
             fillQuantity?: BigNumber;
@@ -682,7 +683,8 @@ export class OnChainCalls {
         callArgs.push(args.makerOrder.expiration.toFixed(0));
         callArgs.push(args.makerOrder.salt.toFixed(0));
         callArgs.push(args.makerOrder.maker);
-        callArgs.push(Array.from(hexToBuffer(args.makerSignature)));
+        callArgs.push(Array.from(hexStrToUint8(args.makerSignature)));
+        callArgs.push(Array.from(base64ToUint8(args.makerPublicKey)));
 
         callArgs.push(encodeOrderFlags(args.takerOrder));
         callArgs.push(args.takerOrder.price.toFixed(0));
@@ -691,14 +693,15 @@ export class OnChainCalls {
         callArgs.push(args.takerOrder.expiration.toFixed(0));
         callArgs.push(args.takerOrder.salt.toFixed(0));
         callArgs.push(args.takerOrder.maker);
-        callArgs.push(Array.from(hexToBuffer(args.takerSignature)));
+        callArgs.push(Array.from(hexStrToUint8(args.takerSignature)));
+        callArgs.push(Array.from(base64ToUint8(args.takerPublicKey)));
 
         callArgs.push(
             args.fillQuantity
                 ? args.fillQuantity.toFixed(0)
                 : args.makerOrder.quantity.lte(args.takerOrder.quantity)
-                    ? args.makerOrder.quantity.toFixed(0)
-                    : args.takerOrder.quantity.toFixed(0)
+                ? args.makerOrder.quantity.toFixed(0)
+                : args.takerOrder.quantity.toFixed(0)
         );
 
         callArgs.push(
@@ -872,6 +875,7 @@ export class OnChainCalls {
         args: {
             order: Order;
             signature: string;
+            publicKey: string;
             subAccountsMapID?: string;
             gasBudget?: number;
         },
@@ -892,7 +896,8 @@ export class OnChainCalls {
         callArgs.push(args.order.expiration.toFixed(0));
         callArgs.push(args.order.salt.toFixed(0));
         callArgs.push(args.order.maker);
-        callArgs.push(Array.from(hexToBuffer(args.signature)));
+        callArgs.push(Array.from(hexStrToUint8(args.signature)));
+        callArgs.push(Array.from(base64ToUint8(args.publicKey)));
 
         return this.signAndCall(
             caller,
@@ -941,7 +946,7 @@ export class OnChainCalls {
             perpID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner,
+        signer?: RawSigner
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -952,7 +957,7 @@ export class OnChainCalls {
         callArgs.push(args.updateOPCapID || this.getPriceOracleOperatorCap());
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.price);
-        
+
         return this.signAndCall(
             caller,
             "set_oracle_price",
@@ -1353,9 +1358,9 @@ export class OnChainCalls {
         if (gasBudget) tx.setGasBudget(gasBudget);
 
         const params = callArgs.map(v => tx.pure(v));
-        
-        if (packageId==undefined){
-            packageId=this.getPackageID();
+
+        if (packageId == undefined) {
+            packageId = this.getPackageID();
         }
 
         tx.moveCall({
@@ -1567,20 +1572,21 @@ export class OnChainCalls {
         const callArgs = [];
         callArgs.push(SUI_CLOCK_OBJECT_ID);
 
-        return this.signAndCall(
-            caller,
-            "create_price_obj",
-            callArgs,
-            "price_info",
-        );
+        return this.signAndCall(caller, "create_price_obj", callArgs, "price_info");
     }
-
 
     /*
     @dev updates oracle price on pyth contract.
     Note that this function will only work on our own deployed Fake Pyth contract
     */
-    public setOraclePrice(price: string, confidence: string, priceInfoFeedId: string, pythPackageId: string, signer?: RawSigner, market="ETH-PERP") {
+    public setOraclePrice(
+        price: string,
+        confidence: string,
+        priceInfoFeedId: string,
+        pythPackageId: string,
+        signer?: RawSigner,
+        market = "ETH-PERP"
+    ) {
         const caller = signer || this.signer;
 
         const callArgs = [];
@@ -1599,7 +1605,6 @@ export class OnChainCalls {
             pythPackageId
         );
     }
-
 
     // ===================================== //
     //          HELPER METHODS
