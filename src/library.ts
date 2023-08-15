@@ -137,15 +137,14 @@ export function getValue(object: object, path: string, defaultValue: any) {
     return _.get(object, path, defaultValue);
 }
 
-
 /**
  * Returns parsed { signature, publicKey} from a string containing signature followed by public key
  * @param signature string containing sigature and public key
  * @returns SigPK
  */
-export function parseSigPK(signature:string): SigPK {
+export function parseSigPK(signature: string): SigPK {
     return {
         signature: signature.slice(0, 129),
         publicKey: signature.slice(129)
-    }
+    };
 }

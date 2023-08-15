@@ -659,10 +659,9 @@ export class OnChainCalls {
             bankID?: string;
             subAccountsMapID?: string;
             gasBudget?: number;
-            market?: string
+            market?: string;
         },
-        signer?: RawSigner,
-
+        signer?: RawSigner
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -701,8 +700,8 @@ export class OnChainCalls {
             args.fillQuantity
                 ? args.fillQuantity.toFixed(0)
                 : args.makerOrder.quantity.lte(args.takerOrder.quantity)
-                    ? args.makerOrder.quantity.toFixed(0)
-                    : args.takerOrder.quantity.toFixed(0)
+                ? args.makerOrder.quantity.toFixed(0)
+                : args.takerOrder.quantity.toFixed(0)
         );
 
         callArgs.push(
@@ -723,6 +722,7 @@ export class OnChainCalls {
             allOrNothing?: boolean;
             subAccountsMapID?: string;
             gasBudget?: number;
+            market?: string;
         },
         signer?: RawSigner
     ): Promise<SuiTransactionBlockResponse> {
@@ -739,6 +739,8 @@ export class OnChainCalls {
         callArgs.push(args.quantity);
         callArgs.push(args.leverage);
         callArgs.push(args.allOrNothing == true);
+
+        callArgs.push(this.getPriceOracleObjectId(args.market));
 
         return this.signAndCall(
             caller,
@@ -759,6 +761,7 @@ export class OnChainCalls {
             deleveragingCapID?: string;
             safeID?: string;
             gasBudget?: number;
+            market?: string;
         },
         signer?: RawSigner
     ): Promise<SuiTransactionBlockResponse> {
@@ -775,6 +778,7 @@ export class OnChainCalls {
         callArgs.push(args.taker);
         callArgs.push(args.quantity);
         callArgs.push(args.allOrNothing == true);
+        callArgs.push(this.getPriceOracleObjectId(args.market));
 
         return this.signAndCall(
             caller,
@@ -791,6 +795,7 @@ export class OnChainCalls {
             account?: string;
             perpID?: string;
             subAccountsMapID?: string;
+            market?: string;
             gasBudget?: number;
         },
         signer?: RawSigner
@@ -804,6 +809,7 @@ export class OnChainCalls {
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(args.account || (await caller.getAddress()));
         callArgs.push(toBigNumberStr(args.amount));
+        callArgs.push(this.getPriceOracleObjectId(args.market));
 
         return this.signAndCall(
             caller,
@@ -820,6 +826,7 @@ export class OnChainCalls {
             account?: string;
             perpID?: string;
             subAccountsMapID?: string;
+            market?: string;
             gasBudget?: number;
         },
         signer?: RawSigner
@@ -833,6 +840,7 @@ export class OnChainCalls {
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(args.account || (await caller.getAddress()));
         callArgs.push(toBigNumberStr(args.amount));
+        callArgs.push(this.getPriceOracleObjectId(args.market));
 
         return this.signAndCall(
             caller,
@@ -849,6 +857,7 @@ export class OnChainCalls {
             account?: string;
             perpID?: string;
             subAccountsMapID?: string;
+            market?: string;
             gasBudget?: number;
         },
         signer?: RawSigner
@@ -862,6 +871,7 @@ export class OnChainCalls {
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(args.account || (await caller.getAddress()));
         callArgs.push(toBigNumberStr(args.leverage));
+        callArgs.push(this.getPriceOracleObjectId(args.market));
 
         return this.signAndCall(
             caller,
@@ -915,6 +925,7 @@ export class OnChainCalls {
             safeID?: string;
             updateFRCapID?: string;
             perpID?: string;
+            market?: string;
             gasBudget?: number;
         },
         signer?: RawSigner
@@ -929,68 +940,13 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.rate.absoluteValue().toString());
         callArgs.push(args.rate.isPositive());
+        callArgs.push(this.getPriceOracleObjectId(args.market));
 
         return this.signAndCall(
             caller,
             "set_funding_rate",
             callArgs,
             "perpetual",
-            args.gasBudget
-        );
-    }
-
-    public async updateOraclePrice(
-        args: {
-            price: string;
-            safeID?: string;
-            updateOPCapID?: string;
-            perpID?: string;
-            gasBudget?: number;
-        },
-        signer?: RawSigner
-    ): Promise<SuiTransactionBlockResponse> {
-        const caller = signer || this.signer;
-
-        const callArgs = [];
-
-        callArgs.push(SUI_CLOCK_OBJECT_ID);
-        callArgs.push(args.safeID || this.getSafeID());
-        callArgs.push(args.updateOPCapID || this.getPriceOracleOperatorCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
-        callArgs.push(args.price);
-
-        return this.signAndCall(
-            caller,
-            "set_oracle_price",
-            callArgs,
-            "perpetual",
-            args.gasBudget
-        );
-    }
-
-    public async setPriceOracleOperator(
-        args: {
-            operator: string;
-            adminID?: string;
-            safeID?: string;
-            gasBudget?: number;
-        },
-        signer?: RawSigner
-    ): Promise<SuiTransactionBlockResponse> {
-        const caller = signer || this.signer;
-
-        const callArgs = [];
-
-        callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.safeID || this.getSafeID());
-
-        callArgs.push(args.operator);
-
-        return this.signAndCall(
-            caller,
-            "set_price_oracle_operator",
-            callArgs,
-            "roles",
             args.gasBudget
         );
     }
@@ -1044,32 +1000,6 @@ export class OnChainCalls {
             "set_sub_account",
             callArgs,
             "roles",
-            args.gasBudget
-        );
-    }
-
-    public async updatePriceOracleMaxAllowedPriceDifference(
-        args: {
-            adminID?: string;
-            perpID?: string;
-            maxAllowedPriceDifference: string;
-            gasBudget?: number;
-        },
-        signer?: RawSigner
-    ): Promise<SuiTransactionBlockResponse> {
-        const caller = signer || this.signer;
-
-        const callArgs = [];
-
-        callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
-        callArgs.push(args.maxAllowedPriceDifference);
-
-        return this.signAndCall(
-            caller,
-            "set_oracle_price_max_allowed_diff",
-            callArgs,
-            "perpetual",
             args.gasBudget
         );
     }
@@ -1257,6 +1187,50 @@ export class OnChainCalls {
             callArgs,
             "exchange",
             args?.gasBudget
+        );
+    }
+
+    /*
+     * Note that this function will only work on Pyth fake contract
+     * and can only be used for testing
+     */
+    public async createOracleObjects(signer?: RawSigner) {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+        callArgs.push(SUI_CLOCK_OBJECT_ID);
+
+        return this.signAndCall(caller, "create_price_obj", callArgs, "price_info");
+    }
+
+    /*
+     * @dev updates oracle price on pyth contract.
+     * Note that this function will only work on our own deployed Fake Pyth contract
+     */
+    public async setOraclePrice(
+        price: string,
+        confidence: string,
+        priceInfoFeedId: string,
+        pythPackageId: string,
+        signer?: RawSigner,
+        market = "ETH-PERP"
+    ) {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+        callArgs.push(this.getPriceOracleObjectId(market));
+        callArgs.push(SUI_CLOCK_OBJECT_ID);
+        callArgs.push(price);
+        callArgs.push(confidence);
+        callArgs.push(hexToString(priceInfoFeedId));
+
+        return this.signAndCall(
+            caller,
+            "update_price_info_object_for_test",
+            callArgs,
+            "price_info",
+            undefined,
+            pythPackageId
         );
     }
 
@@ -1561,50 +1535,6 @@ export class OnChainCalls {
 
     getTreasuryCapID(): string {
         return this.deployment["objects"]["TreasuryCap"].id as string;
-    }
-
-    /*
-    Note that this function will only work on Pyth fake contract and can only be used for testing
-    */
-
-    public createPythObjectOnTest(signer?: RawSigner) {
-        const caller = signer || this.signer;
-
-        const callArgs = [];
-        callArgs.push(SUI_CLOCK_OBJECT_ID);
-
-        return this.signAndCall(caller, "create_price_obj", callArgs, "price_info");
-    }
-
-    /*
-    @dev updates oracle price on pyth contract.
-    Note that this function will only work on our own deployed Fake Pyth contract
-    */
-    public setOraclePrice(
-        price: string,
-        confidence: string,
-        priceInfoFeedId: string,
-        pythPackageId: string,
-        signer?: RawSigner,
-        market = "ETH-PERP"
-    ) {
-        const caller = signer || this.signer;
-
-        const callArgs = [];
-        callArgs.push(this.getPriceOracleObjectId(market));
-        callArgs.push(SUI_CLOCK_OBJECT_ID);
-        callArgs.push(price);
-        callArgs.push(confidence);
-        callArgs.push(hexToString(priceInfoFeedId));
-
-        return this.signAndCall(
-            caller,
-            "update_price_info_object_for_test",
-            callArgs,
-            "price_info",
-            undefined,
-            pythPackageId
-        );
     }
 
     // ===================================== //
