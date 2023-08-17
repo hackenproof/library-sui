@@ -1,7 +1,7 @@
 {
     "name": "@firefly-exchange/library-sui",
     "description": "Sui library housing helper methods, classes to interact with Bluefin protocol deployed on Sui",
-    "version": "0.1.40",
+    "version": "0.1.41",
     "main": "dist/index.js",
     "typings": "dist/index",
     "scripts": {

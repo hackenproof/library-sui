@@ -16,7 +16,7 @@ import { SigPK } from "../types";
 import { SIGNER_TYPES } from "../enums";
 
 export class OrderSigner {
-    constructor(private keypair: Keypair) { }
+    constructor(private keypair: Keypair) {}
 
     public getSignedOrder(order: Order, keyPair?: Keypair): SignedOrder {
         const typedSignature = this.signOrder(order, keyPair);
@@ -35,7 +35,7 @@ export class OrderSigner {
         const msgData = new TextEncoder().encode(OrderSigner.getSerializedOrder(order));
         // take sha256 hash of order
         const msgHash = sha256(msgData);
-        const publicKey = signer.getPublicKey().toString()
+        const publicKey = signer.getPublicKey().toString();
         const keyScheme = signer.getKeyScheme();
         if (keyScheme == "Secp256k1") {
             // sign the raw data
@@ -86,10 +86,12 @@ export class OrderSigner {
         };
     }
 
-    public signPayload(payload: unknown, keyPair?: Keypair): string {
+    public signPayload(payload: unknown, keyPair?: Keypair): SigPK {
         const signer = keyPair || this.keypair;
 
         const encodedData = OrderSigner.encodePayload(payload);
+
+        const publicKey = signer.getPublicKey().toString();
 
         let signature: string;
 
@@ -109,10 +111,10 @@ export class OrderSigner {
             throw "Invalid wallet type";
         }
 
-        return signature;
+        return { signature, publicKey };
     }
 
-    public async signPayloadUsingWallet(
+    public static async signPayloadUsingWallet(
         payload: unknown,
         wallet: WalletContextState
     ): Promise<SigPK> {

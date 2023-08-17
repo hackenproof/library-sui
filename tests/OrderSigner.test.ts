@@ -105,19 +105,17 @@ describe("Order Signer", () => {
         const payload = { onboarding: "https://trade-sui.bluefin.exchange" };
 
         const signature = orderSigner.signPayload(payload, secpKP);
-        const publicKey = secpKP.getPublicKey().toString();
 
-        expect(OrderSigner.verifySignature(payload, signature, publicKey)).to.be.equal(
-            true
-        );
+        expect(
+            OrderSigner.verifySignature(payload, signature.signature, signature.publicKey)
+        ).to.be.equal(true);
     });
 
     it("should verify payload signature generated using ED wallet", async () => {
         const payload = { onboarding: "https://trade-sui.bluefin.exchange" };
         const signature = orderSigner.signPayload(payload, edKP);
-        const publicKey = edKP.getPublicKey().toString();
-        expect(OrderSigner.verifySignature(payload, signature, publicKey)).to.be.equal(
-            true
-        );
+        expect(
+            OrderSigner.verifySignature(payload, signature.signature, signature.publicKey)
+        ).to.be.equal(true);
     });
 });
