@@ -26,8 +26,8 @@ export class Trader {
             postOnly: false
         };
 
-        const makerSignature = orderSigner.signOrder(makerOrder, maker);
-        const takerSignature = orderSigner.signOrder(takerOrder, taker);
+        const makerSignature = orderSigner.signOrder(makerOrder, maker).signature;
+        const takerSignature = orderSigner.signOrder(takerOrder, taker).signature;
 
         const makerPublicKey = orderSigner.getPublicKeyStr(maker);
         const takerPublicKey = orderSigner.getPublicKeyStr(taker);

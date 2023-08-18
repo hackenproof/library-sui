@@ -14,6 +14,7 @@ import { WalletContextState } from "@suiet/wallet-kit";
 import { blake2b } from "@noble/hashes/blake2b";
 import { SigPK } from "../types";
 import { SIGNER_TYPES } from "../enums";
+import { sign } from "@noble/secp256k1";
 
 export class OrderSigner {
     constructor(private keypair: Keypair) {}
@@ -161,8 +162,12 @@ export class OrderSigner {
 
         if (char == SIGNER_TYPES.KP_SECP256) {
             return this.verifySECP(signature, sha256(encodedData), pkBytes);
-        } else if (char == SIGNER_TYPES.KP_ED25519 || char == SIGNER_TYPES.UI_ED25519) {
+        } else if (char == SIGNER_TYPES.UI_ED25519) {
             return ed25519.verify(signature, encodedData, pkBytes);
+        }else if (char==SIGNER_TYPES.KP_ED25519){
+            const encodedMessageKp = new TextEncoder().encode(JSON.stringify(payload));
+            const messageHash = sha256(encodedMessageKp)
+            return ed25519.verify(signature,messageHash, pkBytes );
         }
 
         return true;
