@@ -26,19 +26,17 @@ export class Trader {
             postOnly: false
         };
 
-        const makerSignature = orderSigner.signOrder(makerOrder, maker);
-        const takerSignature = orderSigner.signOrder(takerOrder, taker);
+        const makerSigPK = orderSigner.signOrder(makerOrder, maker);
+        const takerSigPK = orderSigner.signOrder(takerOrder, taker);
 
-        const makerPublicKey = orderSigner.getPublicKeyStr(maker);
-        const takerPublicKey = orderSigner.getPublicKeyStr(taker);
 
         return {
             makerOrder,
-            makerSignature,
-            makerPublicKey,
+            makerSignature: makerSigPK.signature,
+            makerPublicKey: makerSigPK.publicKey,
             takerOrder,
-            takerSignature,
-            takerPublicKey,
+            takerSignature: takerSigPK.signature,
+            takerPublicKey: takerSigPK.publicKey,
             fillQuantity:
                 options?.quantity ||
                 BigNumber.min(makerOrder.quantity, takerOrder.quantity),

@@ -1207,22 +1207,24 @@ export class OnChainCalls {
      * @dev updates oracle price on pyth contract.
      * Note that this function will only work on our own deployed Fake Pyth contract
      */
-    public async setOraclePrice(
-        price: string,
-        confidence: string,
+    public async setOraclePrice(args:{
+        price: number,
+        confidence?: string,
         priceInfoFeedId: string,
         pythPackageId: string,
+        market?:string,
+        },
         signer?: RawSigner,
-        market = "ETH-PERP"
+
     ) {
         const caller = signer || this.signer;
 
         const callArgs = [];
-        callArgs.push(this.getPriceOracleObjectId(market));
+        callArgs.push(this.getPriceOracleObjectId(args.market || "ETH-PERP"));
         callArgs.push(SUI_CLOCK_OBJECT_ID);
-        callArgs.push(price);
-        callArgs.push(confidence);
-        callArgs.push(hexToString(priceInfoFeedId));
+        callArgs.push(args.price * 1e5);
+        callArgs.push(args.confidence || "10");
+        callArgs.push(hexToString(args.priceInfoFeedId));
 
         return this.signAndCall(
             caller,
@@ -1230,7 +1232,7 @@ export class OnChainCalls {
             callArgs,
             "price_info",
             undefined,
-            pythPackageId
+            args.pythPackageId
         );
     }
 

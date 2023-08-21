@@ -32,6 +32,24 @@ export class Transaction {
         }
     }
 
+    static getDryRunErrorCode(error: string): number {
+        const regex = /[0-9]+[)]/
+        const match = error.match(regex);
+        let code = "0"
+        if (match) {
+            code = match[0].replace(/\D/g, '');
+        }
+        return Number(code)
+    }
+
+
+   
+    static getDryRunError(error: string): string {
+        const code = Transaction.getDryRunErrorCode(error);
+        return ERROR_CODES[code];
+    }
+    
+
     static getEvents(tx: SuiTransactionBlockResponse, eventName?: string): Array<any> {
         let events = [];
 
@@ -107,7 +125,7 @@ export class Transaction {
         return objects;
     }
 
-    static getAccountPositionFromEvent(
+    static getAccountPosition(
         tx: SuiTransactionBlockResponse,
         address: string
     ): UserPositionExtended {
@@ -136,7 +154,7 @@ export class Transaction {
         }
     }
 
-    static getAccountBankBalanceFromEvent(
+    static getAccountBankBalance(
         tx: SuiTransactionBlockResponse,
         address: string
     ): BigNumber {
@@ -174,4 +192,7 @@ export class Transaction {
             return "";
         }
     }
+
+
+    
 }
