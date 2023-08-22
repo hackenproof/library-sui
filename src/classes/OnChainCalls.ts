@@ -1236,6 +1236,27 @@ export class OnChainCalls {
         );
     }
 
+    /**
+     * Returns price of oracle 
+     * @param market name of the market for which oracle price is to be fetched
+     * @returns oracle price in base number
+     */
+    public async getOraclePrice(market?: string): Promise<number>{
+        const id = this.getPriceOracleObjectId(market);
+        const obj = await this.getOnChainObject(id);
+        const fields = (obj.data?.content as any)
+        .fields
+            .price_info
+            .fields
+                .price_feed
+                .fields
+                    .price
+                    .fields;
+
+        return Number(fields.price.fields.magnitude) / Math.pow(10, Number(fields.expo.fields.magnitude))
+
+    }
+
     public async mintUSDC(
         args?: {
             amount?: string;
@@ -1257,7 +1278,7 @@ export class OnChainCalls {
 
         return this.signAndCall(caller, "mint", callArgs, "tusdc");
     }
-
+    
     public async getUSDCCoins(
         args?: {
             address?: string;

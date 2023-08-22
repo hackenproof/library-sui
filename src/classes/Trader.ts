@@ -1,6 +1,6 @@
 import { JsonRpcProvider, Keypair } from "@mysten/sui.js";
 import BigNumber from "bignumber.js";
-import { Order } from "../interfaces";
+import { Order, TradeData } from "../interfaces";
 import { getSignerFromKeyPair } from "../utils";
 import { OrderSigner } from "./OrderSigner";
 
@@ -16,7 +16,7 @@ export class Trader {
             quantity?: BigNumber;
             price?: BigNumber;
         }
-    ) {
+    ):Promise<TradeData> {
         const takerAddress = await getSignerFromKeyPair(taker, provider).getAddress();
 
         const takerOrder = options?.takerOrder || {
@@ -41,6 +41,6 @@ export class Trader {
                 options?.quantity ||
                 BigNumber.min(makerOrder.quantity, takerOrder.quantity),
             fillPrice: options?.price || makerOrder.price
-        };
+        } as TradeData;
     }
 }

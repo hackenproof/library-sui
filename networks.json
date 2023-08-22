@@ -14,5 +14,9 @@
     "testnet": {
         "rpc": "https://fullnode.testnet.sui.io:443",
         "faucet": "https://faucet.testnet.sui.io/gas"
+    },
+    "mainnet": {
+        "rpc": "https://fullnode.mainnet.sui.io:443",
+        "faucet": "https://faucet.mainnet.sui.io/gas"
     }
 }
