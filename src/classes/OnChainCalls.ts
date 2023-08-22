@@ -1153,7 +1153,6 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(SUI_CLOCK_OBJECT_ID);
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.price);
 
