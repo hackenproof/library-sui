@@ -1207,15 +1207,15 @@ export class OnChainCalls {
      * @dev updates oracle price on pyth contract.
      * Note that this function will only work on our own deployed Fake Pyth contract
      */
-    public async setOraclePrice(args:{
-        price: number,
-        confidence?: string,
-        priceInfoFeedId: string,
-        pythPackageId: string,
-        market?:string,
+    public async setOraclePrice(
+        args: {
+            price: number;
+            confidence?: string;
+            priceInfoFeedId: string;
+            pythPackageId: string;
+            market?: string;
         },
-        signer?: RawSigner,
-
+        signer?: RawSigner
     ) {
         const caller = signer || this.signer;
 
@@ -1237,24 +1237,20 @@ export class OnChainCalls {
     }
 
     /**
-     * Returns price of oracle 
+     * Returns price of oracle
      * @param market name of the market for which oracle price is to be fetched
      * @returns oracle price in base number
      */
-    public async getOraclePrice(market?: string): Promise<number>{
+    public async getOraclePrice(market?: string): Promise<number> {
         const id = this.getPriceOracleObjectId(market);
         const obj = await this.getOnChainObject(id);
-        const fields = (obj.data?.content as any)
-        .fields
-            .price_info
-            .fields
-                .price_feed
-                .fields
-                    .price
-                    .fields;
+        const fields = (obj.data?.content as any).fields.price_info.fields.price_feed
+            .fields.price.fields;
 
-        return Number(fields.price.fields.magnitude) / Math.pow(10, Number(fields.expo.fields.magnitude))
-
+        return (
+            Number(fields.price.fields.magnitude) /
+            Math.pow(10, Number(fields.expo.fields.magnitude))
+        );
     }
 
     public async mintUSDC(
@@ -1278,7 +1274,7 @@ export class OnChainCalls {
 
         return this.signAndCall(caller, "mint", callArgs, "tusdc");
     }
-    
+
     public async getUSDCCoins(
         args?: {
             address?: string;

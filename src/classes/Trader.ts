@@ -16,7 +16,7 @@ export class Trader {
             quantity?: BigNumber;
             price?: BigNumber;
         }
-    ):Promise<TradeData> {
+    ): Promise<TradeData> {
         const takerAddress = await getSignerFromKeyPair(taker, provider).getAddress();
 
         const takerOrder = options?.takerOrder || {
@@ -28,7 +28,6 @@ export class Trader {
 
         const makerSigPK = orderSigner.signOrder(makerOrder, maker);
         const takerSigPK = orderSigner.signOrder(takerOrder, taker);
-
 
         return {
             makerOrder,

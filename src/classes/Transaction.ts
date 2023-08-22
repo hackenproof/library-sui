@@ -33,22 +33,19 @@ export class Transaction {
     }
 
     static getDryRunErrorCode(error: string): number {
-        const regex = /[0-9]+[)]/
+        const regex = /[0-9]+[)]/;
         const match = error.match(regex);
-        let code = "0"
+        let code = "0";
         if (match) {
-            code = match[0].replace(/\D/g, '');
+            code = match[0].replace(/\D/g, "");
         }
-        return Number(code)
+        return Number(code);
     }
 
-
-   
     static getDryRunError(error: string): string {
         const code = Transaction.getDryRunErrorCode(error);
         return ERROR_CODES[code];
     }
-    
 
     static getEvents(tx: SuiTransactionBlockResponse, eventName?: string): Array<any> {
         let events = [];
@@ -192,7 +189,4 @@ export class Transaction {
             return "";
         }
     }
-
-
-    
 }
