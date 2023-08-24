@@ -5,7 +5,7 @@ import { Network, DeploymentConfig } from "./interfaces";
 import { processTradingStartTime } from "./helpers";
 
 config({ path: ".env" });
-export const market = process.env.MARKET;
+export const market = process.env.MARKET || "ETH-PERP";
 
 export const network = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

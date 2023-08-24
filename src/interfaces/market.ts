@@ -49,8 +49,10 @@ export interface MarketDetails {
     feePool?: string;
     // time at which trading will start on perpetual
     tradingStartTime?: number;
-
-    priceInfoFeedId?: string;
+    // the starting oracle price to be set on the perp
+    oraclePrice?: string;
+    // owner of the perp
+    owner?: string;
 }
 
 export interface PerpCreationMarketDetails extends MarketDetails {

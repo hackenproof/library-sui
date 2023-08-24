@@ -116,11 +116,14 @@ export class OnChainCalls {
         signer?: RawSigner,
         gasBudget?: number
     ): Promise<SuiTransactionBlockResponse> {
+
+        const caller = signer || this.signer;
+
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
 
-        callArgs.push(this.getBankID());
+        // callArgs.push(this.getBankID());
 
         callArgs.push(args.symbol || "ETH-PERP");
 
@@ -168,9 +171,10 @@ export class OnChainCalls {
         callArgs.push(args.tradingStartTime || Date.now());
 
         //Price Info Feed id converted from Hex String to just string
-        callArgs.push(hexToString(args.priceInfoFeedId));
+        callArgs.push(args.oraclePrice || 0);
 
-        const caller = signer || this.signer;
+        // owner of the perpetual
+        callArgs.push(args.owner || await caller.getAddress())
 
         return this.signAndCall(
             caller,
@@ -654,6 +658,8 @@ export class OnChainCalls {
             settlementCapID?: string;
             fillPrice?: BigNumber;
             fillQuantity?: BigNumber;
+            currentTime?: number;
+            oraclePrice?: BigNumber;
             perpID?: string;
             safeID?: string;
             bankID?: string;
@@ -666,15 +672,14 @@ export class OnChainCalls {
         const caller = signer || this.signer;
 
         const callArgs = [];
-        callArgs.push(SUI_CLOCK_OBJECT_ID);
 
         callArgs.push(args.perpID || this.getPerpetualID());
-        callArgs.push(args.bankID || this.getBankID());
+        // callArgs.push(args.bankID || this.getBankID());
         callArgs.push(args.safeID || this.getSafeID());
-        callArgs.push(args.settlementCapID || this.settlementCap);
+        // callArgs.push(args.settlementCapID || this.settlementCap);
 
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
-        callArgs.push(this.getOrdersTableID());
+        // callArgs.push(this.getOrdersTableID());
 
         callArgs.push(encodeOrderFlags(args.makerOrder));
         callArgs.push(args.makerOrder.price.toFixed(0));
@@ -708,7 +713,10 @@ export class OnChainCalls {
             args.fillPrice ? args.fillPrice.toFixed(0) : args.makerOrder.price.toFixed(0)
         );
 
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+        callArgs.push(args.oraclePrice? args.oraclePrice.toFixed(0): args.makerOrder.price.toFixed(0));
+
+        callArgs.push(args.currentTime || Date.now());
+
         return this.signAndCall(caller, "trade", callArgs, "exchange", args.gasBudget);
     }
 
