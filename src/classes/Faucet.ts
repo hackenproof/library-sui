@@ -3,7 +3,8 @@ import { USDC_BASE_DECIMALS } from "../constants";
 import { toBigNumberStr } from "../library";
 import { OnChainCalls } from "./OnChainCalls";
 import { Transaction } from "./Transaction";
-
+import { address, Coin } from "../types";
+import { getCoinWithAmount } from "../helpers";
 export class Faucet {
     /**
      * Requests SUI token from faucet running on Sui Node
@@ -67,37 +68,56 @@ export class Faucet {
         amount?: number | string
     ) {
         const amt = Number(amount) || 10_000;
+        
         const ownerAddress = await onChain.signer.getAddress();
 
-        let coin = undefined;
-        // TODO figure out why `onChain.getUSDCCoins` calls returns no coin
-        // until then use while
-        while (coin == undefined) {
-            // get USDC balance of owner
-            const ownerBalance = await onChain.getUSDCBalance();
+        // get USDC balance of owner
+        const ownerBalance = await onChain.getUSDCBalance();
 
-            // mint coins for owner
-            if (amt > ownerBalance) {
-                await onChain.mintUSDC({
-                    amount: toBigNumberStr(1_000_000_000, USDC_BASE_DECIMALS)
-                });
-            }
-
-            // TODO: implement a method to get the coin with balance > amt
-            // assuming 0th index coin will have balance > amount
-            const usdcCoins = await onChain.getUSDCCoins({ address: ownerAddress });
-            coin = usdcCoins.data.pop();
+        // mint coins for owner
+        if (amt > ownerBalance) {
+            await Faucet.mintUSDC(onChain, 1_000_000_000);
         }
 
+        const  coins = await onChain.getUSDCCoins({ address: ownerAddress });
+
+        const coin = getCoinWithAmount(coins.data, amt);
+
         // transferring from owners usdc coin to receiver
-        const tx = await onChain.depositToBank({
-            coinID: coin.coinObjectId,
-            amount: toBigNumberStr(amt, USDC_BASE_DECIMALS),
-            accountAddress: address
+        const tx = await onChain.depositToExternalBank({
+            coinID: coin?.coinObjectId,
+            amount: amt,
+            accountAddress: address,
+            gasBudget: 5_000_000
         });
 
         const status = Transaction.getStatus(tx);
         const error = Transaction.getError(tx);
-        return { status, error };
+        const txHash = Transaction.getTxHash(tx);
+
+        return { status, error, txHash };
     }
+
+
+    static async mintUSDC(onChain: OnChainCalls, amount:number, dest?:address): Promise<Coin[]>{
+
+        const destination = dest || await onChain.signer.getAddress();
+    
+        let coins = { data: [] };
+        while (coins.data.length == 0) {
+            const tx = await onChain.mintUSDC({
+                amount: toBigNumberStr(amount, USDC_BASE_DECIMALS),
+                to: destination
+            });
+
+            if(Transaction.getStatus(tx) == "failure"){
+                throw("Error minting USDC");
+            }
+
+            coins = await onChain.getUSDCCoins({ address: destination });
+        }
+    
+        return coins.data as Coin[];
+    }
+
 }
