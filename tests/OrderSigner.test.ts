@@ -1,7 +1,7 @@
 import { fromSerializedSignature } from "@mysten/sui.js";
 import { getKeyPairFromSeed, OrderSigner } from "../src";
 import { SIGNER_TYPES } from "../src/enums";
-import { TEST_WALLETS } from "../src/helpers";
+import { TEST_WALLETS } from "../src/accounts";
 import { expect } from "./helpers";
 
 describe("Order Signer", () => {
