@@ -76,3 +76,14 @@ export type SigPK = {
     signature: string;
     publicKey: string;
 };
+
+
+
+export type Coin = {
+    coinObjectId: string;
+    coinType: string;
+    version: string;
+    balance: string;
+    previousTransaction: string;
+    digest: string;
+}
