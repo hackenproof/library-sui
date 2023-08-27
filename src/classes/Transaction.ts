@@ -189,4 +189,8 @@ export class Transaction {
             return "";
         }
     }
+
+    static getTxHash(tx:SuiTransactionBlockResponse): string{
+        return tx.digest;
+    }
 }
