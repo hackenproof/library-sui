@@ -4,7 +4,6 @@ import {
     SuiObjectResponse,
     SuiTransactionBlockResponse,
     TransactionBlock,
-    SUI_CLOCK_OBJECT_ID
 } from "@mysten/sui.js";
 import BigNumber from "bignumber.js";
 import { DEFAULT } from "../defaults";
@@ -19,13 +18,13 @@ import {
     bigNumber,
     encodeOrderFlags,
     hexStrToUint8,
-    hexToString,
     toBigNumber,
     toBigNumberStr,
     usdcToBaseNumber
 } from "../library";
 import { USDC_BASE_DECIMALS } from "../constants";
 import { BigNumberable } from "../types";
+import { randomString } from "../helpers";
 
 export class OnChainCalls {
     signer: SignerWithProvider | any;
@@ -122,8 +121,6 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-
-        // callArgs.push(this.getBankID());
 
         callArgs.push(args.symbol || "ETH-PERP");
 
@@ -674,13 +671,9 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.perpID || this.getPerpetualID());
-        // callArgs.push(args.bankID || this.getBankID());
+        callArgs.push(args.bankID || this.getInternalBankID());
         callArgs.push(args.safeID || this.getSafeID());
-        // callArgs.push(args.settlementCapID || this.settlementCap);
-
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
-        // callArgs.push(this.getOrdersTableID());
-
         callArgs.push(encodeOrderFlags(args.makerOrder));
         callArgs.push(args.makerOrder.price.toFixed(0));
         callArgs.push(args.makerOrder.quantity.toFixed(0));
@@ -731,15 +724,16 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             gasBudget?: number;
             market?: string;
+            currentTime?:number;
+            oraclePrice?: number;
         },
         signer?: RawSigner
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
         const callArgs = [];
-        callArgs.push(SUI_CLOCK_OBJECT_ID);
         callArgs.push(args.perpID || this.getPerpetualID());
-        callArgs.push(this.getBankID());
+        callArgs.push(this.getInternalBankID());
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
 
         callArgs.push(args.liquidatee);
@@ -748,7 +742,8 @@ export class OnChainCalls {
         callArgs.push(args.leverage);
         callArgs.push(args.allOrNothing == true);
 
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+        callArgs.push(args.currentTime || Date.now());
+        callArgs.push(args.oraclePrice ? toBigNumber(args.oraclePrice) : 0 );
 
         return this.signAndCall(
             caller,
@@ -770,23 +765,25 @@ export class OnChainCalls {
             safeID?: string;
             gasBudget?: number;
             market?: string;
+            currentTime?: number;
+            oraclePrice?: number;
         },
         signer?: RawSigner
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
         const callArgs = [];
-        callArgs.push(SUI_CLOCK_OBJECT_ID);
         callArgs.push(args.perpID || this.getPerpetualID());
-        callArgs.push(this.getBankID());
+        callArgs.push(this.getInternalBankID());
         callArgs.push(args.safeID || this.getSafeID());
-        callArgs.push(args.deleveragingCapID || this.getDeleveragingCapID());
 
         callArgs.push(args.maker);
         callArgs.push(args.taker);
         callArgs.push(args.quantity);
         callArgs.push(args.allOrNothing == true);
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+
+        callArgs.push(args.currentTime || Date.now());
+        callArgs.push(args.oraclePrice ? toBigNumber(args.oraclePrice) : 0 );
 
         return this.signAndCall(
             caller,
@@ -805,6 +802,8 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             market?: string;
             gasBudget?: number;
+            currentTime?: number;
+            oraclePrice?: number;
         },
         signer?: RawSigner
     ) {
@@ -812,12 +811,15 @@ export class OnChainCalls {
 
         const callArgs = [];
         callArgs.push(args.perpID || this.getPerpetualID());
-        callArgs.push(this.getBankID());
+        callArgs.push(this.getInternalBankID());
 
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(args.account || (await caller.getAddress()));
         callArgs.push(toBigNumberStr(args.amount));
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+        
+        callArgs.push(args.currentTime || Date.now());
+        callArgs.push(args.oraclePrice ? toBigNumber(args.oraclePrice) : 0 );
+
 
         return this.signAndCall(
             caller,
@@ -836,6 +838,8 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             market?: string;
             gasBudget?: number;
+            currentTime?: number;
+            oraclePrice?: number;
         },
         signer?: RawSigner
     ) {
@@ -844,11 +848,14 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.perpID || this.getPerpetualID());
-        callArgs.push(this.getBankID());
+        callArgs.push(this.getInternalBankID());
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(args.account || (await caller.getAddress()));
         callArgs.push(toBigNumberStr(args.amount));
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+
+        callArgs.push(args.currentTime || Date.now());
+        callArgs.push(args.oraclePrice ? toBigNumber(args.oraclePrice) : 0 );
+
 
         return this.signAndCall(
             caller,
@@ -867,6 +874,8 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             market?: string;
             gasBudget?: number;
+            currentTime?: number;
+            oraclePrice?: number;
         },
         signer?: RawSigner
     ) {
@@ -875,11 +884,13 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.perpID || this.getPerpetualID());
-        callArgs.push(this.getBankID());
+        callArgs.push(this.getInternalBankID());
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(args.account || (await caller.getAddress()));
         callArgs.push(toBigNumberStr(args.leverage));
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+
+        callArgs.push(args.currentTime || Date.now());
+        callArgs.push(args.oraclePrice ? toBigNumber(args.oraclePrice) : 0 );
 
         return this.signAndCall(
             caller,
@@ -935,6 +946,8 @@ export class OnChainCalls {
             perpID?: string;
             market?: string;
             gasBudget?: number;
+            currentTime?: number;
+            oraclePrice?: number;
         },
         signer?: RawSigner
     ): Promise<SuiTransactionBlockResponse> {
@@ -942,13 +955,13 @@ export class OnChainCalls {
 
         const callArgs = [];
 
-        callArgs.push(SUI_CLOCK_OBJECT_ID);
-        callArgs.push(args.safeID || this.getSafeID());
-        callArgs.push(args.updateFRCapID || this.getFROperatorCapID());
         callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(args.safeID || this.getSafeID());
         callArgs.push(args.rate.absoluteValue().toString());
         callArgs.push(args.rate.isPositive());
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+
+        callArgs.push(args.currentTime || Date.now());
+        callArgs.push(args.oraclePrice ? toBigNumber(args.oraclePrice) : 0 );
 
         return this.signAndCall(
             caller,
@@ -1012,10 +1025,10 @@ export class OnChainCalls {
         );
     }
 
-    public async depositToBank(
+    public async depositToExternalBank(
         args: {
             coinID: string;
-            amount: string;
+            amount: string | number;
             accountAddress?: string;
             bankID?: string;
             gasBudget?: number;
@@ -1026,7 +1039,7 @@ export class OnChainCalls {
 
         const callArgs = [];
 
-        callArgs.push(args.bankID ? args.bankID : this.getBankID());
+        callArgs.push(args.bankID ? args.bankID : this.getExternalBankID());
         callArgs.push(
             args.accountAddress ? args.accountAddress : await caller.getAddress()
         );
@@ -1035,12 +1048,92 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "deposit_to_bank",
+            "deposit_to_external_bank",
             callArgs,
             "margin_bank",
             args.gasBudget
         );
     }
+
+    public async depositToInternalBank(
+        args: {
+            bankID?: string;
+            amount: string | number;
+            srcAddress?: string;
+            destAddress?: string;
+            txHash?: string;
+            gasBudget?: number;
+        },
+        signer?: RawSigner
+    ): Promise<SuiTransactionBlockResponse> {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+
+        callArgs.push(args.bankID ? args.bankID : this.getInternalBankID());
+        callArgs.push(
+            args.srcAddress ? args.srcAddress : await caller.getAddress()
+        );
+
+        callArgs.push(
+            args.destAddress ? args.destAddress : await caller.getAddress()
+        );
+
+        callArgs.push(args.amount);
+
+        callArgs.push(args.txHash || randomString());
+
+        return this.signAndCall(
+            caller,
+            "deposit_to_internal_bank",
+            callArgs,
+            "margin_bank",
+            args.gasBudget
+        );
+    }
+
+    public async withdrawFromInternalBank(
+        args: {
+            amount: string | number;
+            salt:number;
+            signature: string;
+            publicKey: string;
+            bankID?: string;
+            srcAddress?: string;
+            destAddress?: string;
+            gasBudget?: number;
+        },
+        signer?: RawSigner
+    ): Promise<SuiTransactionBlockResponse> {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+
+        callArgs.push(args.bankID ? args.bankID : this.getInternalBankID());
+
+        callArgs.push(
+            args.srcAddress ? args.srcAddress : await caller.getAddress()
+        );
+
+        callArgs.push(
+            args.destAddress ? args.destAddress : await caller.getAddress()
+        );
+
+        callArgs.push(args.amount);
+
+        callArgs.push(args.salt);
+
+        callArgs.push(Array.from(new Uint8Array([...hexStrToUint8(args.signature), ... base64ToUint8(args.publicKey)])));
+
+        return this.signAndCall(
+            caller,
+            "withdraw_from_internal_bank",
+            callArgs,
+            "margin_bank",
+            args.gasBudget
+        );
+    }
+
 
     public async setBankWithdrawalStatus(
         args: {
@@ -1057,8 +1150,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.safeID || this.getSafeID());
-        callArgs.push(args.guardianCap || this.getGuardianCap());
-        callArgs.push(args.bankID || this.getBankID());
+        callArgs.push(args.bankID || this.getInternalBankID());
         callArgs.push(args.isAllowed);
 
         return this.signAndCall(
@@ -1085,7 +1177,6 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.safeID || this.getSafeID());
-        callArgs.push(args.guardianCap || this.getGuardianCap());
         callArgs.push(args.perpID || this.getPerpetualID());
         callArgs.push(args.isPermitted);
 
@@ -1111,7 +1202,7 @@ export class OnChainCalls {
 
         const callArgs = [];
 
-        callArgs.push(args.bankID ? args.bankID : this.getBankID());
+        callArgs.push(args.bankID ? args.bankID : this.getInternalBankID());
         callArgs.push(
             args.accountAddress ? args.accountAddress : await caller.getAddress()
         );
@@ -1135,7 +1226,7 @@ export class OnChainCalls {
 
         const callArgs = [];
 
-        callArgs.push(bankID || this.getBankID());
+        callArgs.push(bankID || this.getInternalBankID());
         callArgs.push(await caller.getAddress());
 
         return this.signAndCall(
@@ -1186,7 +1277,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args?.perpID || this.getPerpetualID());
-        callArgs.push(args?.bankID || this.getBankID());
+        callArgs.push(args?.bankID || this.getInternalBankID());
 
         return this.signAndCall(
             caller,
@@ -1197,68 +1288,23 @@ export class OnChainCalls {
         );
     }
 
-    /*
-     * Note that this function will only work on Pyth fake contract
-     * and can only be used for testing
-     */
-    public async createOracleObjects(signer?: RawSigner) {
-        const caller = signer || this.signer;
+    // /**
+    //  * Returns price of oracle
+    //  * @param market name of the market for which oracle price is to be fetched
+    //  * @returns oracle price in base number
+    //  */
+    // public async getOraclePrice(market?: string): Promise<number> {
+    //     // const id = this.getPriceOracleObjectId(market);
+    //     // const obj = await this.getOnChainObject(id);
+    //     // const fields = (obj.data?.content as any).fields.price_info.fields.price_feed
+    //     //     .fields.price.fields;
 
-        const callArgs = [];
-        callArgs.push(SUI_CLOCK_OBJECT_ID);
-
-        return this.signAndCall(caller, "create_price_obj", callArgs, "price_info");
-    }
-
-    /*
-     * @dev updates oracle price on pyth contract.
-     * Note that this function will only work on our own deployed Fake Pyth contract
-     */
-    public async setOraclePrice(
-        args: {
-            price: number;
-            confidence?: string;
-            priceInfoFeedId: string;
-            pythPackageId: string;
-            market?: string;
-        },
-        signer?: RawSigner
-    ) {
-        const caller = signer || this.signer;
-
-        const callArgs = [];
-        callArgs.push(this.getPriceOracleObjectId(args.market || "ETH-PERP"));
-        callArgs.push(SUI_CLOCK_OBJECT_ID);
-        callArgs.push(args.price * 1e5);
-        callArgs.push(args.confidence || "10");
-        callArgs.push(hexToString(args.priceInfoFeedId));
-
-        return this.signAndCall(
-            caller,
-            "update_price_info_object_for_test",
-            callArgs,
-            "price_info",
-            undefined,
-            args.pythPackageId
-        );
-    }
-
-    /**
-     * Returns price of oracle
-     * @param market name of the market for which oracle price is to be fetched
-     * @returns oracle price in base number
-     */
-    public async getOraclePrice(market?: string): Promise<number> {
-        const id = this.getPriceOracleObjectId(market);
-        const obj = await this.getOnChainObject(id);
-        const fields = (obj.data?.content as any).fields.price_info.fields.price_feed
-            .fields.price.fields;
-
-        return (
-            Number(fields.price.fields.magnitude) /
-            Math.pow(10, Number(fields.expo.fields.magnitude))
-        );
-    }
+    //     // return (
+    //     //     Number(fields.price.fields.magnitude) /
+    //     //     Math.pow(10, Number(fields.expo.fields.magnitude))
+    //     // );
+    //     return 0;
+    // }
 
     public async mintUSDC(
         args?: {
@@ -1466,47 +1512,35 @@ export class OnChainCalls {
     public async getUserBankBalance(user?: string, bankID?: string): Promise<BigNumber> {
         try {
             const userBalance = await this.signer.provider.getDynamicFieldObject({
-                parentId: bankID || this.getBankTableID(),
+                parentId: bankID || this.getInternalBankBalanceTableID(),
                 name: {
                     type: "address",
                     value: user || (await this.signer.getAddress())
                 }
             });
-
+            
             return new BigNumber(
-                (userBalance.data as any).content.fields.value.fields.balance
+                (userBalance.data as any).content.fields.value
             );
         } catch (e) {
             return new BigNumber(0);
         }
     }
 
-    getPriceOracleObjectId(market = "ETH-PERP"): string {
-        return this.deployment["markets"][market]["Objects"]["PriceOracle"]["id"];
+    getExternalBankID(): string {
+        return this.deployment["objects"]["ExternalBank"].id as string;
     }
 
-    getBankID(): string {
-        return this.deployment["objects"]["Bank"].id as string;
+    getInternalBankID(): string {
+        return this.deployment["objects"]["InternalBank"].id as string;
     }
 
+    getInternalBankBalanceTableID(): string{
+        return this.deployment["objects"]["BankAccountsTable"].id as string;
+    }
+    
     getSafeID(): string {
         return this.deployment["objects"]["CapabilitiesSafe"].id as string;
-    }
-
-    getGuardianCap(): string {
-        return this.deployment["objects"]["ExchangeGuardianCap"].id as string;
-    }
-
-    getFROperatorCapID(): string {
-        return this.deployment["objects"]["FundingRateCap"].id as string;
-    }
-
-    getDeleveragingCapID(): string {
-        return this.deployment["objects"]["DeleveragingCap"].id as string;
-    }
-
-    getSettlementOperatorTable(): string {
-        return this.deployment["objects"]["Table<address, bool>"].id as string;
     }
 
     getPackageID(): string {
@@ -1521,13 +1555,6 @@ export class OnChainCalls {
         return this.deployment["objects"]["SubAccounts"].id as string;
     }
 
-    getPriceOracleOperatorCap(): string {
-        return this.deployment["objects"]["PriceOracleOperatorCap"].id as string;
-    }
-
-    getPublicSettlementCap(): string {
-        return this.deployment["objects"]["SettlementCap"].id as string;
-    }
 
     // by default returns the perpetual id of 1st market
     getPerpetualID(market = "ETH-PERP"): string {
