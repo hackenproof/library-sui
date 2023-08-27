@@ -13,7 +13,6 @@ import { toBigNumber, bigNumber } from "./library";
 import { Order } from "../src/interfaces";
 import { DEFAULT } from "./defaults";
 import { config } from "dotenv";
-import { network } from "./DeploymentConfig";
 import fs from "fs";
 config({ path: ".env" });
 
@@ -96,35 +95,6 @@ export function createOrder(params?: {
     } as Order;
 }
 
-export function printOrder(order: Order) {
-    console.log(
-        "\norder.maker:",
-        order.maker,
-        "\norder.market:",
-        order.market,
-        "\norder.isBuy:",
-        order.isBuy,
-        "\norder.reduceOnly:",
-        order.reduceOnly,
-        "\norder.postOnly:",
-        order.postOnly,
-        "\norder.orderbookOnly:",
-        order.orderbookOnly,
-        "\norder.ioc:",
-        order.ioc,
-        "\norder.price:",
-        order.price.toFixed(0),
-        "\norder.quantity:",
-        order.quantity.toFixed(0),
-        "\norder.leverage:",
-        order.leverage.toFixed(0),
-        "\norder.expiration:",
-        order.expiration.toFixed(0),
-        "\norder.salt:",
-        order.salt.toFixed(0)
-    );
-}
-
 /**
  * Consumes an order of type StoredOrder and returns a SuiOrder that can be sent to on-chain for settlement
  * @param order StoredOrder to be transformed
@@ -150,25 +120,4 @@ export function storedOrderToSui(
         expiration: bigNumber(order.expiration),
         salt: bigNumber(order.salt)
     };
-}
-
-export async function requestGas(address: string) {
-    const url = network.faucet;
-    try {
-        const data = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                FixedAmountRequest: {
-                    recipient: address
-                }
-            })
-        });
-        return data;
-    } catch (e: any) {
-        console.log("Error while requesting gas", e.message);
-    }
-    return false;
 }
