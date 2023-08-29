@@ -83,19 +83,21 @@ export class Faucet {
 
         const coin = getCoinWithAmount(coins.data, amt);
 
-        // transferring from owners usdc coin to receiver
-        const tx = await onChain.depositToExternalBank({
+        // transferring from owners usdc coin to receiver in external bank
+        await onChain.depositToExternalBank({
             coinID: coin?.coinObjectId,
-            amount: amt,
+            amount: toBigNumberStr(amt, USDC_BASE_DECIMALS),
             accountAddress: address,
             gasBudget: 5_000_000
         });
+        
+        // updating destination balance in internal bank
+        await onChain.depositToInternalBank({
+            amount:toBigNumberStr(amt), 
+            srcAddress:ownerAddress,
+            destAddress:address
+        });
 
-        const status = Transaction.getStatus(tx);
-        const error = Transaction.getError(tx);
-        const txHash = Transaction.getTxHash(tx);
-
-        return { status, error, txHash };
     }
 
 

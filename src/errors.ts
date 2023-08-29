@@ -117,5 +117,6 @@ export const ERROR_CODES: { [key: string]: string } = {
     "903": "Wrong Price Identifier",
     "910": "Transaction has already been processed",
     "911": "Invalid signature",
+    "912": "Request to withdraw funds from external bank, must be signed by sequencer",
 
 };

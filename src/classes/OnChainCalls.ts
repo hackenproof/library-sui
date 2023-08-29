@@ -73,7 +73,7 @@ export class OnChainCalls {
 
         const callArgs = [];
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.safeID || this.getSafeID());
+        callArgs.push(args.safeID || this.getSharedSafeID());
         callArgs.push(args.address);
 
         return this.signAndCall(
@@ -1149,8 +1149,9 @@ export class OnChainCalls {
 
         const callArgs = [];
 
-        callArgs.push(args.safeID || this.getSafeID());
-        callArgs.push(args.bankID || this.getInternalBankID());
+        callArgs.push(args.safeID || this.getSharedSafeID());
+        callArgs.push(args.guardianCap || this.getGuardianCap());
+        callArgs.push(args.bankID || this.getExternalBankID());
         callArgs.push(args.isAllowed);
 
         return this.signAndCall(
@@ -1189,11 +1190,18 @@ export class OnChainCalls {
         );
     }
 
-    public async withdrawFromBank(
+    public async withdrawFromExternalBank(
         args: {
-            amount: string;
-            accountAddress?: string;
+            amount: string | number;
+            salt:number;
+            userSignature: string;
+            sequencerSignature: string;
+            userPK: string;
+            sequencerPK: string;
+            safeID?: string;
             bankID?: string;
+            srcAddress?: string;
+            destAddress?: string;
             gasBudget?: number;
         },
         signer?: RawSigner
@@ -1202,15 +1210,29 @@ export class OnChainCalls {
 
         const callArgs = [];
 
-        callArgs.push(args.bankID ? args.bankID : this.getInternalBankID());
+        callArgs.push(args.safeID ? args.safeID : this.getSharedSafeID());
+
+        callArgs.push(args.bankID ? args.bankID : this.getExternalBankID());
         callArgs.push(
-            args.accountAddress ? args.accountAddress : await caller.getAddress()
+            args.srcAddress || await caller.getAddress()
         );
+
+        callArgs.push(
+            args.destAddress || await caller.getAddress()
+        );
+
         callArgs.push(args.amount);
+
+        callArgs.push(args.salt);
+
+        callArgs.push(Array.from(new Uint8Array([...hexStrToUint8(args.userSignature), ... base64ToUint8(args.userPK)])));
+
+        callArgs.push(Array.from(new Uint8Array([...hexStrToUint8(args.sequencerSignature), ... base64ToUint8(args.sequencerPK)])));
+
 
         return this.signAndCall(
             caller,
-            "withdraw_from_bank",
+            "withdraw_from_external_bank",
             callArgs,
             "margin_bank",
             args.gasBudget
@@ -1543,6 +1565,10 @@ export class OnChainCalls {
         return this.deployment["objects"]["CapabilitiesSafe"].id as string;
     }
 
+    getSharedSafeID(): string {
+        return this.deployment["objects"]["SharedCapabilitiesSafe"].id as string;
+    }
+
     getPackageID(): string {
         return this.deployment["objects"]["package"].id as string;
     }
@@ -1588,6 +1614,10 @@ export class OnChainCalls {
 
     getTreasuryCapID(): string {
         return this.deployment["objects"]["TreasuryCap"].id as string;
+    }
+
+    getGuardianCap(): string {
+        return this.deployment["objects"]["ExchangeGuardianCap"].id as string;
     }
 
     // ===================================== //
