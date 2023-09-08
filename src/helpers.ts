@@ -66,7 +66,7 @@ export function processTradingStartTime(
     tradingStartTime: number | string,
     env: string
 ): number {
-    const threshold = 180000; // threshold is set to 3 min as contracts take this much time to deploy
+    const threshold = 30000; // threshold is set to 30 seconds as contracts take this much time to deploy
     const ms_in_an_hour = 3600 * 1000;
 
     if (env == "DEV") {
