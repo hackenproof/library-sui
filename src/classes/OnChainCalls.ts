@@ -700,8 +700,8 @@ export class OnChainCalls {
             args.fillQuantity
                 ? args.fillQuantity.toFixed(0)
                 : args.makerOrder.quantity.lte(args.takerOrder.quantity)
-                    ? args.makerOrder.quantity.toFixed(0)
-                    : args.takerOrder.quantity.toFixed(0)
+                ? args.makerOrder.quantity.toFixed(0)
+                : args.takerOrder.quantity.toFixed(0)
         );
 
         callArgs.push(
@@ -1296,28 +1296,27 @@ export class OnChainCalls {
     }
 
     /**
-    * Transfers Sui Balance to given wallet address
-    * @param args.to destination wallet address
-    * @param args.balance sui balance in normal base to transfer to destination wallet address
-    * @param signer the signer object of the wallet that owns sui to transfer
-    * @returns transaction Result
-    */
-    async tranferSuiBalance(args: { to: string, balance: number }, signer?: RawSigner) {
+     * Transfers Sui Balance to given wallet address
+     * @param args.to destination wallet address
+     * @param args.balance sui balance in normal base to transfer to destination wallet address
+     * @param signer the signer object of the wallet that owns sui to transfer
+     * @returns transaction Result
+     */
+    async tranferSuiBalance(args: { to: string; balance: number }, signer?: RawSigner) {
         const caller = signer || this.signer;
         const txb = new TransactionBlock();
 
         const transferAmount = toBigNumber(args.balance);
-        const existingBalance = BigNumber(await this.getUserSuiBalance(await caller.getAddress()));
+        const existingBalance = BigNumber(
+            await this.getUserSuiBalance(await caller.getAddress())
+        );
 
         if (existingBalance.lte(transferAmount)) {
-            throw new Error('owner has not enough sui tokens to transfer')
+            throw new Error("owner has not enough sui tokens to transfer");
         }
 
         // First, split the gas coin into multiple coins using gas coin:
-        const coin = txb.splitCoins(
-            txb.gas,
-            [txb.pure(toBigNumber(args.balance))]
-        );
+        const coin = txb.splitCoins(txb.gas, [txb.pure(toBigNumber(args.balance))]);
         txb.transferObjects([coin], txb.pure(args.to));
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: txb,
@@ -1329,7 +1328,6 @@ export class OnChainCalls {
             }
         });
     }
-
 
     public async getUSDCBalance(
         args?: {
@@ -1428,12 +1426,9 @@ export class OnChainCalls {
 
     async getUserSuiBalance(user?: string): Promise<string> {
         const address = user || (await this.signer.getAddress());
-        const suiCoin = await this.signer.provider.getBalance(
-            {
-                owner: address
-            }
-
-        )
+        const suiCoin = await this.signer.provider.getBalance({
+            owner: address
+        });
         return suiCoin?.totalBalance;
     }
 
@@ -1479,8 +1474,8 @@ export class OnChainCalls {
             }
         });
 
-        if (userPos.error?.code == 'dynamicFieldNotFound') {
-            throw new Error("Given user has never opened on-chain position")
+        if (userPos.error?.code == "dynamicFieldNotFound") {
+            throw new Error("Given user has never opened on-chain position");
         }
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
