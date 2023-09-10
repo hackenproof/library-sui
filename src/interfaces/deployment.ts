@@ -39,5 +39,6 @@ export interface DeploymentConfig {
 export interface Network {
     name: string;
     rpc: string;
+    ws: string;
     faucet: string;
 }
