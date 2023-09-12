@@ -70,39 +70,7 @@
       "owner": "Shared",
       "id": "0xa01d1142ad1f27e77c43a552929cb9ed2ad66cd7ecb4aeb9be21adef059f60b4",
       "dataType": "0x2::table::Table<address, 0x9c8677cb3560604af0d1a9a0d7e146ae92d46fecae86692b5f0e8e105943692b::margin_bank::BankAccount>"
-    },
-    "settlementOperators": [
-      {
-        "address": "0x9a96c0fefb710c3aa55ceff0d3ba945b8aff6ecfd2f6b686f949e3b909cb213b",
-        "phrase": "level ridge bulb jacket want timber wave unfold bamboo album infant grass",
-        "privateKey": "",
-        "capID": "0x048e72b6be297d94f2c8a284373ce0c688b5e10045902922e0a8217bfc5be34f"
-      },
-      {
-        "address": "0x3306094933d05b860518e5dc1b713347bfc1085863598aa4b74d1d2e822fd4ab",
-        "phrase": "spring paper mercy hip water slam winner coffee battle globe vague van",
-        "privateKey": "",
-        "capID": "0x535b28b474c2616c5ce12059097aaac1d193beb31e195226b5003347b9a47267"
-      },
-      {
-        "address": "0xfd175e40d2b18665036ac744326692a70e836bd49fe4a2bc406651ade908aff8",
-        "phrase": "indicate hole private code grant canyon space rebuild buzz lift senior trouble",
-        "privateKey": "",
-        "capID": "0xb64fd818f82b4e2f5ecaff451ba2a71527baccfda20c3b2acc4ae027f23f0fa0"
-      },
-      {
-        "address": "0x18f2bee301371bf96aa3dd2b3ed4bba0901ff388c39a465d9c997601984779b7",
-        "phrase": "squirrel twice swim trick gold forum history siren payment morning fever beach",
-        "privateKey": "",
-        "capID": "0x2dbae4ff8542b6cd008fe0787b81f860aa39284fb01baa344ee5e8efe5ad76e2"
-      },
-      {
-        "address": "0xa7966620030bb486fca34508e588018af3ad9b197790b2830ac3a84be1c872ca",
-        "phrase": "",
-        "privateKey": "",
-        "capID": "0xca680278a1d5ae6126d355cdbc3c6ab9d4a1406af227643cdab908280417e7d7"
-      }
-    ]
+    }
   },
   "markets": {
     "ETH-PERP": {

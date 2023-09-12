@@ -70,39 +70,7 @@
       "owner": "Shared",
       "id": "0xfcf1373ea198dd798d809081e575502551f556762af4b070a94ea74e267d4398",
       "dataType": "0x2::table::Table<address, 0x845f8b92d39cd077415d591ecbeef1647f52490a7b94cf74b61099eeac381678::margin_bank::BankAccount>"
-    },
-    "settlementOperators": [
-      {
-        "address": "0xa7966620030bb486fca34508e588018af3ad9b197790b2830ac3a84be1c872ca",
-        "phrase": "",
-        "privateKey": "",
-        "capID": "0xa0cd3fa707ef7a0787723fbc85029d70657003a1a5cf75dcda617b3ec3b5d99f"
-      },
-      {
-        "address": "0x17826aa78491a3dd76a13187cdd4b35b2cc5acbbcb6712582fced3856dbb12ec",
-        "phrase": "cloud athlete merge matter select rib message elephant announce creek border catalog",
-        "privateKey": "",
-        "capID": "0x1619a46b889bc3817077e41a4e002a9ec7e0936c3f316280a56f818adc29c8c8"
-      },
-      {
-        "address": "0xc1953eb00f2ad787be28cf4f18ba6a8cb7d575a242124009f5167d05352a3fef",
-        "phrase": "announce ice behind actor sauce glue garbage found wisdom badge lion hunt",
-        "privateKey": "",
-        "capID": "0xd240cb1ffe7e8cc8c4d7b6312756dcf917e51087cc28a0601f90a6edd5ae9377"
-      },
-      {
-        "address": "0xb149b778794b2e2c8dc63bc1b4e493941e3fb30e0ace8e4840afa94bfd8a9a86",
-        "phrase": "loyal cloth hedgehog zebra hard pet fork fruit social cost net twist",
-        "privateKey": "",
-        "capID": "0xa118ffbe82215fb3c2232e0bfdef5c46e45395cefe0f81a6646d355a8a29bd34"
-      },
-      {
-        "address": "0x16698e5f0f7942ca1dca8a1aced129cdab5cd2924d676df61917da55aa9a7f10",
-        "phrase": "door vast wrong own keen inherit very organ noise game food giggle",
-        "privateKey": "",
-        "capID": "0x44a36806949983d5b61c19bf425a7f6d1ad90696c1c36b17064e6a47e163348d"
-      }
-    ]
+    }
   },
   "markets": {
     "ETH-PERP": {
