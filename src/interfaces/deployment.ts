@@ -33,6 +33,7 @@ export interface DeploymentConfig {
     network: Network;
     deployer: string;
     filePath: string;
+    objects?: any;
     markets: MarketDetails[];
 }
 
