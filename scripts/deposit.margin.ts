@@ -6,13 +6,14 @@ import {
   DeploymentConfig, 
   Transaction,
   toBigNumberStr, 
-  bnToBaseStr
+  bnToBaseStr,
+  USDC_BASE_DECIMALS
 } from "../src";
 
 
 const Config = {
   SUI_TESTNET : {
-    provider: "https://fullnode.testnet.sui.io:443"
+    provider: "https://api.shinami.com/node/v1//sui_testnet_0d359e0ce3682c1f5d0cab31de9d151b"
   },
   SUI_MAINNET : {
     provider: "https://fullnode.mainnet.sui.io:443"
@@ -29,35 +30,34 @@ async function main() {
 
   const deployment = readFile("./scripts/deployment.staging.json") as DeploymentConfig;
   const provider = getProvider(Config.SUI_TESTNET.provider);
-  const deployerSeed = "basket trim bicycle ticket penalty window tunnel fit insane orange virtual tennis"
+  const deployerSeed = "royal reopen journey royal enlist vote core cluster shield slush hill sample"
   const ownerSigner = getSignerFromSeed(deployerSeed, provider);
   const onChain = new OnChainCalls(ownerSigner, deployment);
 
   console.log("usdc balance of the deployer %o", await onChain.getUSDCBalance())
   console.log("bank balance of the deployer %o", bnToBaseStr(await onChain.getUserBankBalance()))
 
-  // coin object holding tons of fake USDC
-  const usdcObjectHolder = deployment.objects["Currency"]["id"]
-  const usdcObjects = await onChain.getOnChainObject(usdcObjectHolder)
-  console.log("usdc coin objects held by deployer %o", usdcObjects.data);
-  const usdcCoinId = usdcObjects.data.objectId
-
-  for(const recepientAddress of recepients) {
-    const txResult = await onChain.depositToBank(
-      {
-          coinID: usdcCoinId,
-          amount: toBigNumberStr("100000", 6),
-          accountAddress: recepientAddress,
-          gasBudget: 1000000,
-      },
-      ownerSigner
-    );
-    console.log("tx result = %o", txResult)
-    const bankBalanceUpdateEvent = Transaction.getEvents(
-        txResult,
-        "BankBalanceUpdate"
-    )[0];
-    console.log("bank balance update event %o = ", bankBalanceUpdateEvent);
+  const usdcAmount = 10000
+  const coinObj = await onChain.getUSDCoinHavingBalance({
+    amount: usdcAmount
+  })
+  if(coinObj) {
+    for(const recepientAddress of recepients) {
+      const txResult = await onChain.depositToBank(
+        {
+            coinID: coinObj.coinObjectId,
+            amount: toBigNumberStr(usdcAmount, USDC_BASE_DECIMALS),
+            accountAddress: recepientAddress,
+        },
+        ownerSigner
+      );
+      console.log("tx result = %o", txResult)
+      const bankBalanceUpdateEvent = Transaction.getEvents(
+          txResult,
+          "BankBalanceUpdate"
+      )[0];
+      console.log("bank balance update event %o = ", bankBalanceUpdateEvent);
+      }
   }
 }
 
