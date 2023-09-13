@@ -47,6 +47,15 @@ export class Transaction {
         return ERROR_CODES[code];
     }
 
+    static getTxNumber(error:string): number {
+        const regex = /(\d+)(?!.*\d)/;
+        const match = error.match(regex);
+        if(match){
+            return Number(match[0]);
+        }
+        return -1;
+    }
+
     static getEvents(tx: SuiTransactionBlockResponse, eventName?: string): Array<any> {
         let events = [];
 
