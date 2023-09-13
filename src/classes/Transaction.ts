@@ -47,10 +47,10 @@ export class Transaction {
         return ERROR_CODES[code];
     }
 
-    static getTxNumber(error:string): number {
+    static getTxNumber(error: string): number {
         const regex = /(\d+)(?!.*\d)/;
         const match = error.match(regex);
-        if(match){
+        if (match) {
             return Number(match[0]);
         }
         return -1;

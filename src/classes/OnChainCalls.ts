@@ -700,8 +700,8 @@ export class OnChainCalls {
             args.fillQuantity
                 ? args.fillQuantity.toFixed(0)
                 : args.makerOrder.quantity.lte(args.takerOrder.quantity)
-                    ? args.makerOrder.quantity.toFixed(0)
-                    : args.takerOrder.quantity.toFixed(0)
+                ? args.makerOrder.quantity.toFixed(0)
+                : args.takerOrder.quantity.toFixed(0)
         );
 
         callArgs.push(
@@ -771,15 +771,16 @@ export class OnChainCalls {
                         arg.fillQuantity
                             ? arg.fillQuantity.toFixed(0)
                             : arg.makerOrder.quantity.lte(arg.takerOrder.quantity)
-                                ? arg.makerOrder.quantity.toFixed(0)
-                                : arg.takerOrder.quantity.toFixed(0)
+                            ? arg.makerOrder.quantity.toFixed(0)
+                            : arg.takerOrder.quantity.toFixed(0)
                     ),
 
                     txBlock.pure(
-                        arg.fillPrice ? arg.fillPrice.toFixed(0) : arg.makerOrder.price.toFixed(0)
+                        arg.fillPrice
+                            ? arg.fillPrice.toFixed(0)
+                            : arg.makerOrder.price.toFixed(0)
                     ),
                     txBlock.object(this.getPriceOracleObjectId(arg.market))
-
                 ]
             });
         }
@@ -795,7 +796,6 @@ export class OnChainCalls {
                 showInput: true
             }
         });
-
     }
 
     public async liquidate(
@@ -837,6 +837,54 @@ export class OnChainCalls {
         );
     }
 
+    public async batchLiquidate(
+        args: {
+            perpID?: string;
+            liquidatee: string;
+            quantity: string;
+            leverage: string;
+            liquidator?: string;
+            allOrNothing?: boolean;
+            subAccountsMapID?: string;
+            gasBudget?: number;
+            market?: string;
+        }[],
+        gasBudget?: number,
+        signer?: RawSigner
+    ): Promise<SuiTransactionBlockResponse> {
+        const caller = signer || this.signer;
+        const txBlock = new TransactionBlock();
+        for (const arg of args) {
+            txBlock.moveCall({
+                target: `${this.getPackageID()}::exchange::liquidate`,
+                arguments: [
+                    txBlock.object(SUI_CLOCK_OBJECT_ID),
+                    txBlock.object(arg.perpID || this.getPerpetualID()),
+                    txBlock.object(this.getBankID()),
+                    txBlock.object(arg.subAccountsMapID || this.getSubAccountsID()),
+
+                    txBlock.pure(arg.liquidatee),
+                    txBlock.pure(arg.liquidator || (await caller.getAddress())),
+                    txBlock.pure(arg.quantity),
+                    txBlock.pure(arg.leverage),
+                    txBlock.pure(arg.allOrNothing === true),
+                    txBlock.object(this.getPriceOracleObjectId(arg.market))
+                ]
+            });
+        }
+        if (gasBudget) txBlock.setGasBudget(gasBudget);
+
+        return caller.signAndExecuteTransactionBlock({
+            transactionBlock: txBlock,
+            options: {
+                showObjectChanges: true,
+                showEffects: true,
+                showEvents: true,
+                showInput: true
+            }
+        });
+    }
+
     public async deleverage(
         args: {
             maker: string;
@@ -873,6 +921,54 @@ export class OnChainCalls {
             "exchange",
             args.gasBudget
         );
+    }
+
+    public async batchDeleverage(
+        args: {
+            maker: string;
+            taker: string;
+            quantity: string;
+            allOrNothing?: boolean;
+            perpID?: string;
+            deleveragingCapID?: string;
+            safeID?: string;
+            gasBudget?: number;
+            market?: string;
+        }[],
+        gasBudget?: number,
+        signer?: RawSigner
+    ): Promise<SuiTransactionBlockResponse> {
+        const caller = signer || this.signer;
+        const txBlock = new TransactionBlock();
+        for (const arg of args) {
+            txBlock.moveCall({
+                target: `${this.getPackageID()}::exchange::deleverage`,
+                arguments: [
+                    txBlock.object(SUI_CLOCK_OBJECT_ID),
+                    txBlock.object(arg.perpID || this.getPerpetualID()),
+                    txBlock.object(this.getBankID()),
+                    txBlock.object(arg.safeID || this.getSafeID()),
+                    txBlock.object(arg.deleveragingCapID || this.getDeleveragingCapID()),
+
+                    txBlock.pure(arg.maker),
+                    txBlock.pure(arg.taker),
+                    txBlock.pure(arg.quantity),
+                    txBlock.pure(arg.allOrNothing === true),
+                    txBlock.object(this.getPriceOracleObjectId(arg.market))
+                ]
+            });
+        }
+        if (gasBudget) txBlock.setGasBudget(gasBudget);
+
+        return caller.signAndExecuteTransactionBlock({
+            transactionBlock: txBlock,
+            options: {
+                showObjectChanges: true,
+                showEffects: true,
+                showEvents: true,
+                showInput: true
+            }
+        });
     }
 
     public async addMargin(
