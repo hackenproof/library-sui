@@ -24,7 +24,7 @@ import {
     toBigNumberStr,
     usdcToBaseNumber
 } from "../library";
-import { BASE_DECIMALS_ON_CHAIN, USDC_BASE_DECIMALS } from "../constants";
+import { BASE_DECIMALS_ON_CHAIN, SUI_NATIVE_BASE, USDC_BASE_DECIMALS } from "../constants";
 import { BigNumberable } from "../types";
 
 export class OnChainCalls {
@@ -700,8 +700,8 @@ export class OnChainCalls {
             args.fillQuantity
                 ? args.fillQuantity.toFixed(0)
                 : args.makerOrder.quantity.lte(args.takerOrder.quantity)
-                ? args.makerOrder.quantity.toFixed(0)
-                : args.takerOrder.quantity.toFixed(0)
+                    ? args.makerOrder.quantity.toFixed(0)
+                    : args.takerOrder.quantity.toFixed(0)
         );
 
         callArgs.push(
@@ -771,8 +771,8 @@ export class OnChainCalls {
                         arg.fillQuantity
                             ? arg.fillQuantity.toFixed(0)
                             : arg.makerOrder.quantity.lte(arg.takerOrder.quantity)
-                            ? arg.makerOrder.quantity.toFixed(0)
-                            : arg.takerOrder.quantity.toFixed(0)
+                                ? arg.makerOrder.quantity.toFixed(0)
+                                : arg.takerOrder.quantity.toFixed(0)
                     ),
 
                     txBlock.pure(
@@ -1533,17 +1533,18 @@ export class OnChainCalls {
         const caller = signer || this.signer;
         const txb = new TransactionBlock();
 
-        const transferAmount = toBigNumber(args.balance);
-        const existingBalance = BigNumber(
-            await this.getUserSuiBalance(await caller.getAddress())
-        );
+        const transferAmount = toBigNumber(args.balance, SUI_NATIVE_BASE);
+        const existingBalance = BigNumber(await this.getUserSuiBalance(await caller.getAddress()));
 
         if (existingBalance.lte(transferAmount)) {
-            throw new Error("owner has not enough sui tokens to transfer");
+            throw new Error('owner has not enough sui tokens to transfer')
         }
 
         // First, split the gas coin into multiple coins using gas coin:
-        const coin = txb.splitCoins(txb.gas, [txb.pure(toBigNumber(args.balance))]);
+        const coin = txb.splitCoins(
+            txb.gas,
+            [txb.pure(toBigNumber(args.balance, SUI_NATIVE_BASE))]
+        );
         txb.transferObjects([coin], txb.pure(args.to));
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: txb,
@@ -1646,7 +1647,7 @@ export class OnChainCalls {
     // ===================================== //
 
     /**
-     * Transfer Sui Balance to given wallet address
+     * Get Sui Balance of given wallet address
      * @param user wallet address to get the sui balance of
      * @returns sui balance of user in base 9
      */

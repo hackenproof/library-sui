@@ -18,6 +18,7 @@ export const INTEGERS = {
 };
 
 export const BASE_DECIMALS = 18;
+export const SUI_NATIVE_BASE = 9;
 export const BIGNUMBER_BASE = new BigNumber(1).shiftedBy(BASE_DECIMALS);
 
 export const BASE_DECIMALS_ON_CHAIN = 9;
