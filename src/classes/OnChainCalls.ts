@@ -24,7 +24,7 @@ import {
     toBigNumberStr,
     usdcToBaseNumber
 } from "../library";
-import { USDC_BASE_DECIMALS } from "../constants";
+import { BASE_DECIMALS_ON_CHAIN, USDC_BASE_DECIMALS } from "../constants";
 import { BigNumberable } from "../types";
 
 export class OnChainCalls {
@@ -1367,6 +1367,51 @@ export class OnChainCalls {
             "close_position",
             callArgs,
             "exchange",
+            args?.gasBudget
+        );
+    }
+
+    /*
+     * @notice allows exchange admin to set a specific maker/taker tx fee for a user
+     * @param args:
+     *  marketName: (optional) Name of the perpetual (ETH-PERP, BTC-PERP etc..) for which to set special fee
+     *              Default is ETH-PERP
+     *  account: address of the user
+     *  status: staus indicating if the maker/taker fee are to be applied or not
+     *  makerFee: (base number) the maker fee to be charged from user on each tx
+     *  takerFee: (base number) the taker fee to be charged from user on each tx
+     *  adminID: (optional) exchange ownership object id
+     *  gasBudget: (optional) the gas limit to be paid for call
+     * @param signer: (optional) the caller performing the call
+     */
+    public async setSpecialFee(
+        args: {
+            adminID?: string;
+            marketName?: string;
+            account: string;
+            status: boolean;
+            makerFee: number;
+            takerFee: number;
+            gasBudget?: number;
+        },
+        signer?: RawSigner
+    ) {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+
+        callArgs.push(args.adminID || this.getExchangeAdminCap());
+        callArgs.push(this.getPerpetualID(args.marketName));
+        callArgs.push(args.account);
+        callArgs.push(args.status);
+        callArgs.push(toBigNumber(args.makerFee, BASE_DECIMALS_ON_CHAIN));
+        callArgs.push(toBigNumber(args.takerFee, BASE_DECIMALS_ON_CHAIN));
+
+        return this.signAndCall(
+            caller,
+            "set_special_fee",
+            callArgs,
+            "perpetual",
             args?.gasBudget
         );
     }
