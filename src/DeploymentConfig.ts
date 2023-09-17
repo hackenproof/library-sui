@@ -15,6 +15,10 @@ export const network = {
 
 export const packageName = "bluefin_foundation";
 
+//Bridge SUI USDC from wormhole address
+//ref: https://docs.sui.io/learn/sui-bridging
+export const usdcAddress =
+    "0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf";
 export const DeploymentConfigs: DeploymentConfig = {
     filePath: "./deployment.json", // Todo will create separate files for separate networks
     network: network,

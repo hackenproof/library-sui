@@ -177,7 +177,9 @@ export class OnChainCalls {
             "create_perpetual",
             callArgs,
             "exchange",
-            gasBudget
+            gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -709,7 +711,15 @@ export class OnChainCalls {
         );
 
         callArgs.push(this.getPriceOracleObjectId(args.market));
-        return this.signAndCall(caller, "trade", callArgs, "exchange", args.gasBudget);
+        return this.signAndCall(
+            caller,
+            "trade",
+            callArgs,
+            "exchange",
+            args.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
+        );
     }
 
     public async batchTrade(
@@ -833,7 +843,9 @@ export class OnChainCalls {
             "liquidate",
             callArgs,
             "exchange",
-            args.gasBudget
+            args.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -919,7 +931,9 @@ export class OnChainCalls {
             "deleverage",
             callArgs,
             "exchange",
-            args.gasBudget
+            args.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -998,7 +1012,9 @@ export class OnChainCalls {
             "add_margin",
             callArgs,
             "exchange",
-            args.gasBudget
+            args.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -1029,7 +1045,9 @@ export class OnChainCalls {
             "remove_margin",
             callArgs,
             "exchange",
-            args.gasBudget
+            args.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -1060,7 +1078,9 @@ export class OnChainCalls {
             "adjust_leverage",
             callArgs,
             "exchange",
-            args.gasBudget
+            args.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -1207,12 +1227,16 @@ export class OnChainCalls {
         callArgs.push(args.amount);
         callArgs.push(args.coinID);
 
+        const typeArguments = [this.getCoinType()];
+
         return this.signAndCall(
             caller,
             "deposit_to_bank",
             callArgs,
             "margin_bank",
-            args.gasBudget
+            args.gasBudget,
+            undefined,
+            typeArguments
         );
     }
 
@@ -1240,7 +1264,9 @@ export class OnChainCalls {
             "set_withdrawal_status",
             callArgs,
             "margin_bank",
-            args.gasBudget
+            args.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -1296,7 +1322,9 @@ export class OnChainCalls {
             "withdraw_from_bank",
             callArgs,
             "margin_bank",
-            args.gasBudget
+            args.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -1317,7 +1345,9 @@ export class OnChainCalls {
             "withdraw_all_margin_from_bank",
             callArgs,
             "margin_bank",
-            gasBudget
+            gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -1367,7 +1397,9 @@ export class OnChainCalls {
             "close_position",
             callArgs,
             "exchange",
-            args?.gasBudget
+            args?.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -1448,7 +1480,7 @@ export class OnChainCalls {
         const callArgs = [];
         callArgs.push(this.getPriceOracleObjectId(args.market || "ETH-PERP"));
         callArgs.push(SUI_CLOCK_OBJECT_ID);
-        callArgs.push(args.price * 1e5);
+        callArgs.push(args.price * 1e6);
         callArgs.push(args.confidence || "10");
         callArgs.push(hexToString(args.priceInfoFeedId));
 
@@ -1498,7 +1530,7 @@ export class OnChainCalls {
 
         callArgs.push(args?.to || (await caller.getAddress()));
 
-        return this.signAndCall(caller, "mint", callArgs, "tusdc");
+        return this.signAndCall(caller, "mint", callArgs, "coin");
     }
 
     public async getUSDCCoins(
@@ -1607,7 +1639,8 @@ export class OnChainCalls {
         callArgs: any[],
         moduleName: string,
         gasBudget?: number,
-        packageId?: string
+        packageId?: string,
+        typeArguments?: string[]
     ): Promise<SuiTransactionBlockResponse> {
         const tx = new TransactionBlock();
         if (gasBudget) tx.setGasBudget(gasBudget);
@@ -1617,11 +1650,18 @@ export class OnChainCalls {
         if (packageId == undefined) {
             packageId = this.getPackageID();
         }
-
-        tx.moveCall({
-            target: `${packageId}::${moduleName}::${method}`,
-            arguments: params
-        });
+        if (typeArguments != undefined) {
+            tx.moveCall({
+                target: `${packageId}::${moduleName}::${method}`,
+                arguments: params,
+                typeArguments: typeArguments
+            });
+        } else {
+            tx.moveCall({
+                target: `${packageId}::${moduleName}::${method}`,
+                arguments: params
+            });
+        }
 
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: tx,
@@ -1758,7 +1798,7 @@ export class OnChainCalls {
     }
 
     getBankID(): string {
-        return this.deployment["objects"]["Bank"].id as string;
+        return this.deployment["objects"]["Bank"].id;
     }
 
     getSafeID(): string {
@@ -1829,6 +1869,14 @@ export class OnChainCalls {
 
     getCoinType(): string {
         return this.deployment["objects"]["Currency"].dataType as string;
+    }
+
+    getBankType(): string {
+        return this.deployment["objects"]["Bank"]["dataType"];
+    }
+
+    getCurrencyType(): string {
+        return this.deployment["objects"]["Currency"]["dataType"] as string;
     }
 
     getTreasuryCapID(): string {
