@@ -13,31 +13,35 @@ import {
 
 const Config = {
   SUI_TESTNET : {
-    provider: "https://api.shinami.com/node/v1//sui_testnet_0d359e0ce3682c1f5d0cab31de9d151b"
+    provider: "https://api.shinami.com/node/v1//sui_testnet_0d359e0ce3682c1f5d0cab31de9d151b",
+    deploymentPath : "./scripts/deployment.staging.json"
   },
   SUI_MAINNET : {
-    provider: "https://fullnode.mainnet.sui.io:443"
+    provider: "https://fullnode.mainnet.sui.io:443",
+    deploymentPath : "./scripts/deployment.prod.json"
   }
 }
 
 async function main() {
 
   const recepients = [
-    "0x76eb4121b05bb58e66c121c85f6fbcb0f739169b14ecd92bcb6f39838f49582c",
-    "0x45c1fde973e22a1f9386fcaf0ff1d11fb7eeec4a951c0b138d1d155332e3b765",
-    "0x46590c3753c585d1ec14337ce20b79e0f1568c047695ea5984f0120c69268e9d"
+    "0xb88a385c92c90f2d2e525b74adf64ebed61cb0c29016e995c4758b7cf7b4efc5",
+    "0x22d6456c2ec3ebdcdc513dd5ccc50f1ef197549aab81d03c7a5dba91e9a26a02",
+    "0x28c7e39a04d281d5f0a5e15ce50b54d3f0ee8b7dcab556dc709ede22d1704ed8",
+    "0xadefbe39c57912cd7d3a156e4b0b88599c5c91a8b13fcb52226f2d2f3dfe7ede",
   ]
 
-  const deployment = readFile("./scripts/deployment.staging.json") as DeploymentConfig;
-  const provider = getProvider(Config.SUI_TESTNET.provider);
+  const deployment = readFile(Config.SUI_MAINNET.deploymentPath) as DeploymentConfig;
+  const provider = getProvider(Config.SUI_MAINNET.provider);
   const deployerSeed = "royal reopen journey royal enlist vote core cluster shield slush hill sample"
   const ownerSigner = getSignerFromSeed(deployerSeed, provider);
   const onChain = new OnChainCalls(ownerSigner, deployment);
 
+  const usdcAmount = 1000000
+
   console.log("usdc balance of the deployer %o", await onChain.getUSDCBalance())
   console.log("bank balance of the deployer %o", bnToBaseStr(await onChain.getUserBankBalance()))
 
-  const usdcAmount = 10000
   const coinObj = await onChain.getUSDCoinHavingBalance({
     amount: usdcAmount
   })
@@ -62,4 +66,3 @@ async function main() {
 }
 
 main()
-
