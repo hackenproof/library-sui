@@ -29,7 +29,7 @@ export const DeploymentConfigs: DeploymentConfig = {
             defaultLeverage: toBigNumberStr(3),
             minOrderPrice: toBigNumberStr(50),
             maxOrderPrice: toBigNumberStr(50000),
-            tickSize: toBigNumberStr(0.1),
+            tickSize: toBigNumberStr(0.01),
             minTradeQty: toBigNumberStr(0.01),
             maxTradeQtyLimit: toBigNumberStr(1000),
             maxTradeQtyMarket: toBigNumberStr(100),
