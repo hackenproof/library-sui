@@ -24,7 +24,11 @@ import {
     toBigNumberStr,
     usdcToBaseNumber
 } from "../library";
-import { BASE_DECIMALS_ON_CHAIN, SUI_NATIVE_BASE, USDC_BASE_DECIMALS } from "../constants";
+import {
+    BASE_DECIMALS_ON_CHAIN,
+    SUI_NATIVE_BASE,
+    USDC_BASE_DECIMALS
+} from "../constants";
 import { BigNumberable } from "../types";
 
 export class OnChainCalls {
@@ -186,7 +190,7 @@ export class OnChainCalls {
     public async setMinPrice(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             minPrice: number;
             gasBudget?: number;
         },
@@ -197,7 +201,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(toBigNumberStr(args.minPrice));
 
         return this.signAndCall(
@@ -212,7 +216,7 @@ export class OnChainCalls {
     public async setMaxPrice(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             maxPrice: number;
             gasBudget?: number;
         },
@@ -223,7 +227,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(toBigNumberStr(args.maxPrice));
 
         return this.signAndCall(
@@ -238,7 +242,7 @@ export class OnChainCalls {
     public async setStepSize(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             stepSize: number;
             gasBudget?: number;
         },
@@ -249,7 +253,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(toBigNumberStr(args.stepSize));
 
         return this.signAndCall(
@@ -264,7 +268,7 @@ export class OnChainCalls {
     public async setTickSize(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             tickSize: number;
             gasBudget?: number;
         },
@@ -275,7 +279,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(toBigNumberStr(args.tickSize));
 
         return this.signAndCall(
@@ -290,7 +294,7 @@ export class OnChainCalls {
     public async setMTBLong(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             mtbLong: number;
             gasBudget?: number;
         },
@@ -301,7 +305,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(toBigNumberStr(args.mtbLong));
 
         return this.signAndCall(
@@ -316,7 +320,7 @@ export class OnChainCalls {
     public async setMTBShort(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             mtbShort: number;
             gasBudget?: number;
         },
@@ -327,7 +331,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(toBigNumberStr(args.mtbShort));
 
         return this.signAndCall(
@@ -342,7 +346,7 @@ export class OnChainCalls {
     public async setMaxQtyLimit(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             maxQtyLimit: number;
             gasBudget?: number;
         },
@@ -353,7 +357,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(toBigNumberStr(args.maxQtyLimit));
 
         return this.signAndCall(
@@ -368,7 +372,7 @@ export class OnChainCalls {
     public async setMaxQtyMarket(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             maxQtyMarket: number;
             gasBudget?: number;
         },
@@ -379,7 +383,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(toBigNumberStr(args.maxQtyMarket));
 
         return this.signAndCall(
@@ -394,7 +398,7 @@ export class OnChainCalls {
     public async setMinQty(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             minQty: number;
             gasBudget?: number;
         },
@@ -405,7 +409,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(toBigNumberStr(args.minQty));
 
         return this.signAndCall(
@@ -420,7 +424,7 @@ export class OnChainCalls {
     public async setMaxAllowedOIOpen(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             maxLimit: string[];
             gasBudget?: number;
         },
@@ -431,7 +435,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(args.maxLimit);
 
         return this.signAndCall(
@@ -446,7 +450,7 @@ export class OnChainCalls {
     public async setMaintenanceMarginRequired(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             mmr: string;
             gasBudget?: number;
         },
@@ -457,7 +461,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(args.mmr);
 
         return this.signAndCall(
@@ -472,7 +476,7 @@ export class OnChainCalls {
     public async setInitialMarginRequired(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             imr: string;
             gasBudget?: number;
         },
@@ -483,7 +487,8 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
+
         callArgs.push(args.imr);
 
         return this.signAndCall(
@@ -548,7 +553,7 @@ export class OnChainCalls {
     public async setFeePoolAddress(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             address: string;
             gasBudget?: number;
         },
@@ -558,7 +563,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(args.address);
 
         return this.signAndCall(
@@ -573,7 +578,7 @@ export class OnChainCalls {
     public async setInsurancePoolAddress(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             address: string;
             gasBudget?: number;
         },
@@ -583,7 +588,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(args.address);
 
         return this.signAndCall(
@@ -598,7 +603,7 @@ export class OnChainCalls {
     public async setInsurancePoolPercentage(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             percentage: number;
             gasBudget?: number;
         },
@@ -608,7 +613,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(toBigNumberStr(args.percentage));
 
         return this.signAndCall(
@@ -623,7 +628,7 @@ export class OnChainCalls {
     public async setMaxAllowedFundingRate(
         args: {
             adminID?: string;
-            perpID?: string;
+            market?: string;
             maxFundingRate: number;
             gasBudget?: number;
         },
@@ -633,7 +638,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(toBigNumberStr(args.maxFundingRate));
 
         return this.signAndCall(
@@ -670,7 +675,7 @@ export class OnChainCalls {
         const callArgs = [];
         callArgs.push(SUI_CLOCK_OBJECT_ID);
 
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(args.perpID || this.getPerpetualID(args.market));
         callArgs.push(args.bankID || this.getBankID());
         callArgs.push(args.safeID || this.getSafeID());
         callArgs.push(args.settlementCapID || this.settlementCap);
@@ -702,8 +707,8 @@ export class OnChainCalls {
             args.fillQuantity
                 ? args.fillQuantity.toFixed(0)
                 : args.makerOrder.quantity.lte(args.takerOrder.quantity)
-                    ? args.makerOrder.quantity.toFixed(0)
-                    : args.takerOrder.quantity.toFixed(0)
+                ? args.makerOrder.quantity.toFixed(0)
+                : args.takerOrder.quantity.toFixed(0)
         );
 
         callArgs.push(
@@ -720,7 +725,6 @@ export class OnChainCalls {
             undefined,
             [this.getCurrencyType()]
         );
-
     }
 
     public async batchTrade(
@@ -752,7 +756,7 @@ export class OnChainCalls {
                 target: `${this.getPackageID()}::exchange::trade`,
                 arguments: [
                     txBlock.object(SUI_CLOCK_OBJECT_ID),
-                    txBlock.object(arg.perpID || this.getPerpetualID()),
+                    txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
                     txBlock.object(arg.bankID || this.getBankID()),
                     txBlock.object(arg.safeID || this.getSafeID()),
                     txBlock.object(arg.settlementCapID || this.settlementCap),
@@ -782,8 +786,8 @@ export class OnChainCalls {
                         arg.fillQuantity
                             ? arg.fillQuantity.toFixed(0)
                             : arg.makerOrder.quantity.lte(arg.takerOrder.quantity)
-                                ? arg.makerOrder.quantity.toFixed(0)
-                                : arg.takerOrder.quantity.toFixed(0)
+                            ? arg.makerOrder.quantity.toFixed(0)
+                            : arg.takerOrder.quantity.toFixed(0)
                     ),
 
                     txBlock.pure(
@@ -827,7 +831,7 @@ export class OnChainCalls {
 
         const callArgs = [];
         callArgs.push(SUI_CLOCK_OBJECT_ID);
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(args.perpID || this.getPerpetualID(args.market));
         callArgs.push(this.getBankID());
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
 
@@ -872,7 +876,7 @@ export class OnChainCalls {
                 target: `${this.getPackageID()}::exchange::liquidate`,
                 arguments: [
                     txBlock.object(SUI_CLOCK_OBJECT_ID),
-                    txBlock.object(arg.perpID || this.getPerpetualID()),
+                    txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
                     txBlock.object(this.getBankID()),
                     txBlock.object(arg.subAccountsMapID || this.getSubAccountsID()),
 
@@ -916,7 +920,7 @@ export class OnChainCalls {
 
         const callArgs = [];
         callArgs.push(SUI_CLOCK_OBJECT_ID);
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(args.perpID || this.getPerpetualID(args.market));
         callArgs.push(this.getBankID());
         callArgs.push(args.safeID || this.getSafeID());
         callArgs.push(args.deleveragingCapID || this.getDeleveragingCapID());
@@ -960,7 +964,7 @@ export class OnChainCalls {
                 target: `${this.getPackageID()}::exchange::deleverage`,
                 arguments: [
                     txBlock.object(SUI_CLOCK_OBJECT_ID),
-                    txBlock.object(arg.perpID || this.getPerpetualID()),
+                    txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
                     txBlock.object(this.getBankID()),
                     txBlock.object(arg.safeID || this.getSafeID()),
                     txBlock.object(arg.deleveragingCapID || this.getDeleveragingCapID()),
@@ -1000,7 +1004,7 @@ export class OnChainCalls {
         const caller = signer || this.signer;
 
         const callArgs = [];
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(args.perpID || this.getPerpetualID(args.market));
         callArgs.push(this.getBankID());
 
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
@@ -1034,7 +1038,7 @@ export class OnChainCalls {
 
         const callArgs = [];
 
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(args.perpID || this.getPerpetualID(args.market));
         callArgs.push(this.getBankID());
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(args.account || (await caller.getAddress()));
@@ -1067,7 +1071,7 @@ export class OnChainCalls {
 
         const callArgs = [];
 
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(args.perpID || this.getPerpetualID(args.market));
         callArgs.push(this.getBankID());
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(args.account || (await caller.getAddress()));
@@ -1140,7 +1144,7 @@ export class OnChainCalls {
         callArgs.push(SUI_CLOCK_OBJECT_ID);
         callArgs.push(args.safeID || this.getSafeID());
         callArgs.push(args.updateFRCapID || this.getFROperatorCapID());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(args.perpID || this.getPerpetualID(args.market));
         callArgs.push(args.rate.absoluteValue().toString());
         callArgs.push(args.rate.isPositive());
         callArgs.push(this.getPriceOracleObjectId(args.market));
@@ -1274,7 +1278,7 @@ export class OnChainCalls {
     public async setPerpetualTradingPermit(
         args: {
             isPermitted: boolean;
-            perpID?: string;
+            market?: string;
             safeID?: string;
             guardianCap?: string;
             gasBudget?: number;
@@ -1287,7 +1291,7 @@ export class OnChainCalls {
 
         callArgs.push(args.safeID || this.getSafeID());
         callArgs.push(args.guardianCap || this.getGuardianCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(args.isPermitted);
 
         return this.signAndCall(
@@ -1355,7 +1359,7 @@ export class OnChainCalls {
     public async delistPerpetual(
         args: {
             price: string;
-            perpID?: string;
+            market?: string;
             adminID?: string;
             gasBudget?: number;
         },
@@ -1366,7 +1370,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.perpID || this.getPerpetualID());
+        callArgs.push(this.getPerpetualID(args.market));
         callArgs.push(args.price);
 
         return this.signAndCall(
@@ -1401,7 +1405,6 @@ export class OnChainCalls {
             args?.gasBudget,
             undefined,
             [this.getCurrencyType()]
-
         );
     }
 
@@ -1568,17 +1571,18 @@ export class OnChainCalls {
         const txb = new TransactionBlock();
 
         const transferAmount = toBigNumber(args.balance, SUI_NATIVE_BASE);
-        const existingBalance = BigNumber(await this.getUserSuiBalance(await caller.getAddress()));
+        const existingBalance = BigNumber(
+            await this.getUserSuiBalance(await caller.getAddress())
+        );
 
         if (existingBalance.lte(transferAmount)) {
-            throw new Error('owner has not enough sui tokens to transfer')
+            throw new Error("owner has not enough sui tokens to transfer");
         }
 
         // First, split the gas coin into multiple coins using gas coin:
-        const coin = txb.splitCoins(
-            txb.gas,
-            [txb.pure(toBigNumber(args.balance, SUI_NATIVE_BASE))]
-        );
+        const coin = txb.splitCoins(txb.gas, [
+            txb.pure(toBigNumber(args.balance, SUI_NATIVE_BASE))
+        ]);
         txb.transferObjects([coin], txb.pure(args.to));
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: txb,
