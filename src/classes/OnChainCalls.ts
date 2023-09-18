@@ -720,6 +720,7 @@ export class OnChainCalls {
             undefined,
             [this.getCurrencyType()]
         );
+
     }
 
     public async batchTrade(
@@ -1400,6 +1401,7 @@ export class OnChainCalls {
             args?.gasBudget,
             undefined,
             [this.getCurrencyType()]
+
         );
     }
 
