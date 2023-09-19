@@ -1474,8 +1474,6 @@ export class OnChainCalls {
         args: {
             price: number;
             confidence?: string;
-            priceInfoFeedId: string;
-            pythPackageId: string;
             market?: string;
         },
         signer?: RawSigner
@@ -1483,11 +1481,12 @@ export class OnChainCalls {
         const caller = signer || this.signer;
 
         const callArgs = [];
-        callArgs.push(this.getPriceOracleObjectId(args.market || "ETH-PERP"));
+        const pythPkg = this.getPythPkgId(args.market);
+        callArgs.push(this.getPriceOracleObjectId(args.market));
         callArgs.push(SUI_CLOCK_OBJECT_ID);
         callArgs.push(args.price * 1e6);
         callArgs.push(args.confidence || "10");
-        callArgs.push(hexToString(args.priceInfoFeedId));
+        callArgs.push(hexToString(this.getPriceOracleFeedId(args.market)));
 
         return this.signAndCall(
             caller,
@@ -1495,7 +1494,7 @@ export class OnChainCalls {
             callArgs,
             "price_info",
             undefined,
-            args.pythPackageId
+            pythPkg
         );
     }
 
@@ -1801,6 +1800,16 @@ export class OnChainCalls {
 
     getPriceOracleObjectId(market = "ETH-PERP"): string {
         return this.deployment["markets"][market]["Objects"]["PriceOracle"]["id"];
+    }
+
+    getPriceOracleFeedId(market = "ETH-PERP"): string {
+        return this.deployment["markets"][market]["Config"]["priceInfoFeedId"];
+    }
+
+    getPythPkgId(market = "ETH-PERP"): string {
+        return this.deployment["markets"][market]["Objects"]["PriceOracle"][
+            "dataType"
+        ].split("::")[0];
     }
 
     getBankID(): string {
