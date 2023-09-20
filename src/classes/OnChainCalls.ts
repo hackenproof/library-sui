@@ -727,6 +727,7 @@ export class OnChainCalls {
         );
     }
 
+
     public async batchTrade(
         args: {
             makerOrder: Order;
@@ -805,6 +806,99 @@ export class OnChainCalls {
 
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: txBlock,
+            options: {
+                showObjectChanges: true,
+                showEffects: true,
+                showEvents: true,
+                showInput: true
+            }
+        });
+    }
+
+    public async buildBatchTradeTxBlock(
+        args: {
+            makerOrder: Order;
+            makerSignature: string;
+            makerPublicKey: string;
+            takerOrder: Order;
+            takerSignature: string;
+            takerPublicKey: string;
+            settlementCapID?: string;
+            fillPrice?: BigNumber;
+            fillQuantity?: BigNumber;
+            perpID?: string;
+            safeID?: string;
+            bankID?: string;
+            subAccountsMapID?: string;
+            market?: string;
+        }[],
+        gasBudget?: number,
+    ): Promise<TransactionBlock> {
+
+        const txBlock = new TransactionBlock();
+
+        for (const arg of args) {
+            txBlock.moveCall({
+                target: `${this.getPackageID()}::exchange::trade`,
+                arguments: [
+                    txBlock.object(SUI_CLOCK_OBJECT_ID),
+                    txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
+                    txBlock.object(arg.bankID || this.getBankID()),
+                    txBlock.object(arg.safeID || this.getSafeID()),
+                    txBlock.object(arg.settlementCapID || this.settlementCap),
+                    txBlock.object(arg.subAccountsMapID || this.getSubAccountsID()),
+                    txBlock.object(this.getOrdersTableID()),
+                    txBlock.pure(encodeOrderFlags(arg.makerOrder)),
+                    txBlock.pure(arg.makerOrder.price.toFixed(0)),
+                    txBlock.pure(arg.makerOrder.quantity.toFixed(0)),
+                    txBlock.pure(arg.makerOrder.leverage.toFixed(0)),
+                    txBlock.pure(arg.makerOrder.expiration.toFixed(0)),
+                    txBlock.pure(arg.makerOrder.salt.toFixed(0)),
+                    txBlock.pure(arg.makerOrder.maker),
+                    txBlock.pure(Array.from(hexStrToUint8(arg.makerSignature))),
+                    txBlock.pure(Array.from(base64ToUint8(arg.makerPublicKey))),
+
+                    txBlock.pure(encodeOrderFlags(arg.takerOrder)),
+                    txBlock.pure(arg.takerOrder.price.toFixed(0)),
+                    txBlock.pure(arg.takerOrder.quantity.toFixed(0)),
+                    txBlock.pure(arg.takerOrder.leverage.toFixed(0)),
+                    txBlock.pure(arg.takerOrder.expiration.toFixed(0)),
+                    txBlock.pure(arg.takerOrder.salt.toFixed(0)),
+                    txBlock.pure(arg.takerOrder.maker),
+                    txBlock.pure(Array.from(hexStrToUint8(arg.takerSignature))),
+                    txBlock.pure(Array.from(base64ToUint8(arg.takerPublicKey))),
+
+                    txBlock.pure(
+                        arg.fillQuantity
+                            ? arg.fillQuantity.toFixed(0)
+                            : arg.makerOrder.quantity.lte(arg.takerOrder.quantity)
+                            ? arg.makerOrder.quantity.toFixed(0)
+                            : arg.takerOrder.quantity.toFixed(0)
+                    ),
+
+                    txBlock.pure(
+                        arg.fillPrice
+                            ? arg.fillPrice.toFixed(0)
+                            : arg.makerOrder.price.toFixed(0)
+                    ),
+                    txBlock.object(this.getPriceOracleObjectId(arg.market))
+                ],
+                typeArguments: [this.getCurrencyType()]
+            });
+        }
+
+        if (gasBudget) txBlock.setGasBudget(gasBudget);
+
+        return txBlock;
+
+    }
+
+    public async executeTxBlock(block:TransactionBlock, signer?:RawSigner): Promise<SuiTransactionBlockResponse> {
+
+        const caller = signer || this.signer;
+
+        return caller.signAndExecuteTransactionBlock({
+            transactionBlock: block,
             options: {
                 showObjectChanges: true,
                 showEffects: true,
