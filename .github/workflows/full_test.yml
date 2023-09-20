@@ -1,8 +1,8 @@
 name: build test
 
-on:
-    pull_request:
-        branches: [main]
+# on:
+#     pull_request:
+#         branches: [main]
 
 jobs:
     clone-bluefin-repo:

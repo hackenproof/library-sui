@@ -163,9 +163,9 @@ export class OrderSigner {
             return this.verifySECP(signature, sha256(encodedData), pkBytes);
         } else if (char == SIGNER_TYPES.KP_ED25519 || char == SIGNER_TYPES.UI_ED25519) {
             return ed25519.verify(signature, encodedData, pkBytes);
+        } else {
+            throw "Invalid signature type";
         }
-
-        return true;
     }
 
     /**

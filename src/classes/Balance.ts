@@ -1,7 +1,11 @@
 import BigNumber from "bignumber.js";
 import { UserPosition, UserPositionExtended } from "../interfaces";
 import { toBaseNumber } from "../library";
-import { BASE_DECIMALS_ON_CHAIN, BIGNUMBER_BASE, BIGNUMBER_BASE_ON_CHAIN } from "../constants";
+import {
+    BASE_DECIMALS_ON_CHAIN,
+    BIGNUMBER_BASE,
+    BIGNUMBER_BASE_ON_CHAIN
+} from "../constants";
 import { BigNumberable } from "../types";
 export class Balance {
     public mro: BigNumber;
