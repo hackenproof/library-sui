@@ -796,7 +796,8 @@ export class OnChainCalls {
                             : arg.makerOrder.price.toFixed(0)
                     ),
                     txBlock.object(this.getPriceOracleObjectId(arg.market))
-                ]
+                ],
+                typeArguments: [this.getCurrencyType()]
             });
         }
 
@@ -886,7 +887,8 @@ export class OnChainCalls {
                     txBlock.pure(arg.leverage),
                     txBlock.pure(arg.allOrNothing === true),
                     txBlock.object(this.getPriceOracleObjectId(arg.market))
-                ]
+                ],
+                typeArguments: [this.getCurrencyType()]
             });
         }
         if (gasBudget) txBlock.setGasBudget(gasBudget);
@@ -974,7 +976,8 @@ export class OnChainCalls {
                     txBlock.pure(arg.quantity),
                     txBlock.pure(arg.allOrNothing === true),
                     txBlock.object(this.getPriceOracleObjectId(arg.market))
-                ]
+                ],
+                typeArguments: [this.getCurrencyType()]
             });
         }
         if (gasBudget) txBlock.setGasBudget(gasBudget);
