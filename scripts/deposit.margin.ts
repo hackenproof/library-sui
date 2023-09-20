@@ -58,11 +58,15 @@ async function main() {
         },
         ownerSigner
       );
-      console.log("tx result = %o", txResult)
       const bankBalanceUpdateEvent = Transaction.getEvents(
           txResult,
           "BankBalanceUpdate"
       )[0];
+      if(!bankBalanceUpdateEvent) {
+        console.error("transaction failed %o", txResult);
+        process.exit(1);
+      }
+      console.log("tx result = %o", txResult)
       console.log("bank balance update event %o = ", bankBalanceUpdateEvent);
 
       console.log("after credit")
