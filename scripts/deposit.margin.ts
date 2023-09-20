@@ -25,8 +25,6 @@ const Config = {
 }
 
 async function main() {
-
-  // 997909000, 996909000
   const recepients = [
     "0x748c14178781e3ece2f0d8e243699873f963baba727c86f1b17e1a53fb59f1be",
   ]
@@ -37,7 +35,6 @@ async function main() {
   const onChain = new OnChainCalls(ownerSigner, deployment);
 
   const usdcAmount = 1000000
-
   console.log("deployer usdc balance %o", await onChain.getUSDCBalance())
   console.log("deployer margin bank balance %o", bnToBaseStr(await onChain.getUserBankBalance()))
 
@@ -50,13 +47,14 @@ async function main() {
       console.log("recepient usdc balance %o", await onChain.getUSDCBalance({
         address: recepientAddress,
       }))
-      console.log("recepient margin bank balance %o", bnToBaseStr(await onChain.getUserBankBalance(recepientAddress)))    
+      console.log("recepient margin bank balance %o", bnToBaseStr(await onChain.getUserBankBalance(recepientAddress), USDC_BASE_DECIMALS))    
 
       const txResult = await onChain.depositToBank(
         {
             coinID: coinObj.coinObjectId,
             amount: toBigNumberStr(usdcAmount, USDC_BASE_DECIMALS),
             accountAddress: recepientAddress,
+            gasBudget: 10000000,
         },
         ownerSigner
       );
