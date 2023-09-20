@@ -14,39 +14,44 @@ import {
 const Config = {
   SUI_TESTNET : {
     provider: "https://api.shinami.com/node/v1//sui_testnet_0d359e0ce3682c1f5d0cab31de9d151b",
-    deploymentPath : "./scripts/deployment.staging.json"
+    deploymentPath : "./scripts/deployment.staging.json",
+    deployerSeed: "basket trim bicycle ticket penalty window tunnel fit insane orange virtual tennis"
   },
   SUI_MAINNET : {
     provider: "https://fullnode.mainnet.sui.io:443",
-    deploymentPath : "./scripts/deployment.prod.json"
+    deploymentPath : "./scripts/deployment.prod.json",
+    deployerSeed: "basket trim bicycle ticket penalty window tunnel fit insane orange virtual tennis"
   }
 }
 
 async function main() {
 
+  // 997909000, 996909000
   const recepients = [
-    "0xb88a385c92c90f2d2e525b74adf64ebed61cb0c29016e995c4758b7cf7b4efc5",
-    "0x22d6456c2ec3ebdcdc513dd5ccc50f1ef197549aab81d03c7a5dba91e9a26a02",
-    "0x28c7e39a04d281d5f0a5e15ce50b54d3f0ee8b7dcab556dc709ede22d1704ed8",
-    "0xadefbe39c57912cd7d3a156e4b0b88599c5c91a8b13fcb52226f2d2f3dfe7ede",
+    "0x748c14178781e3ece2f0d8e243699873f963baba727c86f1b17e1a53fb59f1be",
   ]
 
   const deployment = readFile(Config.SUI_MAINNET.deploymentPath) as DeploymentConfig;
   const provider = getProvider(Config.SUI_MAINNET.provider);
-  const deployerSeed = "royal reopen journey royal enlist vote core cluster shield slush hill sample"
-  const ownerSigner = getSignerFromSeed(deployerSeed, provider);
+  const ownerSigner = getSignerFromSeed(Config.SUI_MAINNET.deployerSeed, provider);
   const onChain = new OnChainCalls(ownerSigner, deployment);
 
   const usdcAmount = 1000000
 
-  console.log("usdc balance of the deployer %o", await onChain.getUSDCBalance())
-  console.log("bank balance of the deployer %o", bnToBaseStr(await onChain.getUserBankBalance()))
+  console.log("deployer usdc balance %o", await onChain.getUSDCBalance())
+  console.log("deployer margin bank balance %o", bnToBaseStr(await onChain.getUserBankBalance()))
 
   const coinObj = await onChain.getUSDCoinHavingBalance({
     amount: usdcAmount
   })
   if(coinObj) {
     for(const recepientAddress of recepients) {
+      console.log("before credit")
+      console.log("recepient usdc balance %o", await onChain.getUSDCBalance({
+        address: recepientAddress,
+      }))
+      console.log("recepient margin bank balance %o", bnToBaseStr(await onChain.getUserBankBalance(recepientAddress)))    
+
       const txResult = await onChain.depositToBank(
         {
             coinID: coinObj.coinObjectId,
@@ -61,6 +66,12 @@ async function main() {
           "BankBalanceUpdate"
       )[0];
       console.log("bank balance update event %o = ", bankBalanceUpdateEvent);
+
+      console.log("after credit")
+      console.log("recepient usdc balance %o", await onChain.getUSDCBalance({
+        address: recepientAddress,
+      }))
+      console.log("recepient margin bank balance %o", bnToBaseStr(await onChain.getUserBankBalance(recepientAddress)))    
       }
   }
 }
