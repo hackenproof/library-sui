@@ -7,6 +7,7 @@ import {
     Keypair,
     RawSigner,
     SuiTransactionBlockResponse,
+    DryRunTransactionBlockResponse,
     TransactionBlock,
     OwnedObjectRef,
     getSuiObjectData
@@ -67,6 +68,7 @@ export {
     RawSigner,
     BigNumber,
     SuiTransactionBlockResponse,
+    DryRunTransactionBlockResponse,
     TransactionBlock,
     OwnedObjectRef,
     getSuiObjectData

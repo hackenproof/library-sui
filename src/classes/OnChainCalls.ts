@@ -3,6 +3,7 @@ import {
     SignerWithProvider,
     SuiObjectResponse,
     SuiTransactionBlockResponse,
+    DryRunTransactionBlockResponse,
     TransactionBlock,
     SUI_CLOCK_OBJECT_ID
 } from "@mysten/sui.js";
@@ -949,7 +950,8 @@ export class OnChainCalls {
         );
     }
 
-    public async batchLiquidate(
+
+    public async getBatchLiquidationTransactionBlock(
         args: {
             perpID?: string;
             liquidatee: string;
@@ -963,7 +965,7 @@ export class OnChainCalls {
         }[],
         gasBudget?: number,
         signer?: RawSigner
-    ): Promise<SuiTransactionBlockResponse> {
+    ): Promise<TransactionBlock> {
         const caller = signer || this.signer;
         const txBlock = new TransactionBlock();
         for (const arg of args) {
@@ -986,7 +988,26 @@ export class OnChainCalls {
             });
         }
         if (gasBudget) txBlock.setGasBudget(gasBudget);
+        return txBlock;
+    }
 
+    public async batchLiquidate(
+        args: {
+            perpID?: string;
+            liquidatee: string;
+            quantity: string;
+            leverage: string;
+            liquidator?: string;
+            allOrNothing?: boolean;
+            subAccountsMapID?: string;
+            gasBudget?: number;
+            market?: string;
+        }[],
+        gasBudget?: number,
+        signer?: RawSigner
+    ): Promise<SuiTransactionBlockResponse> {
+        const caller = signer || this.signer;
+        const txBlock = this.getBatchLiquidationTransactionBlock(args, gasBudget, signer);
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: txBlock,
             options: {
@@ -995,6 +1016,14 @@ export class OnChainCalls {
                 showEvents: true,
                 showInput: true
             }
+        });
+    }
+
+    public async dryRun(txBlock:TransactionBlock,
+                        signer?: RawSigner): Promise<DryRunTransactionBlockResponse>{
+        const caller = signer || this.signer;
+        return caller.dryRunTransactionBlock({
+            transactionBlock: txBlock
         });
     }
 
