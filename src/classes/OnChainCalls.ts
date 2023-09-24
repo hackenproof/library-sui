@@ -728,7 +728,6 @@ export class OnChainCalls {
         );
     }
 
-
     public async batchTrade(
         args: {
             makerOrder: Order;
@@ -833,9 +832,8 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             market?: string;
         }[],
-        gasBudget?: number,
+        gasBudget?: number
     ): Promise<TransactionBlock> {
-
         const txBlock = new TransactionBlock();
 
         for (const arg of args) {
@@ -891,11 +889,12 @@ export class OnChainCalls {
         if (gasBudget) txBlock.setGasBudget(gasBudget);
 
         return txBlock;
-
     }
 
-    public async executeTxBlock(block:TransactionBlock, signer?:RawSigner): Promise<SuiTransactionBlockResponse> {
-
+    public async executeTxBlock(
+        block: TransactionBlock,
+        signer?: RawSigner
+    ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
         return caller.signAndExecuteTransactionBlock({
@@ -949,7 +948,6 @@ export class OnChainCalls {
             [this.getCurrencyType()]
         );
     }
-
 
     public async getBatchLiquidationTransactionBlock(
         args: {
@@ -1019,8 +1017,10 @@ export class OnChainCalls {
         });
     }
 
-    public async dryRun(txBlock:TransactionBlock,
-                        signer?: RawSigner): Promise<DryRunTransactionBlockResponse>{
+    public async dryRun(
+        txBlock: TransactionBlock,
+        signer?: RawSigner
+    ): Promise<DryRunTransactionBlockResponse> {
         const caller = signer || this.signer;
         return caller.dryRunTransactionBlock({
             transactionBlock: txBlock

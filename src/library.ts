@@ -3,6 +3,7 @@ import { Order, OrderFlags } from "./interfaces";
 import { BASE_DECIMALS, USDC_BASE_DECIMALS } from "./constants";
 import { SignedNumber, BigNumberable, SigPK } from "./types";
 import _ from "lodash";
+import { Ed25519PublicKey, Secp256k1PublicKey, SignatureScheme } from "@mysten/sui.js";
 
 const toBnBase = (base: number) => {
     return new BigNumber(1).shiftedBy(base);
@@ -147,4 +148,25 @@ export function parseSigPK(signature: string): SigPK {
         signature: signature.slice(0, 129),
         publicKey: signature.slice(129)
     };
+}
+
+export function getSuiAddressFromSigPk(sigPk: SigPK): string {
+    const isSecpWallet = sigPk.signature[sigPk.signature.length - 1] == "0";
+    return isSecpWallet
+        ? getSuiAddressFromPublicKey(sigPk.publicKey, "Secp256k1")
+        : getSuiAddressFromPublicKey(sigPk.publicKey, "ED25519");
+}
+
+export function getSuiAddressFromPublicKey(
+    publicKey: string | Uint8Array,
+    scheme: SignatureScheme
+) {
+    switch (scheme) {
+        case "ED25519":
+            return new Ed25519PublicKey(publicKey).toSuiAddress();
+        case "Secp256k1":
+            return new Secp256k1PublicKey(publicKey).toSuiAddress();
+        default:
+            throw new Error("Provided scheme is invalid");
+    }
 }
