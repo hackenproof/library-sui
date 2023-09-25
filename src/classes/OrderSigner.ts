@@ -135,10 +135,11 @@ export class OrderSigner {
 
     private static encodePayload(payload: unknown): Uint8Array {
         const msgBytes = new TextEncoder().encode(JSON.stringify(payload));
+        const size = 1024 + Math.floor(msgBytes.length / 1024) * 1024;
 
         const intentMsg = messageWithIntent(
             IntentScope.PersonalMessage,
-            bcs.ser(["vector", "u8"], msgBytes).toBytes()
+            bcs.ser(["vector", "u8"], msgBytes, {size}).toBytes()
         );
         const encodeData = blake2b(intentMsg, { dkLen: 32 });
 
@@ -203,6 +204,8 @@ export class OrderSigner {
 
             return ed25519.verify(signature, signedData, pkBytes);
         }
+
+        return false;
     }
 
     public static verifySECP(
