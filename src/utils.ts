@@ -45,6 +45,24 @@ export function getKeyPairFromSeed(
     }
 }
 
+export function getKeyPairFromPvtKey (
+    key: string,
+    scheme: SignatureScheme = "Secp256k1"
+  ): Keypair {
+
+    if (key.startsWith("0x")) {
+      key = key.substring(2); // Remove the first two characters (0x)
+    }
+    switch (scheme) {
+      case "ED25519":
+        return Ed25519Keypair.fromSecretKey(Buffer.from(key, "hex"));
+      case "Secp256k1":
+        return Secp256k1Keypair.fromSecretKey(Buffer.from(key, "hex"));
+      default:
+        throw new Error("Provided key is invalid");
+    }
+  }
+
 export function getSignerFromKeyPair(
     keypair: Keypair,
     provider: JsonRpcProvider
