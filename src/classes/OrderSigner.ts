@@ -139,7 +139,7 @@ export class OrderSigner {
 
         const intentMsg = messageWithIntent(
             IntentScope.PersonalMessage,
-            bcs.ser(["vector", "u8"], msgBytes, {size}).toBytes()
+            bcs.ser(["vector", "u8"], msgBytes, { size }).toBytes()
         );
         const encodeData = blake2b(intentMsg, { dkLen: 32 });
 

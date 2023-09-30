@@ -44,6 +44,26 @@ export function toBaseNumber(
     return Number(new BigNumber(val).shiftedBy(-base).toFixed(decimals));
 }
 
+export function bnMul(
+    a: BigNumberable,
+    b: BigNumberable,
+    base: number = BASE_DECIMALS
+): string {
+    return bigNumber(a).multipliedBy(bigNumber(b)).dividedBy(toBnBase(base)).toFixed(0);
+}
+
+export function bnDiv(
+    a: BigNumberable,
+    b: BigNumberable,
+    base: number = BASE_DECIMALS
+): string {
+    return bigNumber(a).multipliedBy(toBnBase(base)).dividedBy(bigNumber(b)).toFixed(0);
+}
+
+export function bnToString(val: BigNumberable): string {
+    return new BigNumber(val).toFixed(0);
+}
+
 export function bnToHex(bn: BigNumber | number, pad = 32): string {
     // u128 on chain = 16 bytes = 32 hex characters (2 char / byte)
     // u64 on chain = 8 bytes = 16 hex characters (2 char / byte)
