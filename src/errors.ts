@@ -114,5 +114,6 @@ export const ERROR_CODES: { [key: string]: string } = {
     "900": "New address can not be same as current one",
     "901": "Funding rate is not settable for 0th window",
     "902": "Funding rate for current window is already set",
-    "903": "Wrong Price Identifier"
+    "903": "Wrong Price Identifier",
+    "904": "FR must be <= max allowed funding rate"
 };

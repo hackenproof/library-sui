@@ -13,7 +13,8 @@ import {
     UserPosition,
     Order,
     PerpCreationMarketDetails,
-    BankAccountDetails
+    BankAccountDetails,
+    Operator
 } from "../interfaces";
 import {
     base64ToUint8,
@@ -1938,8 +1939,16 @@ export class OnChainCalls {
         ].split("::")[0];
     }
 
+    getSettlementOperators(): Operator[]{
+        return this.deployment["objects"]["settlementOperators"] || [];
+    }
+
     getBankID(): string {
         return this.deployment["objects"]["Bank"].id;
+    }
+
+    getUpgradeCapID(): string {
+        return this.deployment["objects"]["UpgradeCap"].id;
     }
 
     getSafeID(): string {

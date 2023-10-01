@@ -1,3 +1,4 @@
+import { SuiAddress } from "@mysten/sui.js";
 import BigNumber from "bignumber.js";
 
 export interface wallet {
@@ -21,4 +22,12 @@ export interface UserPositionExtended extends UserPosition {
 export interface BankAccountDetails {
     address: string;
     balance: BigNumber;
+}
+
+
+export interface Operator {
+    address: SuiAddress,
+    phrase: string,
+    privateKey:string,
+    capID: SuiAddress
 }
