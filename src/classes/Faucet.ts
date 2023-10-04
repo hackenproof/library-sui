@@ -83,10 +83,7 @@ export class Faucet {
                 });
             }
 
-            // TODO: implement a method to get the coin with balance > amt
-            // assuming 0th index coin will have balance > amount
-            const usdcCoins = await onChain.getUSDCCoins({ address: ownerAddress });
-            coin = usdcCoins.data.pop();
+            coin = await onChain.getUSDCoinHavingBalance({amount:amt});
         }
 
         // transferring from owners usdc coin to receiver
