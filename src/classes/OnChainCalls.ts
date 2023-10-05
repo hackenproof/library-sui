@@ -779,7 +779,6 @@ export class OnChainCalls {
                         txBlock.pure(arg.makerOrder.maker),
                         txBlock.pure(Array.from(hexStrToUint8(arg.makerSignature))),
                         txBlock.pure(Array.from(base64ToUint8(arg.makerPublicKey))),
-
                         txBlock.pure(encodeOrderFlags(arg.takerOrder)),
                         txBlock.pure(arg.takerOrder.price.toFixed(0)),
                         txBlock.pure(arg.takerOrder.quantity.toFixed(0)),
@@ -1690,6 +1689,42 @@ export class OnChainCalls {
         });
 
         return coins;
+    }
+
+    /**
+     * Merges All USDC Coins to single coin
+     * @param coinType [optional] coinType of USDC coin , if not provided will get from deployment json
+     * @param signer the signer object of the wallet that owns USDC coins
+     * @returns transaction result
+     */
+
+    async mergeAllUsdcCoins(coinType?: string, signer?: RawSigner) {
+        const caller = signer || this.signer;
+        const txb = new TransactionBlock();
+        const coins = await caller.provider.getCoins({
+            coinType: coinType || this.getCoinType(),
+            owner: await caller.getAddress()
+        });
+
+        if (coins.length <= 1) {
+            throw new Error("User must have at least two coins to perform merge");
+        }
+
+        const destCoinId = txb.object(coins.data[0].coinObjectId);
+        // Get all source coinIds other than First One (dest Coin)
+        const srcCoinIds = coins.data.slice(1).map((coin: any) => {
+            return txb.object(coin.coinObjectId);
+        });
+        txb.mergeCoins(destCoinId, srcCoinIds);
+        return caller.signAndExecuteTransactionBlock({
+            transactionBlock: txb,
+            options: {
+                showObjectChanges: true,
+                showEffects: true,
+                showEvents: true,
+                showInput: true
+            }
+        });
     }
 
     /**
