@@ -83,7 +83,7 @@ export class Faucet {
                 });
             }
 
-            coin = await onChain.getUSDCoinHavingBalance({amount:amt});
+            coin = await onChain.getUSDCoinHavingBalance({ amount: amt });
         }
 
         // transferring from owners usdc coin to receiver

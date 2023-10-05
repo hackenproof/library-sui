@@ -746,64 +746,71 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             market?: string;
         }[],
-        gasBudget?: number,
-        signer?: RawSigner
+        options: {
+            gasBudget?: number;
+            signer?: RawSigner;
+            transactionBlock?: TransactionBlock;
+        }
     ): Promise<SuiTransactionBlockResponse> {
-        const caller = signer || this.signer;
+        const caller = options.signer || this.signer;
 
-        const txBlock = new TransactionBlock();
+        let txBlock = options.transactionBlock;
 
-        for (const arg of args) {
-            txBlock.moveCall({
-                target: `${this.getPackageID()}::exchange::trade`,
-                arguments: [
-                    txBlock.object(SUI_CLOCK_OBJECT_ID),
-                    txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
-                    txBlock.object(arg.bankID || this.getBankID()),
-                    txBlock.object(arg.safeID || this.getSafeID()),
-                    txBlock.object(arg.settlementCapID || this.settlementCap),
-                    txBlock.object(arg.subAccountsMapID || this.getSubAccountsID()),
-                    txBlock.object(this.getOrdersTableID()),
-                    txBlock.pure(encodeOrderFlags(arg.makerOrder)),
-                    txBlock.pure(arg.makerOrder.price.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.quantity.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.leverage.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.expiration.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.salt.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.maker),
-                    txBlock.pure(Array.from(hexStrToUint8(arg.makerSignature))),
-                    txBlock.pure(Array.from(base64ToUint8(arg.makerPublicKey))),
+        if (!options.transactionBlock) {
+            txBlock = new TransactionBlock();
 
-                    txBlock.pure(encodeOrderFlags(arg.takerOrder)),
-                    txBlock.pure(arg.takerOrder.price.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.quantity.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.leverage.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.expiration.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.salt.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.maker),
-                    txBlock.pure(Array.from(hexStrToUint8(arg.takerSignature))),
-                    txBlock.pure(Array.from(base64ToUint8(arg.takerPublicKey))),
+            for (const arg of args) {
+                txBlock.moveCall({
+                    target: `${this.getPackageID()}::exchange::trade`,
+                    arguments: [
+                        txBlock.object(SUI_CLOCK_OBJECT_ID),
+                        txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
+                        txBlock.object(arg.bankID || this.getBankID()),
+                        txBlock.object(arg.safeID || this.getSafeID()),
+                        txBlock.object(arg.settlementCapID || this.settlementCap),
+                        txBlock.object(arg.subAccountsMapID || this.getSubAccountsID()),
+                        txBlock.object(this.getOrdersTableID()),
+                        txBlock.pure(encodeOrderFlags(arg.makerOrder)),
+                        txBlock.pure(arg.makerOrder.price.toFixed(0)),
+                        txBlock.pure(arg.makerOrder.quantity.toFixed(0)),
+                        txBlock.pure(arg.makerOrder.leverage.toFixed(0)),
+                        txBlock.pure(arg.makerOrder.expiration.toFixed(0)),
+                        txBlock.pure(arg.makerOrder.salt.toFixed(0)),
+                        txBlock.pure(arg.makerOrder.maker),
+                        txBlock.pure(Array.from(hexStrToUint8(arg.makerSignature))),
+                        txBlock.pure(Array.from(base64ToUint8(arg.makerPublicKey))),
 
-                    txBlock.pure(
-                        arg.fillQuantity
-                            ? arg.fillQuantity.toFixed(0)
-                            : arg.makerOrder.quantity.lte(arg.takerOrder.quantity)
-                            ? arg.makerOrder.quantity.toFixed(0)
-                            : arg.takerOrder.quantity.toFixed(0)
-                    ),
+                        txBlock.pure(encodeOrderFlags(arg.takerOrder)),
+                        txBlock.pure(arg.takerOrder.price.toFixed(0)),
+                        txBlock.pure(arg.takerOrder.quantity.toFixed(0)),
+                        txBlock.pure(arg.takerOrder.leverage.toFixed(0)),
+                        txBlock.pure(arg.takerOrder.expiration.toFixed(0)),
+                        txBlock.pure(arg.takerOrder.salt.toFixed(0)),
+                        txBlock.pure(arg.takerOrder.maker),
+                        txBlock.pure(Array.from(hexStrToUint8(arg.takerSignature))),
+                        txBlock.pure(Array.from(base64ToUint8(arg.takerPublicKey))),
 
-                    txBlock.pure(
-                        arg.fillPrice
-                            ? arg.fillPrice.toFixed(0)
-                            : arg.makerOrder.price.toFixed(0)
-                    ),
-                    txBlock.object(this.getPriceOracleObjectId(arg.market))
-                ],
-                typeArguments: [this.getCurrencyType()]
-            });
+                        txBlock.pure(
+                            arg.fillQuantity
+                                ? arg.fillQuantity.toFixed(0)
+                                : arg.makerOrder.quantity.lte(arg.takerOrder.quantity)
+                                ? arg.makerOrder.quantity.toFixed(0)
+                                : arg.takerOrder.quantity.toFixed(0)
+                        ),
+
+                        txBlock.pure(
+                            arg.fillPrice
+                                ? arg.fillPrice.toFixed(0)
+                                : arg.makerOrder.price.toFixed(0)
+                        ),
+                        txBlock.object(this.getPriceOracleObjectId(arg.market))
+                    ],
+                    typeArguments: [this.getCurrencyType()]
+                });
+            }
         }
 
-        if (gasBudget) txBlock.setGasBudget(gasBudget);
+        if (options.gasBudget) txBlock.setGasBudget(options.gasBudget);
 
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: txBlock,
@@ -1939,7 +1946,7 @@ export class OnChainCalls {
         ].split("::")[0];
     }
 
-    getSettlementOperators(): Operator[]{
+    getSettlementOperators(): Operator[] {
         return this.deployment["objects"]["settlementOperators"] || [];
     }
 
