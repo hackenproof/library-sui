@@ -24,10 +24,9 @@ export interface BankAccountDetails {
     balance: BigNumber;
 }
 
-
 export interface Operator {
-    address: SuiAddress,
-    phrase: string,
-    privateKey:string,
-    capID: SuiAddress
+    address: SuiAddress;
+    phrase: string;
+    privateKey: string;
+    capID: SuiAddress;
 }
