@@ -116,5 +116,6 @@ export const ERROR_CODES: { [key: string]: string } = {
     "902": "Funding rate for current window is already set",
     "903": "Wrong Price Identifier",
     "904": "FR must be <= max allowed funding rate",
-    "905": "Object version is not supported by protocol"
+    "905": "Object version is not supported by protocol",
+    "906": "Transaction replay"
 };
