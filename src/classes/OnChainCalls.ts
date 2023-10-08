@@ -1458,7 +1458,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_trading_permit",
+            "set_trading_permit_v2",
             callArgs,
             "perpetual",
             args.gasBudget
