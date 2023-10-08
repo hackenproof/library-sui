@@ -756,78 +756,21 @@ export class OnChainCalls {
             market?: string;
             txHash?: string;
         }[],
-        options: {
+        options?: {
             gasBudget?: number;
             signer?: RawSigner;
             transactionBlock?: TransactionBlock;
         }
     ): Promise<SuiTransactionBlockResponse> {
-        const caller = options.signer || this.signer;
+        const caller = options?.signer || this.signer;
 
-        let txBlock = options.transactionBlock;
+        let txBlock = options?.transactionBlock;
 
-        if (!options.transactionBlock) {
-            txBlock = new TransactionBlock();
-
-            for (const arg of args) {
-
-                const callArgs = [
-                    txBlock.object(SUI_CLOCK_OBJECT_ID),
-                    txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
-                    txBlock.object(arg.bankID || this.getBankID()),
-                    txBlock.object(arg.safeID || this.getSafeID()),
-                    txBlock.object(arg.subAccountsMapID || this.getSubAccountsID()),
-                    txBlock.object(this.getOrdersTableID()),
-                    txBlock.object(this.getSequencer()),
-                    txBlock.object(arg.settlementCapID || this.settlementCap),
-
-                    txBlock.object(this.getPriceOracleObjectId(arg.market)),
-
-                    txBlock.pure(encodeOrderFlags(arg.makerOrder)),
-                    txBlock.pure(arg.makerOrder.price.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.quantity.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.leverage.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.expiration.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.salt.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.maker),
-                    txBlock.pure(Array.from(hexStrToUint8(arg.makerSignature))),
-                    txBlock.pure(Array.from(base64ToUint8(arg.makerPublicKey))),
-                    txBlock.pure(encodeOrderFlags(arg.takerOrder)),
-                    txBlock.pure(arg.takerOrder.price.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.quantity.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.leverage.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.expiration.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.salt.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.maker),
-                    txBlock.pure(Array.from(hexStrToUint8(arg.takerSignature))),
-                    txBlock.pure(Array.from(base64ToUint8(arg.takerPublicKey))),
-
-                    txBlock.pure(
-                        arg.fillQuantity
-                            ? arg.fillQuantity.toFixed(0)
-                            : arg.makerOrder.quantity.lte(arg.takerOrder.quantity)
-                            ? arg.makerOrder.quantity.toFixed(0)
-                            : arg.takerOrder.quantity.toFixed(0)
-                    ),
-
-                    txBlock.pure(
-                        arg.fillPrice
-                            ? arg.fillPrice.toFixed(0)
-                            : arg.makerOrder.price.toFixed(0)
-                    )
-                ]
-
-                callArgs.push(txBlock.pure(arg.txHash || Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString('hex')));
-
-                txBlock.moveCall({                    
-                    target: `${this.getPackageID()}::exchange::trade`,
-                    arguments: callArgs,
-                    typeArguments: [this.getCurrencyType()]
-                });
-            }
+        if (!options?.transactionBlock) {
+            txBlock = await this.buildBatchTradeTxBlock(args);
         }
 
-        if (options.gasBudget) txBlock.setGasBudget(options.gasBudget);
+        if (options?.gasBudget) txBlock.setGasBudget(options.gasBudget);
 
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: txBlock,
