@@ -576,7 +576,9 @@ export class OnChainCalls {
             "set_fee_pool_address_v2",
             callArgs,
             "perpetual",
-            args.gasBudget
+            args.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -601,7 +603,9 @@ export class OnChainCalls {
             "set_insurance_pool_address_v2",
             callArgs,
             "perpetual",
-            args.gasBudget
+            args.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
