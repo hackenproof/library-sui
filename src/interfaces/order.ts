@@ -8,6 +8,7 @@ export interface Order {
     isBuy: boolean;
     reduceOnly: boolean;
     postOnly: boolean;
+    cancelOnRevert?: boolean;
     orderbookOnly: boolean;
     ioc: boolean;
     quantity: BigNumber;
