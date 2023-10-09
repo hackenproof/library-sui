@@ -72,13 +72,16 @@ export class Transaction {
         return events;
     }
 
-    static getCreatedObjectIDs(tx: SuiTransactionBlockResponse, onlyShared?:boolean): string[] {
+    static getCreatedObjectIDs(
+        tx: SuiTransactionBlockResponse,
+        onlyShared?: boolean
+    ): string[] {
         const ids: string[] = [];
         const objects = tx.effects?.created as any[];
         for (const itr in objects) {
-            // if looking for only shared objects 
-            if(onlyShared){
-                if(objects[itr].owner.Shared != undefined)
+            // if looking for only shared objects
+            if (onlyShared) {
+                if (objects[itr].owner.Shared != undefined)
                     ids.push(objects[itr].reference.objectId);
             } else {
                 ids.push(objects[itr].reference.objectId);

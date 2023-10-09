@@ -27,11 +27,14 @@ import {
     usdcToBaseNumber
 } from "../library";
 import {
+    BASE_DECIMALS,
     BASE_DECIMALS_ON_CHAIN,
     SUI_NATIVE_BASE,
     USDC_BASE_DECIMALS
 } from "../constants";
 import { BigNumberable } from "../types";
+import { sha256 } from "@noble/hashes/sha256";
+import { getSalt } from "../utils";
 
 export class OnChainCalls {
     signer: SignerWithProvider | any;
@@ -208,7 +211,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_min_price",
+            "set_min_price_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -234,7 +237,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_max_price",
+            "set_max_price_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -260,7 +263,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_step_size",
+            "set_step_size_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -286,7 +289,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_tick_size",
+            "set_tick_size_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -312,7 +315,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_mtb_long",
+            "set_mtb_long_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -338,7 +341,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_mtb_short",
+            "set_mtb_short_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -364,7 +367,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_max_qty_limit",
+            "set_max_qty_limit_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -390,7 +393,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_max_qty_market",
+            "set_max_qty_market_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -416,7 +419,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_min_qty",
+            "set_min_qty_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -442,7 +445,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_max_oi_open",
+            "set_max_oi_open_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -468,7 +471,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_maintenance_margin_required",
+            "set_maintenance_margin_required_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -495,7 +498,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_initial_margin_required",
+            "set_initial_margin_required_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -570,10 +573,12 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_fee_pool_address",
+            "set_fee_pool_address_v2",
             callArgs,
             "perpetual",
-            args.gasBudget
+            args.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -595,10 +600,12 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_insurance_pool_address",
+            "set_insurance_pool_address_v2",
             callArgs,
             "perpetual",
-            args.gasBudget
+            args.gasBudget,
+            undefined,
+            [this.getCurrencyType()]
         );
     }
 
@@ -620,7 +627,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_insurance_pool_percentage",
+            "set_insurance_pool_percentage_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -645,7 +652,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_max_allowed_funding_rate",
+            "set_max_allowed_funding_rate_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -669,6 +676,7 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             gasBudget?: number;
             market?: string;
+            txHash?: string;
         },
         signer?: RawSigner
     ): Promise<SuiTransactionBlockResponse> {
@@ -680,10 +688,12 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID(args.market));
         callArgs.push(args.bankID || this.getBankID());
         callArgs.push(args.safeID || this.getSafeID());
-        callArgs.push(args.settlementCapID || this.settlementCap);
-
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
         callArgs.push(this.getOrdersTableID());
+        callArgs.push(this.getSequencer());
+
+        callArgs.push(args.settlementCapID || this.settlementCap);
+        callArgs.push(this.getPriceOracleObjectId(args.market));
 
         callArgs.push(encodeOrderFlags(args.makerOrder));
         callArgs.push(args.makerOrder.price.toFixed(0));
@@ -717,7 +727,13 @@ export class OnChainCalls {
             args.fillPrice ? args.fillPrice.toFixed(0) : args.makerOrder.price.toFixed(0)
         );
 
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+        callArgs.push(
+            args.txHash ||
+                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                    "hex"
+                )
+        );
+
         return this.signAndCall(
             caller,
             "trade",
@@ -745,71 +761,23 @@ export class OnChainCalls {
             bankID?: string;
             subAccountsMapID?: string;
             market?: string;
+            txHash?: string;
         }[],
-        options: {
+        options?: {
             gasBudget?: number;
             signer?: RawSigner;
             transactionBlock?: TransactionBlock;
         }
     ): Promise<SuiTransactionBlockResponse> {
-        const caller = options.signer || this.signer;
+        const caller = options?.signer || this.signer;
 
-        let txBlock = options.transactionBlock;
+        let txBlock = options?.transactionBlock;
 
-        if (!options.transactionBlock) {
-            txBlock = new TransactionBlock();
-
-            for (const arg of args) {
-                txBlock.moveCall({
-                    target: `${this.getPackageID()}::exchange::trade`,
-                    arguments: [
-                        txBlock.object(SUI_CLOCK_OBJECT_ID),
-                        txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
-                        txBlock.object(arg.bankID || this.getBankID()),
-                        txBlock.object(arg.safeID || this.getSafeID()),
-                        txBlock.object(arg.settlementCapID || this.settlementCap),
-                        txBlock.object(arg.subAccountsMapID || this.getSubAccountsID()),
-                        txBlock.object(this.getOrdersTableID()),
-                        txBlock.pure(encodeOrderFlags(arg.makerOrder)),
-                        txBlock.pure(arg.makerOrder.price.toFixed(0)),
-                        txBlock.pure(arg.makerOrder.quantity.toFixed(0)),
-                        txBlock.pure(arg.makerOrder.leverage.toFixed(0)),
-                        txBlock.pure(arg.makerOrder.expiration.toFixed(0)),
-                        txBlock.pure(arg.makerOrder.salt.toFixed(0)),
-                        txBlock.pure(arg.makerOrder.maker),
-                        txBlock.pure(Array.from(hexStrToUint8(arg.makerSignature))),
-                        txBlock.pure(Array.from(base64ToUint8(arg.makerPublicKey))),
-                        txBlock.pure(encodeOrderFlags(arg.takerOrder)),
-                        txBlock.pure(arg.takerOrder.price.toFixed(0)),
-                        txBlock.pure(arg.takerOrder.quantity.toFixed(0)),
-                        txBlock.pure(arg.takerOrder.leverage.toFixed(0)),
-                        txBlock.pure(arg.takerOrder.expiration.toFixed(0)),
-                        txBlock.pure(arg.takerOrder.salt.toFixed(0)),
-                        txBlock.pure(arg.takerOrder.maker),
-                        txBlock.pure(Array.from(hexStrToUint8(arg.takerSignature))),
-                        txBlock.pure(Array.from(base64ToUint8(arg.takerPublicKey))),
-
-                        txBlock.pure(
-                            arg.fillQuantity
-                                ? arg.fillQuantity.toFixed(0)
-                                : arg.makerOrder.quantity.lte(arg.takerOrder.quantity)
-                                ? arg.makerOrder.quantity.toFixed(0)
-                                : arg.takerOrder.quantity.toFixed(0)
-                        ),
-
-                        txBlock.pure(
-                            arg.fillPrice
-                                ? arg.fillPrice.toFixed(0)
-                                : arg.makerOrder.price.toFixed(0)
-                        ),
-                        txBlock.object(this.getPriceOracleObjectId(arg.market))
-                    ],
-                    typeArguments: [this.getCurrencyType()]
-                });
-            }
+        if (!options?.transactionBlock) {
+            txBlock = await this.buildBatchTradeTxBlock(args);
         }
 
-        if (options.gasBudget) txBlock.setGasBudget(options.gasBudget);
+        if (options?.gasBudget) txBlock.setGasBudget(options.gasBudget);
 
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: txBlock,
@@ -838,57 +806,71 @@ export class OnChainCalls {
             bankID?: string;
             subAccountsMapID?: string;
             market?: string;
+            txHash?: string;
         }[],
         gasBudget?: number
     ): Promise<TransactionBlock> {
         const txBlock = new TransactionBlock();
 
         for (const arg of args) {
+            const callArgs = [
+                txBlock.object(SUI_CLOCK_OBJECT_ID),
+                txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
+                txBlock.object(arg.bankID || this.getBankID()),
+                txBlock.object(arg.safeID || this.getSafeID()),
+                txBlock.object(arg.subAccountsMapID || this.getSubAccountsID()),
+                txBlock.object(this.getOrdersTableID()),
+                txBlock.object(this.getSequencer()),
+                txBlock.object(arg.settlementCapID || this.settlementCap),
+
+                txBlock.object(this.getPriceOracleObjectId(arg.market)),
+
+                txBlock.pure(encodeOrderFlags(arg.makerOrder)),
+                txBlock.pure(arg.makerOrder.price.toFixed(0)),
+                txBlock.pure(arg.makerOrder.quantity.toFixed(0)),
+                txBlock.pure(arg.makerOrder.leverage.toFixed(0)),
+                txBlock.pure(arg.makerOrder.expiration.toFixed(0)),
+                txBlock.pure(arg.makerOrder.salt.toFixed(0)),
+                txBlock.pure(arg.makerOrder.maker),
+                txBlock.pure(Array.from(hexStrToUint8(arg.makerSignature))),
+                txBlock.pure(Array.from(base64ToUint8(arg.makerPublicKey))),
+                txBlock.pure(encodeOrderFlags(arg.takerOrder)),
+                txBlock.pure(arg.takerOrder.price.toFixed(0)),
+                txBlock.pure(arg.takerOrder.quantity.toFixed(0)),
+                txBlock.pure(arg.takerOrder.leverage.toFixed(0)),
+                txBlock.pure(arg.takerOrder.expiration.toFixed(0)),
+                txBlock.pure(arg.takerOrder.salt.toFixed(0)),
+                txBlock.pure(arg.takerOrder.maker),
+                txBlock.pure(Array.from(hexStrToUint8(arg.takerSignature))),
+                txBlock.pure(Array.from(base64ToUint8(arg.takerPublicKey))),
+
+                txBlock.pure(
+                    arg.fillQuantity
+                        ? arg.fillQuantity.toFixed(0)
+                        : arg.makerOrder.quantity.lte(arg.takerOrder.quantity)
+                        ? arg.makerOrder.quantity.toFixed(0)
+                        : arg.takerOrder.quantity.toFixed(0)
+                ),
+
+                txBlock.pure(
+                    arg.fillPrice
+                        ? arg.fillPrice.toFixed(0)
+                        : arg.makerOrder.price.toFixed(0)
+                )
+            ];
+
+            callArgs.push(
+                txBlock.pure(
+                    arg.txHash ||
+                        Buffer.from(
+                            sha256(JSON.stringify([...callArgs, getSalt()]))
+                        ).toString("hex")
+                )
+            );
+
             txBlock.moveCall({
                 target: `${this.getPackageID()}::exchange::trade`,
-                arguments: [
-                    txBlock.object(SUI_CLOCK_OBJECT_ID),
-                    txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
-                    txBlock.object(arg.bankID || this.getBankID()),
-                    txBlock.object(arg.safeID || this.getSafeID()),
-                    txBlock.object(arg.settlementCapID || this.settlementCap),
-                    txBlock.object(arg.subAccountsMapID || this.getSubAccountsID()),
-                    txBlock.object(this.getOrdersTableID()),
-                    txBlock.pure(encodeOrderFlags(arg.makerOrder)),
-                    txBlock.pure(arg.makerOrder.price.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.quantity.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.leverage.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.expiration.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.salt.toFixed(0)),
-                    txBlock.pure(arg.makerOrder.maker),
-                    txBlock.pure(Array.from(hexStrToUint8(arg.makerSignature))),
-                    txBlock.pure(Array.from(base64ToUint8(arg.makerPublicKey))),
-
-                    txBlock.pure(encodeOrderFlags(arg.takerOrder)),
-                    txBlock.pure(arg.takerOrder.price.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.quantity.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.leverage.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.expiration.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.salt.toFixed(0)),
-                    txBlock.pure(arg.takerOrder.maker),
-                    txBlock.pure(Array.from(hexStrToUint8(arg.takerSignature))),
-                    txBlock.pure(Array.from(base64ToUint8(arg.takerPublicKey))),
-
-                    txBlock.pure(
-                        arg.fillQuantity
-                            ? arg.fillQuantity.toFixed(0)
-                            : arg.makerOrder.quantity.lte(arg.takerOrder.quantity)
-                            ? arg.makerOrder.quantity.toFixed(0)
-                            : arg.takerOrder.quantity.toFixed(0)
-                    ),
-
-                    txBlock.pure(
-                        arg.fillPrice
-                            ? arg.fillPrice.toFixed(0)
-                            : arg.makerOrder.price.toFixed(0)
-                    ),
-                    txBlock.object(this.getPriceOracleObjectId(arg.market))
-                ],
+                arguments: callArgs,
                 typeArguments: [this.getCurrencyType()]
             });
         }
@@ -926,6 +908,7 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             gasBudget?: number;
             market?: string;
+            txHash?: string;
         },
         signer?: RawSigner
     ): Promise<SuiTransactionBlockResponse> {
@@ -936,6 +919,8 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID(args.market));
         callArgs.push(this.getBankID());
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
+        callArgs.push(this.getSequencer());
+        callArgs.push(this.getPriceOracleObjectId(args.market));
 
         callArgs.push(args.liquidatee);
         callArgs.push(args.liquidator || (await caller.getAddress()));
@@ -943,7 +928,12 @@ export class OnChainCalls {
         callArgs.push(args.leverage);
         callArgs.push(args.allOrNothing == true);
 
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+        callArgs.push(
+            args.txHash ||
+                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                    "hex"
+                )
+        );
 
         return this.signAndCall(
             caller,
@@ -967,6 +957,7 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             gasBudget?: number;
             market?: string;
+            txHash?: string;
         }[],
         gasBudget?: number,
         signer?: RawSigner
@@ -974,21 +965,33 @@ export class OnChainCalls {
         const caller = signer || this.signer;
         const txBlock = new TransactionBlock();
         for (const arg of args) {
+            const callArgs = [
+                txBlock.object(SUI_CLOCK_OBJECT_ID),
+                txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
+                txBlock.object(this.getBankID()),
+                txBlock.object(arg.subAccountsMapID || this.getSubAccountsID()),
+                txBlock.object(this.getSequencer()),
+                txBlock.object(this.getPriceOracleObjectId(arg.market)),
+
+                txBlock.pure(arg.liquidatee),
+                txBlock.pure(arg.liquidator || (await caller.getAddress())),
+                txBlock.pure(arg.quantity),
+                txBlock.pure(arg.leverage),
+                txBlock.pure(arg.allOrNothing === true)
+            ];
+
+            callArgs.push(
+                txBlock.pure(
+                    arg.txHash ||
+                        Buffer.from(
+                            sha256(JSON.stringify([...callArgs, getSalt()]))
+                        ).toString("hex")
+                )
+            );
+
             txBlock.moveCall({
                 target: `${this.getPackageID()}::exchange::liquidate`,
-                arguments: [
-                    txBlock.object(SUI_CLOCK_OBJECT_ID),
-                    txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
-                    txBlock.object(this.getBankID()),
-                    txBlock.object(arg.subAccountsMapID || this.getSubAccountsID()),
-
-                    txBlock.pure(arg.liquidatee),
-                    txBlock.pure(arg.liquidator || (await caller.getAddress())),
-                    txBlock.pure(arg.quantity),
-                    txBlock.pure(arg.leverage),
-                    txBlock.pure(arg.allOrNothing === true),
-                    txBlock.object(this.getPriceOracleObjectId(arg.market))
-                ],
+                arguments: callArgs,
                 typeArguments: [this.getCurrencyType()]
             });
         }
@@ -1045,6 +1048,7 @@ export class OnChainCalls {
             safeID?: string;
             gasBudget?: number;
             market?: string;
+            txHash?: string;
         },
         signer?: RawSigner
     ): Promise<SuiTransactionBlockResponse> {
@@ -1055,13 +1059,23 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID(args.market));
         callArgs.push(this.getBankID());
         callArgs.push(args.safeID || this.getSafeID());
+        callArgs.push(this.getSequencer());
+
         callArgs.push(args.deleveragingCapID || this.getDeleveragingCapID());
+
+        callArgs.push(this.getPriceOracleObjectId(args.market));
 
         callArgs.push(args.maker);
         callArgs.push(args.taker);
         callArgs.push(args.quantity);
         callArgs.push(args.allOrNothing == true);
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+
+        callArgs.push(
+            args.txHash ||
+                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                    "hex"
+                )
+        );
 
         return this.signAndCall(
             caller,
@@ -1085,6 +1099,7 @@ export class OnChainCalls {
             safeID?: string;
             gasBudget?: number;
             market?: string;
+            txHash?: string;
         }[],
         gasBudget?: number,
         signer?: RawSigner
@@ -1092,21 +1107,34 @@ export class OnChainCalls {
         const caller = signer || this.signer;
         const txBlock = new TransactionBlock();
         for (const arg of args) {
+            const callArgs = [
+                txBlock.object(SUI_CLOCK_OBJECT_ID),
+                txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
+                txBlock.object(this.getBankID()),
+                txBlock.object(arg.safeID || this.getSafeID()),
+                txBlock.object(this.getSequencer()),
+
+                txBlock.object(arg.deleveragingCapID || this.getDeleveragingCapID()),
+                txBlock.object(this.getPriceOracleObjectId(arg.market)),
+
+                txBlock.pure(arg.maker),
+                txBlock.pure(arg.taker),
+                txBlock.pure(arg.quantity),
+                txBlock.pure(arg.allOrNothing === true)
+            ];
+
+            callArgs.push(
+                txBlock.pure(
+                    arg.txHash ||
+                        Buffer.from(
+                            sha256(JSON.stringify([...callArgs, getSalt()]))
+                        ).toString("hex")
+                )
+            );
+
             txBlock.moveCall({
                 target: `${this.getPackageID()}::exchange::deleverage`,
-                arguments: [
-                    txBlock.object(SUI_CLOCK_OBJECT_ID),
-                    txBlock.object(arg.perpID || this.getPerpetualID(arg.market)),
-                    txBlock.object(this.getBankID()),
-                    txBlock.object(arg.safeID || this.getSafeID()),
-                    txBlock.object(arg.deleveragingCapID || this.getDeleveragingCapID()),
-
-                    txBlock.pure(arg.maker),
-                    txBlock.pure(arg.taker),
-                    txBlock.pure(arg.quantity),
-                    txBlock.pure(arg.allOrNothing === true),
-                    txBlock.object(this.getPriceOracleObjectId(arg.market))
-                ],
+                arguments: callArgs,
                 typeArguments: [this.getCurrencyType()]
             });
         }
@@ -1131,6 +1159,7 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             market?: string;
             gasBudget?: number;
+            txHash?: string;
         },
         signer?: RawSigner
     ) {
@@ -1141,9 +1170,20 @@ export class OnChainCalls {
         callArgs.push(this.getBankID());
 
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
+
+        callArgs.push(this.getSequencer());
+
+        callArgs.push(this.getPriceOracleObjectId(args.market));
+
         callArgs.push(args.account || (await caller.getAddress()));
         callArgs.push(toBigNumberStr(args.amount));
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+
+        callArgs.push(
+            args.txHash ||
+                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                    "hex"
+                )
+        );
 
         return this.signAndCall(
             caller,
@@ -1164,6 +1204,7 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             market?: string;
             gasBudget?: number;
+            txHash?: string;
         },
         signer?: RawSigner
     ) {
@@ -1174,9 +1215,18 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID(args.market));
         callArgs.push(this.getBankID());
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
+        callArgs.push(this.getSequencer());
+        callArgs.push(this.getPriceOracleObjectId(args.market));
+
         callArgs.push(args.account || (await caller.getAddress()));
         callArgs.push(toBigNumberStr(args.amount));
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+
+        callArgs.push(
+            args.txHash ||
+                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                    "hex"
+                )
+        );
 
         return this.signAndCall(
             caller,
@@ -1197,6 +1247,7 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             market?: string;
             gasBudget?: number;
+            txHash?: string;
         },
         signer?: RawSigner
     ) {
@@ -1207,9 +1258,19 @@ export class OnChainCalls {
         callArgs.push(args.perpID || this.getPerpetualID(args.market));
         callArgs.push(this.getBankID());
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
+
+        callArgs.push(this.getSequencer());
+        callArgs.push(this.getPriceOracleObjectId(args.market));
+
         callArgs.push(args.account || (await caller.getAddress()));
         callArgs.push(toBigNumberStr(args.leverage));
-        callArgs.push(this.getPriceOracleObjectId(args.market));
+
+        callArgs.push(
+            args.txHash ||
+                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                    "hex"
+                )
+        );
 
         return this.signAndCall(
             caller,
@@ -1229,6 +1290,7 @@ export class OnChainCalls {
             publicKey: string;
             subAccountsMapID?: string;
             gasBudget?: number;
+            txHash?: string;
         },
         signer?: RawSigner
     ): Promise<SuiTransactionBlockResponse> {
@@ -1237,7 +1299,7 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.subAccountsMapID || this.getSubAccountsID());
-        callArgs.push(this.getOrdersTableID());
+        callArgs.push(this.getSequencer()), callArgs.push(this.getOrdersTableID());
 
         callArgs.push(args.order.market);
         callArgs.push(encodeOrderFlags(args.order));
@@ -1249,6 +1311,13 @@ export class OnChainCalls {
         callArgs.push(args.order.maker);
         callArgs.push(Array.from(hexStrToUint8(args.signature)));
         callArgs.push(Array.from(base64ToUint8(args.publicKey)));
+
+        callArgs.push(
+            args.txHash ||
+                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                    "hex"
+                )
+        );
 
         return this.signAndCall(
             caller,
@@ -1284,7 +1353,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_funding_rate",
+            "set_funding_rate_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -1348,6 +1417,7 @@ export class OnChainCalls {
         args: {
             coinID: string;
             amount: string;
+            txHash?: string;
             accountAddress?: string;
             bankID?: string;
             gasBudget?: number;
@@ -1359,11 +1429,22 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.bankID ? args.bankID : this.getBankID());
+        callArgs.push(this.getSequencer());
+
+        // temporary txHash, works as salt to make hash unique
+        callArgs.push(getSalt());
+
         callArgs.push(
             args.accountAddress ? args.accountAddress : await caller.getAddress()
         );
         callArgs.push(args.amount);
         callArgs.push(args.coinID);
+
+        if (!args.txHash) {
+            args.txHash = Buffer.from(sha256(JSON.stringify(callArgs))).toString("hex");
+        }
+
+        callArgs[2] = args.txHash;
 
         const typeArguments = [this.getCoinType()];
 
@@ -1429,7 +1510,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_trading_permit",
+            "set_trading_permit_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -1440,6 +1521,7 @@ export class OnChainCalls {
         args: {
             amount: string;
             accountAddress?: string;
+            txHash?: string;
             bankID?: string;
             gasBudget?: number;
         },
@@ -1450,10 +1532,21 @@ export class OnChainCalls {
         const callArgs = [];
 
         callArgs.push(args.bankID ? args.bankID : this.getBankID());
+        callArgs.push(this.getSequencer());
+
+        // temporary txHash, works as salt to make hash unique
+        callArgs.push(getSalt());
+
         callArgs.push(
             args.accountAddress ? args.accountAddress : await caller.getAddress()
         );
         callArgs.push(args.amount);
+
+        if (!args.txHash) {
+            args.txHash = Buffer.from(sha256(JSON.stringify(callArgs))).toString("hex");
+        }
+
+        callArgs[2] = args.txHash;
 
         return this.signAndCall(
             caller,
@@ -1469,14 +1562,25 @@ export class OnChainCalls {
     public async withdrawAllMarginFromBank(
         signer?: RawSigner,
         gasBudget?: number,
-        bankID?: string
+        bankID?: string,
+        txHash?: string
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
         const callArgs = [];
 
         callArgs.push(bankID || this.getBankID());
+        callArgs.push(this.getSequencer());
+
+        // temporary txHash, works as salt to make hash unique
+        callArgs.push(getSalt());
         callArgs.push(await caller.getAddress());
+
+        if (!txHash) {
+            txHash = Buffer.from(sha256(JSON.stringify(callArgs))).toString("hex");
+        }
+
+        callArgs[2] = txHash;
 
         return this.signAndCall(
             caller,
@@ -1508,7 +1612,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "delist_perpetual",
+            "delist_perpetual_v2",
             callArgs,
             "perpetual",
             args.gasBudget
@@ -1574,12 +1678,12 @@ export class OnChainCalls {
         callArgs.push(this.getPerpetualID(args.marketName));
         callArgs.push(args.account);
         callArgs.push(args.status);
-        callArgs.push(toBigNumber(args.makerFee, BASE_DECIMALS_ON_CHAIN));
-        callArgs.push(toBigNumber(args.takerFee, BASE_DECIMALS_ON_CHAIN));
+        callArgs.push(toBigNumberStr(args.makerFee));
+        callArgs.push(toBigNumberStr(args.takerFee));
 
         return this.signAndCall(
             caller,
-            "set_special_fee",
+            "set_special_fee_v2",
             callArgs,
             "perpetual",
             args?.gasBudget
@@ -1597,6 +1701,40 @@ export class OnChainCalls {
         callArgs.push(SUI_CLOCK_OBJECT_ID);
 
         return this.signAndCall(caller, "create_price_obj", callArgs, "price_info");
+    }
+
+    /*
+     * Creates the margin bank object
+     * @param usdcAddress address of the coin supported by bank
+     */
+    public async createBank(usdcAddress: string, gasBudget?: number, signer?: RawSigner) {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+        callArgs.push(this.getExchangeAdminCap());
+        callArgs.push(usdcAddress);
+
+        return this.signAndCall(
+            caller,
+            "create_bank",
+            callArgs,
+            "margin_bank",
+            gasBudget,
+            undefined,
+            [`${usdcAddress}::coin::COIN`]
+        );
+    }
+
+    /*
+     * Creates the seqeuncer object
+     */
+    public async createSequencer(signer?: RawSigner) {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+        callArgs.push(this.getExchangeAdminCap());
+
+        return this.signAndCall(caller, "create_sequencer", callArgs, "roles");
     }
 
     /*
@@ -1821,21 +1959,13 @@ export class OnChainCalls {
 
         const params = callArgs.map(v => tx.pure(v));
 
-        if (packageId == undefined) {
-            packageId = this.getPackageID();
-        }
-        if (typeArguments != undefined) {
-            tx.moveCall({
-                target: `${packageId}::${moduleName}::${method}`,
-                arguments: params,
-                typeArguments: typeArguments
-            });
-        } else {
-            tx.moveCall({
-                target: `${packageId}::${moduleName}::${method}`,
-                arguments: params
-            });
-        }
+        packageId = packageId || this.getPackageID();
+
+        tx.moveCall({
+            target: `${packageId}::${moduleName}::${method}`,
+            arguments: params,
+            typeArguments: typeArguments || []
+        });
 
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: tx,
@@ -2073,6 +2203,10 @@ export class OnChainCalls {
 
     getTreasuryCapID(): string {
         return this.deployment["objects"]["TreasuryCap"].id as string;
+    }
+
+    getSequencer(): string {
+        return this.deployment["objects"]["Sequencer"].id as string;
     }
 
     // ===================================== //
