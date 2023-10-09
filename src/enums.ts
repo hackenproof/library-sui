@@ -102,8 +102,6 @@ export enum SOCKET_EVENTS {
     OrderSentForSettlementUpdate = "OrderSettlementUpdate",
     OrderRequeueUpdate = "OrderRequeueUpdate",
     OrderCancelledOnReversionUpdate = "OrderCancelledOnReversionUpdate"
-    
-
 }
 export enum ADJUST_MARGIN {
     Add = "Add",
