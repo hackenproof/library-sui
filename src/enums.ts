@@ -100,7 +100,10 @@ export enum SOCKET_EVENTS {
     AccountPermissionUpdate = "AccountPermissionUpdate",
     RpcUrlResolved = "RpcUrlResolved",
     OrderSentForSettlementUpdate = "OrderSettlementUpdate",
-    OrderRequeueUpdate = "OrderRequeueUpdate"
+    OrderRequeueUpdate = "OrderRequeueUpdate",
+    OrderCancelledOnReversionUpdate = "OrderCancelledOnReversionUpdate"
+    
+
 }
 export enum ADJUST_MARGIN {
     Add = "Add",
