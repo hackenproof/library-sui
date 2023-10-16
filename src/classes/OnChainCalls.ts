@@ -1015,7 +1015,7 @@ export class OnChainCalls {
         signer?: RawSigner
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
-        const txBlock = this.getBatchLiquidationTransactionBlock(args, gasBudget, signer);
+        const txBlock = await this.getBatchLiquidationTransactionBlock(args, gasBudget, signer);
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: txBlock,
             options: {
