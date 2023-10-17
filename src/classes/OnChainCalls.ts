@@ -7,7 +7,8 @@ import {
     DryRunTransactionBlockResponse,
     TransactionBlock,
     SUI_CLOCK_OBJECT_ID,
-    toB64
+    toB64,
+    SignedTransaction
 } from "@mysten/sui.js";
 import BigNumber from "bignumber.js";
 import { DEFAULT } from "../defaults";
@@ -1323,6 +1324,53 @@ export class OnChainCalls {
         );
     }
 
+    public async signAdjustLeverage(
+        args: {
+            leverage: number;
+            account?: string;
+            perpID?: string;
+            subAccountsMapID?: string;
+            market?: string;
+            gasBudget?: number;
+            txHash?: string;
+        },
+        signer?: RawSigner
+    ): Promise<SignedTransaction> {
+        const caller = signer || this.signer;
+
+        const txb = new TransactionBlock();
+
+        const callArgs = [];
+
+
+        callArgs.push(txb.object(args.perpID || this.getPerpetualID(args.market)));
+        callArgs.push(txb.object(this.getBankID()));
+        callArgs.push(txb.object(args.subAccountsMapID || this.getSubAccountsID()));
+
+        callArgs.push(txb.object(this.getSequencer()));
+        callArgs.push(txb.object(this.getPriceOracleObjectId(args.market)));
+
+        callArgs.push(txb.pure(args.account || (await caller.getAddress())));
+        callArgs.push(txb.pure(toBigNumberStr(args.leverage)));
+
+        callArgs.push(txb.pure(
+            args.txHash ||
+                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                    "hex"
+                )
+        ));
+
+        txb.moveCall({
+            arguments:callArgs,
+            target: `${this.getPackageID()}::exchange::adjust_leverage`,
+            typeArguments: [this.getCurrencyType()]
+        });
+            
+        return caller.signTransactionBlock({
+            transactionBlock:  txb
+        });
+    }
+
     public async cancelOrder(
         args: {
             order: Order;
@@ -2172,6 +2220,7 @@ export class OnChainCalls {
                 (userBalance.data as any).content.fields.value.fields.balance
             );
         } catch (e) {
+            console.log(e);
             return new BigNumber(0);
         }
     }
