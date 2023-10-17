@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow-restricted-names */
 import {
     RawSigner,
     SignerWithProvider,
@@ -5,7 +6,8 @@ import {
     SuiTransactionBlockResponse,
     DryRunTransactionBlockResponse,
     TransactionBlock,
-    SUI_CLOCK_OBJECT_ID
+    SUI_CLOCK_OBJECT_ID,
+    toB64
 } from "@mysten/sui.js";
 import BigNumber from "bignumber.js";
 import { DEFAULT } from "../defaults";
@@ -27,12 +29,10 @@ import {
     usdcToBaseNumber
 } from "../library";
 import {
-    BASE_DECIMALS,
-    BASE_DECIMALS_ON_CHAIN,
     SUI_NATIVE_BASE,
     USDC_BASE_DECIMALS
 } from "../constants";
-import { BigNumberable } from "../types";
+import { BigNumberable, address } from "../types";
 import { sha256 } from "@noble/hashes/sha256";
 import { getSalt } from "../utils";
 
@@ -113,7 +113,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
-            "set_funding_rate_operator",
+            "set_funding_rate_operator_v2",
             callArgs,
             "roles",
             args.gasBudget
@@ -483,26 +483,45 @@ export class OnChainCalls {
             adminID?: string;
             market?: string;
             imr: string;
-            gasBudget?: number;
         },
-        signer?: RawSigner
-    ): Promise<SuiTransactionBlockResponse> {
-        const caller = signer || this.signer;
+        options?:{
+            gasBudget?: number,
+            signer?: RawSigner,
+            multiSig?: address,
+        }
+    ): Promise<SuiTransactionBlockResponse | string> {
+        const caller = options?.signer || this.signer;
 
+        const txb = new TransactionBlock();
         const callArgs = [];
 
-        callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(this.getPerpetualID(args.market));
+        callArgs.push(txb.object(args.adminID || this.getExchangeAdminCap()));
+        callArgs.push(txb.object(this.getPerpetualID(args.market)));
 
-        callArgs.push(args.imr);
+        callArgs.push(txb.pure(args.imr));
+        
+        if(options?.gasBudget) txb.setGasBudget(options?.gasBudget);
 
-        return this.signAndCall(
-            caller,
-            "set_initial_margin_required_v2",
-            callArgs,
-            "perpetual",
-            args.gasBudget
-        );
+        txb.moveCall({
+            arguments: callArgs,
+            target: `${this.getPackageID()}::perpetual::set_initial_margin_required_v2`
+        })
+
+        // if multi sig call return tx bytes
+        if(options?.multiSig) {
+            txb.setSender(options?.multiSig);
+            return toB64(await txb.build({provider: caller.provider, onlyTransactionKind: false}))
+        } else {
+            return caller.signAndExecuteTransactionBlock({
+                transactionBlock: txb,
+                options: {
+                    showObjectChanges: true,
+                    showEffects: true,
+                    showEvents: true,
+                    showInput: true
+                }
+            });
+        }
     }
 
     public async createSettlementOperator(
@@ -512,22 +531,43 @@ export class OnChainCalls {
             safeID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        options?:{
+            gasBudget?: number,
+            signer?: RawSigner,
+            multiSig?: address,
+        }
     ) {
-        const caller = signer || this.signer;
+        const caller = options?.signer || this.signer;
         const callArgs = [];
 
-        callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(args.safeID || this.getSafeID());
-        callArgs.push(args.operator);
+        const txb = new TransactionBlock();
 
-        return this.signAndCall(
-            caller,
-            "create_settlement_operator",
-            callArgs,
-            "roles",
-            args.gasBudget
-        );
+        callArgs.push(txb.object(args.adminID || this.getExchangeAdminCap()));
+        callArgs.push(txb.object(args.safeID || this.getSafeID()));
+        callArgs.push(txb.pure(args.operator));
+
+        if(options?.gasBudget) txb.setGasBudget(options?.gasBudget);
+
+        txb.moveCall({
+            arguments: callArgs,
+            target: `${this.getPackageID()}::roles::create_settlement_operator`
+        });
+
+        // if multi sig call return tx bytes
+        if(options?.multiSig) {
+            txb.setSender(options?.multiSig);
+            return toB64(await txb.build({provider: caller.provider, onlyTransactionKind: false}))
+        } else {
+            return caller.signAndExecuteTransactionBlock({
+                transactionBlock: txb,
+                options: {
+                    showObjectChanges: true,
+                    showEffects: true,
+                    showEvents: true,
+                    showInput: true
+                }
+            });
+        }
     }
 
     public async removeSettlementOperator(
@@ -1668,26 +1708,65 @@ export class OnChainCalls {
             takerFee: number;
             gasBudget?: number;
         },
-        signer?: RawSigner
-    ) {
-        const caller = signer || this.signer;
+        options?: {
+            gasBudget?: number;
+            signer?: RawSigner;
+            multiSig?: address;
+        }
+    ):Promise<SuiTransactionBlockResponse | string> {
+        const caller = options?.signer || this.signer;
 
         const callArgs = [];
+        
+        const txb = new TransactionBlock();
 
-        callArgs.push(args.adminID || this.getExchangeAdminCap());
-        callArgs.push(this.getPerpetualID(args.marketName));
-        callArgs.push(args.account);
-        callArgs.push(args.status);
-        callArgs.push(toBigNumberStr(args.makerFee));
-        callArgs.push(toBigNumberStr(args.takerFee));
+        callArgs.push(txb.object(args.adminID || this.getExchangeAdminCap()));
+        callArgs.push(txb.object(this.getPerpetualID(args.marketName)));
+        callArgs.push(txb.pure(args.account));
+        callArgs.push(txb.pure(args.status));
+        callArgs.push(txb.pure(toBigNumberStr(args.makerFee)));
+        callArgs.push(txb.pure(toBigNumberStr(args.takerFee)));
 
-        return this.signAndCall(
-            caller,
-            "set_special_fee_v2",
-            callArgs,
-            "perpetual",
-            args?.gasBudget
-        );
+
+        if(options?.gasBudget) txb.setGasBudget(options?.gasBudget);
+
+        txb.moveCall({
+            arguments: callArgs,
+            target: `${this.getPackageID()}::perpetual::set_special_fee_v2`
+        })
+
+        // if multi sig call return tx bytes
+        if(options?.multiSig) {
+            txb.setSender(options?.multiSig);
+            return toB64(await txb.build({provider: caller.provider, onlyTransactionKind: false}))
+        } else {
+            return caller.signAndExecuteTransactionBlock({
+                transactionBlock: txb,
+                options: {
+                    showObjectChanges: true,
+                    showEffects: true,
+                    showEvents: true,
+                    showInput: true
+                }
+            });
+        }
+    }
+
+    /**
+     * Executes provided signed transaction block
+     * @param blockBytes bytes of the tx block
+     * @param signature signature of the block
+     * @returns 
+     */
+    public async executeSignedTxBlock(blockBytes:string, signature: string){
+        return this.signer.provider.executeTransactionBlock({
+            transactionBlock:blockBytes,
+            signature: signature,
+            options:  {
+                showEffects: true,
+                showEvents: true,
+            }
+        })
     }
 
     /*

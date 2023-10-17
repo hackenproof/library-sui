@@ -4,6 +4,11 @@
         "ws": "ws://127.0.0.1:9000",
         "faucet": "http://127.0.0.1:5003"
     },
+    "localnet": {
+        "rpc": "http://0.0.0.0:9000",
+        "ws": "ws://0.0.0.0:9000",
+        "faucet": "http://0.0.0.0:5003"
+    },
     "cloud": {
         "rpc": "http://suitest.bluefin.io",
         "ws": "ws://suitest.bluefin.io",
