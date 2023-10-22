@@ -78,6 +78,7 @@ export enum SOCKET_EVENTS {
     MarketDataUpdateKey = "MarketDataUpdate",
     RecentTradesKey = "RecentTrades",
     OrderbookUpdateKey = "OrderbookUpdate",
+    OrderbookDepthUpdateKey = "OrderbookDepthUpdate",
     AdjustMarginKey = "AdjustMargin",
     MarketHealthKey = "MarketHealth",
     ExchangeHealthKey = "ExchangeHealth",
