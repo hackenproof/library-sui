@@ -74,6 +74,7 @@ export enum MARKET_STATUS {
 export enum SOCKET_EVENTS {
     GET_LAST_KLINE_WITH_INTERVAL = "{symbol}@kline@{interval}",
     GLOBAL_UPDATES_ROOM = "globalUpdates",
+    ORDERBOOK_DEPTH_STREAM_ROOM = "orderbookDepthStream",
     GlobalUpdatesRoom = "globalUpdates",
     MarketDataUpdateKey = "MarketDataUpdate",
     RecentTradesKey = "RecentTrades",
