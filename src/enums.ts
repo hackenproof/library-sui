@@ -92,6 +92,7 @@ export enum SOCKET_EVENTS {
     NetworkGasFeeUpdate = "NetworkGasFeeUpdate",
     UserUpdatesRoom = "userUpdates",
     OrderUpdateKey = "OrderUpdate",
+    OrderCancellationFailedKey = "OrderCancellationFailed",
     OrderCancelledKey = "OrderCancelled",
     PositionUpdateKey = "PositionUpdate",
     UserTradeKey = "UserTrade",
