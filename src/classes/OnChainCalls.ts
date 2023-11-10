@@ -1129,7 +1129,7 @@ export class OnChainCalls {
         );
     }
 
-    public async batchDeleverage(
+    public async getBatchDeleveragingTransactionBlock(
         args: {
             maker: string;
             taker: string;
@@ -1144,7 +1144,7 @@ export class OnChainCalls {
         }[],
         gasBudget?: number,
         signer?: RawSigner
-    ): Promise<SuiTransactionBlockResponse> {
+    ): Promise<TransactionBlock> {
         const caller = signer || this.signer;
         const txBlock = new TransactionBlock();
         for (const arg of args) {
@@ -1167,9 +1167,9 @@ export class OnChainCalls {
             callArgs.push(
                 txBlock.pure(
                     arg.txHash ||
-                        Buffer.from(
-                            sha256(JSON.stringify([...callArgs, getSalt()]))
-                        ).toString("hex")
+                    Buffer.from(
+                        sha256(JSON.stringify([...callArgs, getSalt()]))
+                    ).toString("hex")
                 )
             );
 
@@ -1180,7 +1180,27 @@ export class OnChainCalls {
             });
         }
         if (gasBudget) txBlock.setGasBudget(gasBudget);
+        return txBlock;
+    }
 
+    public async batchDeleverage(
+        args: {
+            maker: string;
+            taker: string;
+            quantity: string;
+            allOrNothing?: boolean;
+            perpID?: string;
+            deleveragingCapID?: string;
+            safeID?: string;
+            gasBudget?: number;
+            market?: string;
+            txHash?: string;
+        }[],
+        gasBudget?: number,
+        signer?: RawSigner
+    ): Promise<SuiTransactionBlockResponse> {
+        const caller = signer || this.signer;
+        const txBlock = await this.getBatchDeleveragingTransactionBlock(args, gasBudget, signer);
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: txBlock,
             options: {
@@ -1191,6 +1211,7 @@ export class OnChainCalls {
             }
         });
     }
+
 
     public async addMargin(
         args: {
