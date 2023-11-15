@@ -1,6 +1,7 @@
-import { SuiAddress } from "@mysten/sui.js";
+
 import BigNumber from "bignumber.js";
 import { ORDER_TYPE, TIME_IN_FORCE } from "../enums";
+import { SuiAddress } from "../types";
 
 export interface Order {
     market: SuiAddress;

@@ -1,5 +1,5 @@
-import { SuiAddress } from "@mysten/sui.js";
 import BigNumber from "bignumber.js";
+import { SuiAddress } from "../types";
 
 export interface wallet {
     address: string;

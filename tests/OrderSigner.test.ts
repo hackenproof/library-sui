@@ -1,4 +1,4 @@
-import { fromSerializedSignature } from "@mysten/sui.js";
+import { parseSerializedSignature } from "@mysten/sui.js/cryptography";
 import { getKeyPairFromSeed, OrderSigner } from "../src";
 import { SIGNER_TYPES } from "../src/enums";
 import { TEST_WALLETS } from "../src/helpers";
@@ -20,11 +20,11 @@ describe("Order Signer", () => {
                 "AFHcFfuMegVlael9p8X/zUpUhWoEmpnDyWKBnQWfNZFj7zF8sIoxdCp1gt6smAkLHV1i7+jIv8wRJRileWb9nQ0q3XRi9gtN0vRnK6rISvD0CcnlC3m43EiPVlMzPa6sIQ=="
         };
 
-        const SigPK = fromSerializedSignature(uiData.Signature);
+        const SigPK = parseSerializedSignature(uiData.Signature);
 
         const signature =
             Buffer.from(SigPK.signature).toString("hex") + SIGNER_TYPES.UI_ED25519;
-        const publicKey = SigPK.pubKey.toString();
+        const publicKey = SigPK.publicKey.toString();
         expect(OrderSigner.verifySignature(payload, signature, publicKey)).to.be.equal(
             true
         );
@@ -47,11 +47,11 @@ describe("Order Signer", () => {
                 "AHnkknXkyJVFMWP4e4YwshlN820DBCoAw9CCDf7ACPh0Tdq2+oAT/yxp20V8SzdSzvnPaWmex2DkUB6rMUtvtAcq3XRi9gtN0vRnK6rISvD0CcnlC3m43EiPVlMzPa6sIQ=="
         };
 
-        const SigPK = fromSerializedSignature(uiData.Signature);
+        const SigPK = parseSerializedSignature(uiData.Signature);
 
         const signature =
             Buffer.from(SigPK.signature).toString("hex") + SIGNER_TYPES.UI_ED25519;
-        const publicKey = SigPK.pubKey.toString();
+        const publicKey = SigPK.publicKey.toString();
         expect(OrderSigner.verifySignature(payload, signature, publicKey)).to.be.equal(
             true
         );
@@ -68,11 +68,11 @@ describe("Order Signer", () => {
                 "B1FHcFfuMegVlael9p8X/zUpUhWoEmpnDyWKBnQWfNZFj7zF8sIoxdCp1gt6smAkLHV1i7+jIv8wRJRileWb9nQ0q3XRi9gtN0vRnK6rISvD0CcnlC3m43EiPVlMzPa6sIQ=="
         };
 
-        const SigPK = fromSerializedSignature(uiData.Signature);
+        const SigPK = parseSerializedSignature(uiData.Signature);
 
         const signature =
             Buffer.from(SigPK.signature).toString("hex") + SIGNER_TYPES.UI_ED25519;
-        const publicKey = SigPK.pubKey.toString();
+        const publicKey = SigPK.publicKey.toString();
         expect(OrderSigner.verifySignature(payload, signature, publicKey)).to.be.equal(
             false
         );
@@ -90,11 +90,11 @@ describe("Order Signer", () => {
                 "AFHcFfuMegVlael9p8X/zUpUhWoEmpnDyWKBnQWfNZFj7zF8sIoxdCp1gt6smAkLHV1i7+jIv8wRJRileWb9nQ0q3XRi9gtN0vRnK6rISvD0CcnlC3m43EiPVlMzPa6sIQ=="
         };
 
-        const SigPK = fromSerializedSignature(uiData.Signature);
+        const SigPK = parseSerializedSignature(uiData.Signature);
 
         const signature =
             Buffer.from(SigPK.signature).toString("hex") + SIGNER_TYPES.UI_ED25519;
-        const publicKey = SigPK.pubKey.toString();
+        const publicKey = SigPK.publicKey.toString();
 
         expect(OrderSigner.verifySignature(payload, signature, publicKey)).to.be.equal(
             false

@@ -1,5 +1,5 @@
-import { JsonRpcProvider, Keypair, RawSigner } from "@mysten/sui.js";
 import { wallet } from "./interfaces";
+import { Keypair, SuiClient } from "./types";
 import { getKeyPairFromSeed, getSignerFromSeed } from "./utils";
 
 export const TEST_WALLETS: wallet[] = [
@@ -38,7 +38,7 @@ export const TEST_WALLETS: wallet[] = [
 ];
 
 export interface Account {
-    signer: RawSigner;
+    signer: Keypair;
     keyPair: Keypair;
     address: string;
     bankAccountId?: string;
@@ -49,13 +49,13 @@ export interface MakerTakerAccounts {
     taker: Account;
 }
 
-export function getTestAccounts(provider: JsonRpcProvider): Account[] {
+export function getTestAccounts(): Account[] {
     const accounts: Account[] = [];
 
     for (const wallet of TEST_WALLETS) {
         accounts.push({
-            signer: getSignerFromSeed(wallet.phrase, provider),
-            keyPair: getKeyPairFromSeed(wallet.phrase),
+            signer: getSignerFromSeed(wallet.phrase, "ED25519"),
+            keyPair: getKeyPairFromSeed(wallet.phrase, "ED25519"),
             address: wallet.address
         });
     }

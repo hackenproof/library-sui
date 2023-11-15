@@ -1,9 +1,10 @@
-import { RawSigner, TransactionBlock } from "@mysten/sui.js";
+
 import { network } from "../DeploymentConfig";
 import { USDC_BASE_DECIMALS } from "../constants";
 import { toBigNumberStr } from "../library";
 import { OnChainCalls } from "./OnChainCalls";
 import { Transaction } from "./Transaction";
+import { Keypair, SuiClient, TransactionBlock } from "../types";
 
 export class Faucet {
     /**
@@ -37,13 +38,14 @@ export class Faucet {
      * Requests SUI coins from faucet account
      * @param address Account to be funded
      * @param faucet Account having enough SUI tokens to fund the reciever
+     * @param SuiClient client to execute transaction
      * @param amount amount to be funded (must be in normal decimals) default is 1
      */
-    static async requestSUIFromAccount(address: string, faucet:RawSigner, amount = 1){
+    static async requestSUIFromAccount(address: string, faucet: Keypair, suiClient: SuiClient, amount = 1) {
         const txb = new TransactionBlock();
-        const [coin] = txb.splitCoins(txb.gas, [txb.pure(toBigNumberStr(amount,9))]);
+        const [coin] = txb.splitCoins(txb.gas, [txb.pure(toBigNumberStr(amount, 9))]);
         txb.transferObjects([coin], txb.pure(address));
-        await faucet.signAndExecuteTransactionBlock({transactionBlock: txb});
+        await suiClient.signAndExecuteTransactionBlock({ transactionBlock: txb, signer: faucet });
     }
 
     /**

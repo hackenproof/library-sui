@@ -1,12 +1,11 @@
-import { JsonRpcProvider, Keypair } from "@mysten/sui.js";
+
 import BigNumber from "bignumber.js";
 import { Order, TradeData } from "../interfaces";
-import { getSignerFromKeyPair } from "../utils";
+import { Keypair } from "../types";
 import { OrderSigner } from "./OrderSigner";
 
 export class Trader {
     static async setupNormalTrade(
-        provider: JsonRpcProvider,
         orderSigner: OrderSigner,
         maker: Keypair,
         taker: Keypair,
@@ -17,7 +16,7 @@ export class Trader {
             price?: BigNumber;
         }
     ): Promise<TradeData> {
-        const takerAddress = await getSignerFromKeyPair(taker, provider).getAddress();
+        const takerAddress = await taker.getPublicKey().toSuiAddress();
 
         const takerOrder = options?.takerOrder || {
             ...makerOrder,

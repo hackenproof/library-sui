@@ -1,12 +1,4 @@
-import {
-    RawSigner,
-    Keypair,
-    JsonRpcProvider,
-    Secp256k1Keypair,
-    SignatureScheme,
-    Ed25519Keypair,
-    Connection
-} from "@mysten/sui.js";
+
 import { TIME_IN_FORCE } from "../src/enums";
 import { StoredOrder } from "../src/interfaces";
 import { toBigNumber, bigNumber } from "./library";
@@ -15,6 +7,7 @@ import { DEFAULT } from "./defaults";
 import { config } from "dotenv";
 import { network } from "./DeploymentConfig";
 import fs from "fs";
+import { Ed25519Keypair, Keypair, Secp256k1Keypair, SignatureScheme, SuiClient } from "./types";
 config({ path: ".env" });
 
 export function writeFile(filePath: string, jsonData: any) {
@@ -27,8 +20,8 @@ export function readFile(filePath: string): any {
         : {};
 }
 
-export function getProvider(rpcURL: string, faucetURL?: string): JsonRpcProvider {
-    return new JsonRpcProvider(new Connection({ fullnode: rpcURL, faucet: faucetURL }));
+export function getProvider(rpcURL: string): SuiClient {
+    return new SuiClient({ url: rpcURL });;
 }
 
 export function getKeyPairFromSeed(
@@ -62,19 +55,11 @@ export function getKeyPairFromPvtKey(
     }
 }
 
-export function getSignerFromKeyPair(
-    keypair: Keypair,
-    provider: JsonRpcProvider
-): RawSigner {
-    return new RawSigner(keypair, provider);
-}
-
 export function getSignerFromSeed(
     seed: string,
-    provider: JsonRpcProvider,
     scheme: SignatureScheme = "Secp256k1"
-): RawSigner {
-    return getSignerFromKeyPair(getKeyPairFromSeed(seed, scheme), provider);
+): Keypair {
+    return getKeyPairFromSeed(seed, scheme);
 }
 
 export function createOrder(params?: {

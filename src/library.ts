@@ -1,9 +1,8 @@
 import BigNumber from "bignumber.js";
 import { Order, OrderFlags } from "./interfaces";
 import { BASE_DECIMALS, USDC_BASE_DECIMALS } from "./constants";
-import { SignedNumber, BigNumberable, SigPK } from "./types";
+import { SignedNumber, BigNumberable, SigPK, Ed25519Keypair, Ed25519PublicKey, SignatureScheme, Secp256k1PublicKey } from "./types";
 import _ from "lodash";
-import { Ed25519PublicKey, Secp256k1PublicKey, SignatureScheme } from "@mysten/sui.js";
 
 const toBnBase = (base: number) => {
     return new BigNumber(1).shiftedBy(base);

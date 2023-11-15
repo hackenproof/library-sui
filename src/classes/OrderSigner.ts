@@ -1,10 +1,12 @@
 import {
-    bcs,
-    fromSerializedSignature,
+    bcs
+} from "@mysten/sui.js/bcs";
+
+import {
+    parseSerializedSignature,
     IntentScope,
-    Keypair,
     messageWithIntent
-} from "@mysten/sui.js";
+} from "@mysten/sui.js/cryptography";
 import { Order, SignedOrder } from "../interfaces/order";
 import { base64ToUint8, bnToHex, encodeOrderFlags, hexToBuffer } from "../library";
 import { sha256 } from "@noble/hashes/sha256";
@@ -12,11 +14,11 @@ import { secp256k1 } from "@noble/curves/secp256k1";
 import { ed25519 } from "@noble/curves/ed25519";
 import { WalletContextState } from "@suiet/wallet-kit";
 import { blake2b } from "@noble/hashes/blake2b";
-import { SigPK } from "../types";
+import { SigPK,Keypair } from "../types";
 import { SIGNER_TYPES } from "../enums";
 
 export class OrderSigner {
-    constructor(private keypair: Keypair) {}
+    constructor(private keypair: Keypair) { }
 
     public getSignedOrder(order: Order, keyPair?: Keypair): SignedOrder {
         const typedSignature = this.signOrder(order, keyPair);
@@ -35,7 +37,7 @@ export class OrderSigner {
         const msgData = new TextEncoder().encode(OrderSigner.getSerializedOrder(order));
         // take sha256 hash of order
         const msgHash = sha256(msgData);
-        const publicKey = signer.getPublicKey().toString();
+        const publicKey = signer.getPublicKey().toBase64();
         const keyScheme = signer.getKeyScheme();
         if (keyScheme == "Secp256k1") {
             // sign the raw data
@@ -74,7 +76,7 @@ export class OrderSigner {
         const sigOutput = await wallet.signMessage({ message: msgHash });
 
         // segregate public key from signature
-        const sigPublicKey = fromSerializedSignature(sigOutput.signature);
+        const sigPublicKey = parseSerializedSignature(sigOutput.signature);
 
         // return signature in hex - appending 2 at the end so that when verifying off-chain and on-chain
         // we know that this sig was generated using sui ui wallet
@@ -82,7 +84,7 @@ export class OrderSigner {
             signature:
                 Buffer.from(sigPublicKey.signature).toString("hex") +
                 SIGNER_TYPES.UI_ED25519,
-            publicKey: sigPublicKey.pubKey.toString()
+            publicKey: sigPublicKey.publicKey.toString()
         };
     }
 
@@ -91,7 +93,7 @@ export class OrderSigner {
 
         const encodedData = OrderSigner.encodePayload(payload);
 
-        const publicKey = signer.getPublicKey().toString();
+        const publicKey = signer.getPublicKey().toBase64();
 
         let signature: string;
 
@@ -121,7 +123,7 @@ export class OrderSigner {
         const msgBytes = new TextEncoder().encode(JSON.stringify(payload));
         const sigOutput = await wallet.signMessage({ message: msgBytes });
 
-        const sigPublicKey = fromSerializedSignature(sigOutput.signature);
+        const sigPublicKey = parseSerializedSignature(sigOutput.signature);
 
         // return signature in hex - appending 2 at the end so that when verifying off-chain and on-chain
         // we know that this sig was generated using sui ui wallet
@@ -129,7 +131,7 @@ export class OrderSigner {
             signature:
                 Buffer.from(sigPublicKey.signature).toString("hex") +
                 SIGNER_TYPES.UI_ED25519,
-            publicKey: sigPublicKey.pubKey.toString()
+            publicKey: sigPublicKey.publicKey.toString()
         };
     }
 
@@ -261,6 +263,6 @@ export class OrderSigner {
 
     public getPublicKeyStr(keypair?: Keypair) {
         const signer = keypair || this.keypair;
-        return signer.getPublicKey().toString();
+        return signer.getPublicKey().toBase64();
     }
 }

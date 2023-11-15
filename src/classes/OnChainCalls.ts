@@ -1,15 +1,19 @@
 /* eslint-disable no-shadow-restricted-names */
 import {
-    RawSigner,
-    SignerWithProvider,
     SuiObjectResponse,
-    SuiTransactionBlockResponse,
     DryRunTransactionBlockResponse,
-    TransactionBlock,
+    SuiClient
+} from "@mysten/sui.js/client";
+
+
+
+import {
     SUI_CLOCK_OBJECT_ID,
-    toB64,
-    SignedTransaction
-} from "@mysten/sui.js";
+    toB64
+} from "@mysten/sui.js/utils";
+
+
+import { SuiTransactionBlockResponse } from "@mysten/sui.js/client"
 import BigNumber from "bignumber.js";
 import { DEFAULT } from "../defaults";
 import {
@@ -33,16 +37,18 @@ import {
     SUI_NATIVE_BASE,
     USDC_BASE_DECIMALS
 } from "../constants";
-import { BigNumberable, address } from "../types";
+import { BigNumberable, address, Keypair, Ed25519Keypair, TransactionBlock } from "../types";
 import { sha256 } from "@noble/hashes/sha256";
 import { getSalt } from "../utils";
+import { SignatureWithBytes } from "@mysten/sui.js/dist/cjs/cryptography";
 
 export class OnChainCalls {
-    signer: SignerWithProvider | any;
+    signer: Keypair | any;
     settlementCap: string | undefined;
     deployment: any;
+    suiClient: SuiClient;
 
-    constructor(_signer: SignerWithProvider, _deployment: any, settlementCap?: string) {
+    constructor(_signer: Keypair, _deployment: any, settlementCap?: string) {
         this.signer = _signer;
         this.deployment = _deployment;
         this.settlementCap = settlementCap;
@@ -54,7 +60,7 @@ export class OnChainCalls {
             adminID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
 
@@ -64,6 +70,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_exchange_admin",
             callArgs,
             "roles",
@@ -78,7 +85,7 @@ export class OnChainCalls {
             safeID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
 
@@ -89,6 +96,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_exchange_guardian",
             callArgs,
             "roles",
@@ -103,7 +111,7 @@ export class OnChainCalls {
             safeID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
 
@@ -114,6 +122,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_funding_rate_operator_v2",
             callArgs,
             "roles",
@@ -123,7 +132,7 @@ export class OnChainCalls {
 
     public async createPerpetual(
         args: PerpCreationMarketDetails,
-        signer?: RawSigner,
+        signer?: Keypair,
         gasBudget?: number
     ): Promise<SuiTransactionBlockResponse> {
         const callArgs = [];
@@ -184,6 +193,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "create_perpetual",
             callArgs,
             "exchange",
@@ -200,7 +210,7 @@ export class OnChainCalls {
             minPrice: number;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -212,6 +222,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_min_price_v2",
             callArgs,
             "perpetual",
@@ -226,7 +237,7 @@ export class OnChainCalls {
             maxPrice: number;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -238,6 +249,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_max_price_v2",
             callArgs,
             "perpetual",
@@ -252,7 +264,7 @@ export class OnChainCalls {
             stepSize: number;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -264,6 +276,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_step_size_v2",
             callArgs,
             "perpetual",
@@ -278,7 +291,7 @@ export class OnChainCalls {
             tickSize: number;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -290,6 +303,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_tick_size_v2",
             callArgs,
             "perpetual",
@@ -304,7 +318,7 @@ export class OnChainCalls {
             mtbLong: number;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -316,6 +330,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_mtb_long_v2",
             callArgs,
             "perpetual",
@@ -330,7 +345,7 @@ export class OnChainCalls {
             mtbShort: number;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -342,6 +357,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_mtb_short_v2",
             callArgs,
             "perpetual",
@@ -356,7 +372,7 @@ export class OnChainCalls {
             maxQtyLimit: number;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -368,6 +384,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_max_qty_limit_v2",
             callArgs,
             "perpetual",
@@ -382,7 +399,7 @@ export class OnChainCalls {
             maxQtyMarket: number;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -394,6 +411,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_max_qty_market_v2",
             callArgs,
             "perpetual",
@@ -408,7 +426,7 @@ export class OnChainCalls {
             minQty: number;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -420,6 +438,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_min_qty_v2",
             callArgs,
             "perpetual",
@@ -434,7 +453,7 @@ export class OnChainCalls {
             maxLimit: string[];
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -446,6 +465,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_max_oi_open_v2",
             callArgs,
             "perpetual",
@@ -460,7 +480,7 @@ export class OnChainCalls {
             mmr: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -472,6 +492,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_maintenance_margin_required_v2",
             callArgs,
             "perpetual",
@@ -487,7 +508,7 @@ export class OnChainCalls {
         },
         options?:{
             gasBudget?: number,
-            signer?: RawSigner,
+            signer?: Keypair,
             multiSig?: address,
         }
     ): Promise<SuiTransactionBlockResponse | string> {
@@ -511,7 +532,7 @@ export class OnChainCalls {
         // if multi sig call return tx bytes
         if(options?.multiSig) {
             txb.setSender(options?.multiSig);
-            return toB64(await txb.build({provider: caller.provider, onlyTransactionKind: false}))
+            return toB64(await txb.build({client: this.suiClient, onlyTransactionKind: false}))
         } else {
             return caller.signAndExecuteTransactionBlock({
                 transactionBlock: txb,
@@ -534,7 +555,7 @@ export class OnChainCalls {
         },
         options?:{
             gasBudget?: number,
-            signer?: RawSigner,
+            signer?: Keypair,
             multiSig?: address,
         }
     ) {
@@ -557,7 +578,7 @@ export class OnChainCalls {
         // if multi sig call return tx bytes
         if(options?.multiSig) {
             txb.setSender(options?.multiSig);
-            return toB64(await txb.build({provider: caller.provider, onlyTransactionKind: false}))
+            return toB64(await txb.build({client: this.suiClient, onlyTransactionKind: false}))
         } else {
             return caller.signAndExecuteTransactionBlock({
                 transactionBlock: txb,
@@ -578,7 +599,7 @@ export class OnChainCalls {
             safeID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
         const callArgs = [];
@@ -589,6 +610,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "remove_settlement_operator",
             callArgs,
             "roles",
@@ -603,7 +625,7 @@ export class OnChainCalls {
             address: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
         const callArgs = [];
@@ -614,6 +636,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_fee_pool_address_v2",
             callArgs,
             "perpetual",
@@ -630,7 +653,7 @@ export class OnChainCalls {
             address: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
         const callArgs = [];
@@ -641,6 +664,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_insurance_pool_address_v2",
             callArgs,
             "perpetual",
@@ -657,7 +681,7 @@ export class OnChainCalls {
             percentage: number;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
         const callArgs = [];
@@ -668,6 +692,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_insurance_pool_percentage_v2",
             callArgs,
             "perpetual",
@@ -682,7 +707,7 @@ export class OnChainCalls {
             maxFundingRate: number;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
         const callArgs = [];
@@ -693,6 +718,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_max_allowed_funding_rate_v2",
             callArgs,
             "perpetual",
@@ -719,7 +745,7 @@ export class OnChainCalls {
             market?: string;
             txHash?: string;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -777,6 +803,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "trade",
             callArgs,
             "exchange",
@@ -806,7 +833,7 @@ export class OnChainCalls {
         }[],
         options?: {
             gasBudget?: number;
-            signer?: RawSigner;
+            signer?: Keypair;
             transactionBlock?: TransactionBlock;
         }
     ): Promise<SuiTransactionBlockResponse> {
@@ -923,7 +950,7 @@ export class OnChainCalls {
 
     public async executeTxBlock(
         block: TransactionBlock,
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -951,7 +978,7 @@ export class OnChainCalls {
             market?: string;
             txHash?: string;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -978,6 +1005,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "liquidate",
             callArgs,
             "exchange",
@@ -1001,7 +1029,7 @@ export class OnChainCalls {
             txHash?: string;
         }[],
         gasBudget?: number,
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<TransactionBlock> {
         const caller = signer || this.signer;
         const txBlock = new TransactionBlock();
@@ -1053,7 +1081,7 @@ export class OnChainCalls {
             market?: string;
         }[],
         gasBudget?: number,
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
         const txBlock = await this.getBatchLiquidationTransactionBlock(args, gasBudget, signer);
@@ -1070,7 +1098,7 @@ export class OnChainCalls {
 
     public async dryRun(
         txBlock: TransactionBlock,
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<DryRunTransactionBlockResponse> {
         const caller = signer || this.signer;
         return caller.dryRunTransactionBlock({
@@ -1091,7 +1119,7 @@ export class OnChainCalls {
             market?: string;
             txHash?: string;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -1120,6 +1148,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "deleverage",
             callArgs,
             "exchange",
@@ -1143,7 +1172,7 @@ export class OnChainCalls {
             txHash?: string;
         }[],
         gasBudget?: number,
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<TransactionBlock> {
         const caller = signer || this.signer;
         const txBlock = new TransactionBlock();
@@ -1223,7 +1252,7 @@ export class OnChainCalls {
             gasBudget?: number;
             txHash?: string;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
 
@@ -1249,6 +1278,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "add_margin",
             callArgs,
             "exchange",
@@ -1268,7 +1298,7 @@ export class OnChainCalls {
             gasBudget?: number;
             txHash?: string;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
 
@@ -1292,6 +1322,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "remove_margin",
             callArgs,
             "exchange",
@@ -1311,7 +1342,7 @@ export class OnChainCalls {
             gasBudget?: number;
             txHash?: string;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
 
@@ -1336,6 +1367,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "adjust_leverage",
             callArgs,
             "exchange",
@@ -1355,8 +1387,8 @@ export class OnChainCalls {
             gasBudget?: number;
             txHash?: string;
         },
-        signer?: RawSigner
-    ): Promise<SignedTransaction> {
+        signer?: Keypair
+    ): Promise<SignatureWithBytes> {
         const caller = signer || this.signer;
 
         const txb = new TransactionBlock();
@@ -1401,7 +1433,7 @@ export class OnChainCalls {
             gasBudget?: number;
             txHash?: string;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -1430,6 +1462,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "cancel_order",
             callArgs,
             "order",
@@ -1446,7 +1479,7 @@ export class OnChainCalls {
             market?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -1462,6 +1495,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_funding_rate_v2",
             callArgs,
             "perpetual",
@@ -1476,7 +1510,7 @@ export class OnChainCalls {
             safeID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -1489,6 +1523,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_deleveraging_operator",
             callArgs,
             "roles",
@@ -1503,7 +1538,7 @@ export class OnChainCalls {
             subAccountsMapID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -1515,6 +1550,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_sub_account",
             callArgs,
             "roles",
@@ -1531,7 +1567,7 @@ export class OnChainCalls {
             bankID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -1559,6 +1595,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "deposit_to_bank",
             callArgs,
             "margin_bank",
@@ -1576,7 +1613,7 @@ export class OnChainCalls {
             guardianCap?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -1589,6 +1626,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_withdrawal_status",
             callArgs,
             "margin_bank",
@@ -1606,7 +1644,7 @@ export class OnChainCalls {
             guardianCap?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -1619,6 +1657,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "set_trading_permit_v2",
             callArgs,
             "perpetual",
@@ -1634,7 +1673,7 @@ export class OnChainCalls {
             bankID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -1659,6 +1698,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "withdraw_from_bank",
             callArgs,
             "margin_bank",
@@ -1669,7 +1709,7 @@ export class OnChainCalls {
     }
 
     public async withdrawAllMarginFromBank(
-        signer?: RawSigner,
+        signer?: Keypair,
         gasBudget?: number,
         bankID?: string,
         txHash?: string
@@ -1693,6 +1733,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "withdraw_all_margin_from_bank",
             callArgs,
             "margin_bank",
@@ -1709,7 +1750,7 @@ export class OnChainCalls {
             adminID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
 
@@ -1721,6 +1762,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "delist_perpetual_v2",
             callArgs,
             "perpetual",
@@ -1734,7 +1776,7 @@ export class OnChainCalls {
             perpID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
 
@@ -1745,6 +1787,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "close_position",
             callArgs,
             "exchange",
@@ -1779,7 +1822,7 @@ export class OnChainCalls {
         },
         options?: {
             gasBudget?: number;
-            signer?: RawSigner;
+            signer?: Keypair;
             multiSig?: address;
         }
     ):Promise<SuiTransactionBlockResponse | string> {
@@ -1807,7 +1850,7 @@ export class OnChainCalls {
         // if multi sig call return tx bytes
         if(options?.multiSig) {
             txb.setSender(options?.multiSig);
-            return toB64(await txb.build({provider: caller.provider, onlyTransactionKind: false}))
+            return toB64(await txb.build({client: this.suiClient, onlyTransactionKind: false}))
         } else {
             return caller.signAndExecuteTransactionBlock({
                 transactionBlock: txb,
@@ -1842,20 +1885,20 @@ export class OnChainCalls {
      * Note that this function will only work on Pyth fake contract
      * and can only be used for testing
      */
-    public async createOracleObjects(signer?: RawSigner) {
+    public async createOracleObjects(signer?: Keypair) {
         const caller = signer || this.signer;
 
         const callArgs = [];
         callArgs.push(SUI_CLOCK_OBJECT_ID);
 
-        return this.signAndCall(caller, "create_price_obj", callArgs, "price_info");
+        return this.signAndCall(caller,this.suiClient, "create_price_obj", callArgs, "price_info");
     }
 
     /*
      * Creates the margin bank object
      * @param usdcAddress address of the coin supported by bank
      */
-    public async createBank(usdcAddress: string, gasBudget?: number, signer?: RawSigner) {
+    public async createBank(usdcAddress: string, gasBudget?: number, signer?: Keypair) {
         const caller = signer || this.signer;
 
         const callArgs = [];
@@ -1864,6 +1907,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "create_bank",
             callArgs,
             "margin_bank",
@@ -1876,13 +1920,13 @@ export class OnChainCalls {
     /*
      * Creates the seqeuncer object
      */
-    public async createSequencer(signer?: RawSigner) {
+    public async createSequencer(signer?: Keypair) {
         const caller = signer || this.signer;
 
         const callArgs = [];
         callArgs.push(this.getExchangeAdminCap());
 
-        return this.signAndCall(caller, "create_sequencer", callArgs, "roles");
+        return this.signAndCall(caller,this.suiClient, "create_sequencer", callArgs, "roles");
     }
 
     /*
@@ -1895,7 +1939,7 @@ export class OnChainCalls {
             confidence?: string;
             market?: string;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         const caller = signer || this.signer;
 
@@ -1909,6 +1953,7 @@ export class OnChainCalls {
 
         return this.signAndCall(
             caller,
+            this.suiClient,
             "update_price_info_object_for_test",
             callArgs,
             "price_info",
@@ -1941,7 +1986,7 @@ export class OnChainCalls {
             treasuryCapID?: string;
             gasBudget?: number;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
 
@@ -1953,7 +1998,7 @@ export class OnChainCalls {
 
         callArgs.push(args?.to || (await caller.getAddress()));
 
-        return this.signAndCall(caller, "mint", callArgs, "coin");
+        return this.signAndCall(caller,this.suiClient, "mint", callArgs, "coin");
     }
 
     public async getUSDCCoins(
@@ -1963,7 +2008,7 @@ export class OnChainCalls {
             limit?: number;
             cursor?: string;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<any> {
         const caller = signer || this.signer;
 
@@ -1984,7 +2029,7 @@ export class OnChainCalls {
      * @returns transaction result
      */
 
-    async mergeAllUsdcCoins(coinType?: string, signer?: RawSigner) {
+    async mergeAllUsdcCoins(coinType?: string, signer?: Keypair) {
         const caller = signer || this.signer;
         const txb = new TransactionBlock();
         const coins = await caller.provider.getCoins({
@@ -2020,7 +2065,7 @@ export class OnChainCalls {
      * @param signer the signer object of the wallet that owns sui to transfer
      * @returns transaction Result
      */
-    async tranferSuiBalance(args: { to: string; balance: number }, signer?: RawSigner) {
+    async tranferSuiBalance(args: { to: string; balance: number }, signer?: Keypair) {
         const caller = signer || this.signer;
         const txb = new TransactionBlock();
 
@@ -2056,7 +2101,7 @@ export class OnChainCalls {
             limit?: number;
             cursor?: string;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<number> {
         const coins = await this.getUSDCCoins(args, signer);
         if (coins.data.length == 0) {
@@ -2078,7 +2123,7 @@ export class OnChainCalls {
             limit?: number;
             cursor?: string;
         },
-        signer?: RawSigner
+        signer?: Keypair
     ) {
         // get all usdc coins
         const coins = await this.getUSDCCoins(args, signer);
@@ -2094,7 +2139,8 @@ export class OnChainCalls {
     }
 
     public signAndCall(
-        caller: SignerWithProvider,
+        signer: Keypair,
+        suiClient: SuiClient,
         method: string,
         callArgs: any[],
         moduleName: string,
@@ -2115,8 +2161,9 @@ export class OnChainCalls {
             typeArguments: typeArguments || []
         });
 
-        return caller.signAndExecuteTransactionBlock({
+        return suiClient.signAndExecuteTransactionBlock({
             transactionBlock: tx,
+            signer,
             options: {
                 showObjectChanges: true,
                 showEffects: true,

@@ -1,21 +1,34 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-shadow */
 import BigNumber from "bignumber.js";
+import { Secp256k1Keypair, Secp256k1PublicKey } from "@mysten/sui.js/keypairs/secp256k1";
+import { Ed25519Keypair, Ed25519PublicKey } from "@mysten/sui.js/keypairs/ed25519";
+import { Secp256r1Keypair,Secp256r1PublicKey } from "@mysten/sui.js/keypairs/secp256r1";
+import { WalletContextState,SuiProvider } from "@suiet/wallet-kit";
 
 import {
-    JsonRpcProvider,
-    Keypair,
-    RawSigner,
+    TransactionBlock
+} from "@mysten/sui.js/transactions";
+
+import {
     SuiTransactionBlockResponse,
     DryRunTransactionBlockResponse,
-    TransactionBlock,
     OwnedObjectRef,
-    getSuiObjectData
-} from "@mysten/sui.js";
+} from "@mysten/sui.js/client";
 
+import {
+    Keypair
+} from "@mysten/sui.js/cryptography";
+
+import {
+    SuiClient,
+
+} from "@mysten/sui.js/client";
+import {  SignatureScheme } from "@mysten/sui.js/cryptography";
 import { Socket } from "socket.io-client";
 
 import { DefaultEventsMap } from "@socket.io/component-emitter";
+import { string } from "yargs";
 
 export type BigNumberable = BigNumber | number | string;
 export type SignedNumber = {
@@ -23,6 +36,7 @@ export type SignedNumber = {
     value: string;
 };
 
+export type SuiAddress= string;
 export type address = string;
 export type TypedSignature = string;
 export type MarketSymbol = string;
@@ -63,15 +77,23 @@ export type MinifiedCandleStick = [
 export type DAPIKlineResponse = Array<MinifiedCandleStick>;
 
 export {
-    JsonRpcProvider,
+    SuiClient,
     Keypair,
-    RawSigner,
     BigNumber,
     SuiTransactionBlockResponse,
     DryRunTransactionBlockResponse,
     TransactionBlock,
     OwnedObjectRef,
-    getSuiObjectData
+    Ed25519Keypair,
+    Secp256k1Keypair,
+    Secp256r1Keypair,
+    Ed25519PublicKey,
+    Secp256k1PublicKey,
+    Secp256r1PublicKey,
+    SignatureScheme,
+    WalletContextState,
+    SuiProvider
+
 };
 
 export type SigPK = {

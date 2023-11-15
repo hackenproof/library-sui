@@ -1,8 +1,9 @@
-import { SuiTransactionBlockResponse } from "@mysten/sui.js";
+
 import { UserPositionExtended } from "../interfaces";
 import { ERROR_CODES } from "../errors";
 import BigNumber from "bignumber.js";
 import { SignedNumberToBigNumber } from "../library";
+import { SuiTransactionBlockResponse } from "../types";
 
 export class Transaction {
     static getStatus(tx: SuiTransactionBlockResponse) {
