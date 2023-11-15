@@ -1,6 +1,9 @@
 import {
     bcs
 } from "@mysten/sui.js/bcs";
+import { toB64 } from "@mysten/bcs";
+
+import { publicKeyFromRawBytes } from "@mysten/sui.js/verify";
 
 import {
     parseSerializedSignature,
@@ -14,7 +17,7 @@ import { secp256k1 } from "@noble/curves/secp256k1";
 import { ed25519 } from "@noble/curves/ed25519";
 import { WalletContextState } from "@suiet/wallet-kit";
 import { blake2b } from "@noble/hashes/blake2b";
-import { SigPK,Keypair } from "../types";
+import { SigPK, Keypair } from "../types";
 import { SIGNER_TYPES } from "../enums";
 
 export class OrderSigner {
@@ -76,16 +79,41 @@ export class OrderSigner {
         const sigOutput = await wallet.signMessage({ message: msgHash });
 
         // segregate public key from signature
-        const sigPublicKey = parseSerializedSignature(sigOutput.signature);
+        const parsedSignature = parseSerializedSignature(sigOutput.signature);
 
-        // return signature in hex - appending 2 at the end so that when verifying off-chain and on-chain
-        // we know that this sig was generated using sui ui wallet
-        return {
-            signature:
-                Buffer.from(sigPublicKey.signature).toString("hex") +
-                SIGNER_TYPES.UI_ED25519,
-            publicKey: sigPublicKey.publicKey.toString()
-        };
+
+
+
+        if (parsedSignature.signatureScheme === "ZkLogin") {
+            //zk login signature
+            const { userSignature } = parsedSignature.zkLogin;
+
+            //convert user sig to b64
+            const convertedUserSignature = toB64(userSignature as any);
+
+            //reparse b64 converted user sig
+            const parsedUserSignature = parseSerializedSignature(
+                convertedUserSignature
+            );
+            return {
+                signature:
+                    Buffer.from(parsedSignature.serializedSignature).toString("hex") +
+                    "3",
+                publicKey: publicKeyFromRawBytes(
+                    parsedUserSignature.signatureScheme,
+                    parsedUserSignature.publicKey
+                ).toBase64(),
+            };
+        }
+        else
+            // return signature in hex - appending 2 at the end so that when verifying off-chain and on-chain
+            // we know that this sig was generated using sui ui wallet
+            return {
+                signature:
+                    Buffer.from(parsedSignature.signature).toString("hex") +
+                    SIGNER_TYPES.UI_ED25519,
+                publicKey: parsedSignature.publicKey.toString()
+            };
     }
 
     public signPayload(payload: unknown, keyPair?: Keypair): SigPK {
@@ -116,25 +144,48 @@ export class OrderSigner {
         return { signature, publicKey };
     }
 
-    public static async signPayloadUsingWallet(
-        payload: unknown,
-        wallet: WalletContextState
-    ): Promise<SigPK> {
-        const msgBytes = new TextEncoder().encode(JSON.stringify(payload));
-        const sigOutput = await wallet.signMessage({ message: msgBytes });
+    static async signPayloadUsingWallet(payload: unknown, wallet: WalletContextState): Promise<SigPK> {
+        {
+            try {
+                let data: SigPK;
+                const msgBytes = new TextEncoder().encode(JSON.stringify(payload));
+                const sigOutput = await wallet.signMessage({ message: msgBytes });
+                let parsedSignature = parseSerializedSignature(sigOutput.signature);
 
-        const sigPublicKey = parseSerializedSignature(sigOutput.signature);
+                if (parsedSignature.signatureScheme === "ZkLogin") {
+                    //zk login signature
+                    const { userSignature } = parsedSignature.zkLogin;
 
-        // return signature in hex - appending 2 at the end so that when verifying off-chain and on-chain
-        // we know that this sig was generated using sui ui wallet
-        return {
-            signature:
-                Buffer.from(sigPublicKey.signature).toString("hex") +
-                SIGNER_TYPES.UI_ED25519,
-            publicKey: sigPublicKey.publicKey.toString()
-        };
+                    //convert user sig to b64
+                    const convertedUserSignature = toB64(userSignature as any);
+                    //reparse b64 converted user sig
+                    const parsedUserSignature = parseSerializedSignature(
+                        convertedUserSignature
+                    );
+
+                    data = {
+                        signature:
+                            Buffer.from(parsedSignature.serializedSignature).toString("hex") +
+                            "3",
+                        publicKey: publicKeyFromRawBytes(
+                            parsedUserSignature.signatureScheme,
+                            parsedUserSignature.publicKey
+                        ).toBase64(),
+                    };
+                } else {
+                    data = {
+                        signature:
+                            Buffer.from(parsedSignature.signature).toString("hex") +
+                            SIGNER_TYPES.UI_ED25519,
+                        publicKey: parsedSignature.publicKey.toString()
+                    };
+                }
+                return data;
+            } catch (error) {
+                throw error;
+            }
+        }
     }
-
     private static encodePayload(payload: unknown): Uint8Array {
         const msgBytes = new TextEncoder().encode(JSON.stringify(payload));
         const size = 1024 + Math.floor(msgBytes.length / 1024) * 1024;

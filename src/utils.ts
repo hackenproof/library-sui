@@ -1,4 +1,3 @@
-
 import { TIME_IN_FORCE } from "../src/enums";
 import { StoredOrder } from "../src/interfaces";
 import { toBigNumber, bigNumber } from "./library";
@@ -6,8 +5,18 @@ import { Order } from "../src/interfaces";
 import { DEFAULT } from "./defaults";
 import { config } from "dotenv";
 import { network } from "./DeploymentConfig";
+import { publicKeyFromRawBytes } from "@mysten/sui.js/verify";
+import { toB64, fromB64 } from "@mysten/bcs";
+
+import { parseSerializedSignature } from "@mysten/sui.js/cryptography";
 import fs from "fs";
-import { Ed25519Keypair, Keypair, Secp256k1Keypair, SignatureScheme, SuiClient } from "./types";
+import {
+    Ed25519Keypair,
+    Keypair,
+    Secp256k1Keypair,
+    SignatureScheme,
+    SuiClient
+} from "./types";
 config({ path: ".env" });
 
 export function writeFile(filePath: string, jsonData: any) {
@@ -21,7 +30,7 @@ export function readFile(filePath: string): any {
 }
 
 export function getProvider(rpcURL: string): SuiClient {
-    return new SuiClient({ url: rpcURL });;
+    return new SuiClient({ url: rpcURL });
 }
 
 export function getKeyPairFromSeed(
@@ -50,6 +59,8 @@ export function getKeyPairFromPvtKey(
             return Ed25519Keypair.fromSecretKey(Buffer.from(key, "hex"));
         case "Secp256k1":
             return Secp256k1Keypair.fromSecretKey(Buffer.from(key, "hex"));
+        case "ZkLogin":
+            return Ed25519Keypair.fromSecretKey(fromB64(key));
         default:
             throw new Error("Provided key is invalid");
     }
@@ -61,6 +72,39 @@ export function getSignerFromSeed(
 ): Keypair {
     return getKeyPairFromSeed(seed, scheme);
 }
+
+export const verifyZkAddress = (signature, userAddress) => {
+    const parsedSignature = parseSerializedSignature(signature);
+    return parsedSignature.zkLogin.address === userAddress;
+};
+
+export const verifyZkPublicKey = ({ signature, publicKey }) => {
+    const { zkLogin } = parseSerializedSignature(signature);
+    const userSignature = toB64(zkLogin.userSignature as any);
+    const { publicKey: signaturePublicKey, signatureScheme } =
+        parseSerializedSignature(userSignature);
+    return (
+        publicKeyFromRawBytes(signatureScheme, signaturePublicKey).toBase64() ===
+        publicKey
+    );
+};
+
+export const decodeZkSignature = (decodedSignature: string) => {
+    const PUBLIC_KEY_LENGTH = 44;
+    const SCHEME_LENGTH = 1;
+    const SIGNATURE_LENGTH = decodedSignature.length - PUBLIC_KEY_LENGTH - SCHEME_LENGTH;
+    const signature = decodedSignature.slice(0, SIGNATURE_LENGTH);
+    const scheme = decodedSignature.slice(
+        SIGNATURE_LENGTH,
+        SIGNATURE_LENGTH + SCHEME_LENGTH
+    );
+    const publicKey = decodedSignature.slice(-PUBLIC_KEY_LENGTH);
+    return {
+        zkSignature: Buffer.from(signature, "hex").toString("utf-8"),
+        publicKey,
+        scheme
+    };
+};
 
 export function createOrder(params?: {
     market?: string;

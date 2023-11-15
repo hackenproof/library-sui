@@ -991,7 +991,7 @@ export class OnChainCalls {
         callArgs.push(this.getPriceOracleObjectId(args.market));
 
         callArgs.push(args.liquidatee);
-        callArgs.push(args.liquidator || (await caller.getAddress()));
+        callArgs.push(args.liquidator || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())));
         callArgs.push(args.quantity);
         callArgs.push(args.leverage);
         callArgs.push(args.allOrNothing == true);
@@ -1043,7 +1043,7 @@ export class OnChainCalls {
                 txBlock.object(this.getPriceOracleObjectId(arg.market)),
 
                 txBlock.pure(arg.liquidatee),
-                txBlock.pure(arg.liquidator || (await caller.getAddress())),
+                txBlock.pure(arg.liquidator || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress()))),
                 txBlock.pure(arg.quantity),
                 txBlock.pure(arg.leverage),
                 txBlock.pure(arg.allOrNothing === true)
@@ -1226,7 +1226,7 @@ export class OnChainCalls {
             txHash?: string;
         }[],
         gasBudget?: number,
-        signer?: RawSigner
+        signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
         const txBlock = await this.getBatchDeleveragingTransactionBlock(args, gasBudget, signer);
@@ -1266,7 +1266,7 @@ export class OnChainCalls {
 
         callArgs.push(this.getPriceOracleObjectId(args.market));
 
-        callArgs.push(args.account || (await caller.getAddress()));
+        callArgs.push(args.account || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())));
         callArgs.push(toBigNumberStr(args.amount));
 
         callArgs.push(
@@ -1310,7 +1310,7 @@ export class OnChainCalls {
         callArgs.push(this.getSequencer());
         callArgs.push(this.getPriceOracleObjectId(args.market));
 
-        callArgs.push(args.account || (await caller.getAddress()));
+        callArgs.push(args.account || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())));
         callArgs.push(toBigNumberStr(args.amount));
 
         callArgs.push(
@@ -1355,7 +1355,7 @@ export class OnChainCalls {
         callArgs.push(this.getSequencer());
         callArgs.push(this.getPriceOracleObjectId(args.market));
 
-        callArgs.push(args.account || (await caller.getAddress()));
+        callArgs.push(args.account || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())));
         callArgs.push(toBigNumberStr(args.leverage));
 
         callArgs.push(
@@ -1403,7 +1403,7 @@ export class OnChainCalls {
         callArgs.push(txb.object(this.getSequencer()));
         callArgs.push(txb.object(this.getPriceOracleObjectId(args.market)));
 
-        callArgs.push(txb.pure(args.account || (await caller.getAddress())));
+        callArgs.push(txb.pure(args.account || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress()))));
         callArgs.push(txb.pure(toBigNumberStr(args.leverage)));
 
         callArgs.push(txb.pure(
@@ -1580,7 +1580,7 @@ export class OnChainCalls {
         callArgs.push(getSalt());
 
         callArgs.push(
-            args.accountAddress ? args.accountAddress : await caller.getAddress()
+            args.accountAddress ? args.accountAddress : caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())
         );
         callArgs.push(args.amount);
         callArgs.push(args.coinID);
@@ -1686,7 +1686,7 @@ export class OnChainCalls {
         callArgs.push(getSalt());
 
         callArgs.push(
-            args.accountAddress ? args.accountAddress : await caller.getAddress()
+            args.accountAddress ? args.accountAddress : caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())
         );
         callArgs.push(args.amount);
 
@@ -1723,7 +1723,7 @@ export class OnChainCalls {
 
         // temporary txHash, works as salt to make hash unique
         callArgs.push(getSalt());
-        callArgs.push(await caller.getAddress());
+        callArgs.push(caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress()));
 
         if (!txHash) {
             txHash = Buffer.from(sha256(JSON.stringify(callArgs))).toString("hex");
@@ -1996,7 +1996,7 @@ export class OnChainCalls {
 
         callArgs.push(args?.amount || toBigNumberStr(1_000_000_000, USDC_BASE_DECIMALS));
 
-        callArgs.push(args?.to || (await caller.getAddress()));
+        callArgs.push(args?.to || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())));
 
         return this.signAndCall(caller,this.suiClient, "mint", callArgs, "coin");
     }
@@ -2013,7 +2013,7 @@ export class OnChainCalls {
         const caller = signer || this.signer;
 
         const coins = await caller.provider.getCoins({
-            owner: args?.address || (await caller.getAddress()),
+            owner: args?.address || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())),
             coinType: args?.currencyType || this.getCoinType(),
             cursor: args?.cursor ?? null,
             limit: args?.limit ?? null
@@ -2034,7 +2034,7 @@ export class OnChainCalls {
         const txb = new TransactionBlock();
         const coins = await caller.provider.getCoins({
             coinType: coinType || this.getCoinType(),
-            owner: await caller.getAddress()
+            owner: caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())
         });
 
         if (coins.length <= 1) {
@@ -2071,7 +2071,7 @@ export class OnChainCalls {
 
         const transferAmount = toBigNumber(args.balance, SUI_NATIVE_BASE);
         const existingBalance = BigNumber(
-            await this.getUserSuiBalance(await caller.getAddress())
+            await this.getUserSuiBalance(caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress()))
         );
 
         if (existingBalance.lte(transferAmount)) {
