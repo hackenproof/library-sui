@@ -154,7 +154,7 @@ export class OrderSigner {
             }
         }
     }
-    async signPayloadUsingWallet(
+    static async signPayloadUsingWallet(
         payload: unknown,
         wallet: WalletContextState
     ): Promise<SigPK> {
