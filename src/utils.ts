@@ -303,5 +303,6 @@ export const parseAndShapeSignedData = ({
             ).toBase64()
         };
     }
+
     return data;
 };

@@ -150,7 +150,7 @@ export class OrderSigner {
                 });
                 return parseAndShapeSignedData({ signature: zkSignature });
             } catch (error) {
-                throw error
+                console.log(error, "error");
             }
         }
     }
@@ -162,10 +162,9 @@ export class OrderSigner {
             try {
                 const msgBytes = new TextEncoder().encode(JSON.stringify(payload));
                 const { signature } = await wallet.signMessage({ message: msgBytes });
-
                 return parseAndShapeSignedData({ signature });
             } catch (error) {
-                throw error
+                console.log(error, "error");
             }
         }
     }
