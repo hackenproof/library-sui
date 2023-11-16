@@ -100,8 +100,7 @@ export class OrderSigner {
 
         // sign data
         const { signature } = await wallet.signMessage({ message: msgHash });
-
-        return parseAndShapeSignedData({ signature, isParsingRequired: false });
+        return parseAndShapeSignedData({ signature });
     }
 
     public signPayload(payload: unknown, keyPair?: Keypair): SigPK {
@@ -155,8 +154,7 @@ export class OrderSigner {
             }
         }
     }
-
-    static async signPayloadUsingWallet(
+    async signPayloadUsingWallet(
         payload: unknown,
         wallet: WalletContextState
     ): Promise<SigPK> {
@@ -164,7 +162,8 @@ export class OrderSigner {
             try {
                 const msgBytes = new TextEncoder().encode(JSON.stringify(payload));
                 const { signature } = await wallet.signMessage({ message: msgBytes });
-                return parseAndShapeSignedData({ signature, isParsingRequired: false });
+
+                return parseAndShapeSignedData({ signature });
             } catch (error) {
                 throw error
             }

@@ -287,7 +287,10 @@ export const parseAndShapeSignedData = ({
         data = {
             signature:
                 Buffer.from(parsedSignature.serializedSignature).toString("hex") + "3",
-            publicAddress: parsedSignature.zkLogin.address
+            publicKey: publicKeyFromRawBytes(
+                parsedUserSignature.signatureScheme,
+                parsedUserSignature.publicKey
+            ).toBase64()
         };
     } else {
         data = {
