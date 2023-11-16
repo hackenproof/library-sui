@@ -48,10 +48,11 @@ export class OnChainCalls {
     deployment: any;
     suiClient: SuiClient;
 
-    constructor(_signer: Keypair, _deployment: any, settlementCap?: string) {
+    constructor(_signer: Keypair, _deployment: any, settlementCap?: string, suiClient?: SuiClient) {
         this.signer = _signer;
         this.deployment = _deployment;
         this.settlementCap = settlementCap;
+        this.suiClient = suiClient;
     }
 
     public async setExchangeAdmin(
@@ -2139,7 +2140,7 @@ export class OnChainCalls {
     }
 
     public signAndCall(
-        signer: Keypair,
+        signer: Keypair | any,
         suiClient: SuiClient,
         method: string,
         callArgs: any[],
@@ -2161,7 +2162,8 @@ export class OnChainCalls {
             typeArguments: typeArguments || []
         });
 
-        return suiClient.signAndExecuteTransactionBlock({
+         
+        return signer instanceof Keypair ? suiClient.signAndExecuteTransactionBlock({
             transactionBlock: tx,
             signer,
             options: {
@@ -2170,7 +2172,15 @@ export class OnChainCalls {
                 showEvents: true,
                 showInput: true
             }
-        });
+        }) : signer.signAndExecuteTransactionBlock({
+            transactionBlock: tx,
+            options: {
+                showObjectChanges: true,
+                showEffects: true,
+                showEvents: true,
+                showInput: true
+            }
+        })
     }
 
     // ===================================== //
