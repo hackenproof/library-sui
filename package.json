@@ -1,7 +1,7 @@
 {
     "name": "@firefly-exchange/library-sui",
     "description": "Sui library housing helper methods, classes to interact with Bluefin protocol deployed on Sui ",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "main": "dist/index.js",
     "typings": "dist/index",
     "scripts": {
@@ -21,6 +21,7 @@
     },
     "dependencies": {
         "@mysten/sui.js": "^0.45.0",
+        "@mysten/zklogin": "^0.3.5",
         "@noble/hashes": "^1.2.0",
         "@noble/secp256k1": "^1.7.1",
         "@suiet/wallet-kit": "^0.2.18",

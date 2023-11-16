@@ -1,5 +1,5 @@
-import { TIME_IN_FORCE } from "../src/enums";
-import { StoredOrder } from "../src/interfaces";
+import { SIGNER_TYPES, TIME_IN_FORCE } from "../src/enums";
+import { StoredOrder, ZkPayload } from "../src/interfaces";
 import { toBigNumber, bigNumber } from "./library";
 import { Order } from "../src/interfaces";
 import { DEFAULT } from "./defaults";
@@ -14,9 +14,13 @@ import {
     Ed25519Keypair,
     Keypair,
     Secp256k1Keypair,
+    SigPK,
     SignatureScheme,
     SuiClient
 } from "./types";
+import { SerializedSignature } from "@mysten/sui.js/dist/cjs/cryptography";
+import { getZkLoginSignature, genAddressSeed } from "@mysten/zklogin";
+
 config({ path: ".env" });
 
 export function writeFile(filePath: string, jsonData: any) {
@@ -233,3 +237,68 @@ export function getSalt(): number {
         getRandomInt(0, 1_000_000)
     );
 }
+
+export const createZkSignature = ({
+    userSignature,
+    zkPayload
+}: {
+    userSignature: string;
+    zkPayload: ZkPayload;
+}) => {
+    const { salt, decodedJWT, proof, maxEpoch } = zkPayload;
+    const addressSeed: string = genAddressSeed(
+        BigInt(salt!),
+        "sub",
+        decodedJWT.sub,
+        decodedJWT.aud
+    ).toString();
+
+    const zkLoginSignature: SerializedSignature = getZkLoginSignature({
+        inputs: {
+            ...proof,
+            addressSeed
+        },
+        maxEpoch: maxEpoch,
+        userSignature
+    });
+
+    return zkLoginSignature;
+};
+
+export const parseAndShapeSignedData = ({
+    signature,
+    isParsingRequired = true
+}: {
+    signature: string;
+    isParsingRequired?: boolean;
+}): SigPK => {
+    let data: SigPK;
+    let parsedSignature = parseSerializedSignature(signature);
+    if (isParsingRequired && parsedSignature.signatureScheme === "ZkLogin") {
+        //zk login signature
+        const { userSignature } = parsedSignature.zkLogin;
+
+        //convert user sig to b64
+        const convertedUserSignature = toB64(userSignature as any);
+
+        //reparse b64 converted user sig
+        const parsedUserSignature = parseSerializedSignature(convertedUserSignature);
+
+        data = {
+            signature:
+                Buffer.from(parsedSignature.serializedSignature).toString("hex") + "3",
+            publicAddress: parsedSignature.zkLogin.address
+        };
+    } else {
+        data = {
+            signature:
+                Buffer.from(parsedSignature.signature).toString("hex") +
+                SIGNER_TYPES.UI_ED25519,
+            publicKey: publicKeyFromRawBytes(
+                parsedSignature.signatureScheme,
+                parsedSignature.publicKey
+            ).toBase64()
+        };
+    }
+    return data;
+};

@@ -1,7 +1,6 @@
-
 import BigNumber from "bignumber.js";
 import { ORDER_TYPE, TIME_IN_FORCE } from "../enums";
-import { SuiAddress } from "../types";
+import { PartialZkLoginSignature, SuiAddress } from "../types";
 
 export interface Order {
     market: SuiAddress;
@@ -60,4 +59,24 @@ export interface OrderFlags {
 
 export interface SignedOrder extends Order {
     typedSignature: string;
+}
+
+export interface DecodeJWT {
+    iss: string;
+    azp: string;
+    aud: string;
+    sub: string;
+    nonce: string;
+    nbf: number;
+    iat: number;
+    exp: number;
+    jti: string;
+    email: string;
+}
+
+export interface ZkPayload {
+    decodedJWT: DecodeJWT;
+    salt: string;
+    proof: PartialZkLoginSignature;
+    maxEpoch: number;
 }

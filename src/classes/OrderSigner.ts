@@ -1,16 +1,13 @@
+
 import {
     bcs
 } from "@mysten/sui.js/bcs";
-import { toB64 } from "@mysten/bcs";
-
-import { publicKeyFromRawBytes } from "@mysten/sui.js/verify";
 
 import {
-    parseSerializedSignature,
     IntentScope,
     messageWithIntent
 } from "@mysten/sui.js/cryptography";
-import { Order, SignedOrder } from "../interfaces/order";
+import { Order, SignedOrder, ZkPayload } from "../interfaces/order";
 import { base64ToUint8, bnToHex, encodeOrderFlags, hexToBuffer } from "../library";
 import { sha256 } from "@noble/hashes/sha256";
 import { secp256k1 } from "@noble/curves/secp256k1";
@@ -19,6 +16,7 @@ import { WalletContextState } from "@suiet/wallet-kit";
 import { blake2b } from "@noble/hashes/blake2b";
 import { SigPK, Keypair } from "../types";
 import { SIGNER_TYPES } from "../enums";
+import { createZkSignature, parseAndShapeSignedData } from "../utils";
 
 export class OrderSigner {
     constructor(private keypair: Keypair) { }
@@ -59,6 +57,31 @@ export class OrderSigner {
         return { signature, publicKey };
     }
 
+    static async signOrderUsingZkSignature({
+        order,
+        signer,
+        zkPayload
+    }: {
+        order: Order;
+        signer: Keypair;
+        zkPayload: ZkPayload;
+    }): Promise<SigPK> {
+        // serialize order
+        const msgData = new TextEncoder().encode(OrderSigner.getSerializedOrder(order));
+
+        // take sha256 hash of order
+        const msgHash = sha256(msgData);
+
+        // sign data
+        const { signature } = await signer.signPersonalMessage(msgHash);
+
+        const zkSignature = createZkSignature({
+            userSignature: signature,
+            zkPayload
+        });
+        return parseAndShapeSignedData({ signature: zkSignature });
+    }
+
     /**
      * Signs the order using the provided wallet context
      * @param order order to be signed
@@ -76,44 +99,9 @@ export class OrderSigner {
         const msgHash = sha256(msgData);
 
         // sign data
-        const sigOutput = await wallet.signMessage({ message: msgHash });
+        const { signature } = await wallet.signMessage({ message: msgHash });
 
-        // segregate public key from signature
-        const parsedSignature = parseSerializedSignature(sigOutput.signature);
-
-
-
-
-        if (parsedSignature.signatureScheme === "ZkLogin") {
-            //zk login signature
-            const { userSignature } = parsedSignature.zkLogin;
-
-            //convert user sig to b64
-            const convertedUserSignature = toB64(userSignature as any);
-
-            //reparse b64 converted user sig
-            const parsedUserSignature = parseSerializedSignature(
-                convertedUserSignature
-            );
-            return {
-                signature:
-                    Buffer.from(parsedSignature.serializedSignature).toString("hex") +
-                    "3",
-                publicKey: publicKeyFromRawBytes(
-                    parsedUserSignature.signatureScheme,
-                    parsedUserSignature.publicKey
-                ).toBase64(),
-            };
-        }
-        else
-            // return signature in hex - appending 2 at the end so that when verifying off-chain and on-chain
-            // we know that this sig was generated using sui ui wallet
-            return {
-                signature:
-                    Buffer.from(parsedSignature.signature).toString("hex") +
-                    SIGNER_TYPES.UI_ED25519,
-                publicKey: parsedSignature.publicKey.toString()
-            };
+        return parseAndShapeSignedData({ signature, isParsingRequired: false });
     }
 
     public signPayload(payload: unknown, keyPair?: Keypair): SigPK {
@@ -144,45 +132,41 @@ export class OrderSigner {
         return { signature, publicKey };
     }
 
-    static async signPayloadUsingWallet(payload: unknown, wallet: WalletContextState): Promise<SigPK> {
+    static async signPayloadUsingZKSignature({
+        payload,
+        signer,
+        zkPayload
+    }: {
+        payload: unknown;
+        signer: Keypair;
+        zkPayload: ZkPayload;
+    }): Promise<SigPK> {
         {
             try {
-                let data: SigPK;
                 const msgBytes = new TextEncoder().encode(JSON.stringify(payload));
-                const sigOutput = await wallet.signMessage({ message: msgBytes });
-                let parsedSignature = parseSerializedSignature(sigOutput.signature);
-
-                if (parsedSignature.signatureScheme === "ZkLogin") {
-                    //zk login signature
-                    const { userSignature } = parsedSignature.zkLogin;
-
-                    //convert user sig to b64
-                    const convertedUserSignature = toB64(userSignature as any);
-                    //reparse b64 converted user sig
-                    const parsedUserSignature = parseSerializedSignature(
-                        convertedUserSignature
-                    );
-
-                    data = {
-                        signature:
-                            Buffer.from(parsedSignature.serializedSignature).toString("hex") +
-                            "3",
-                        publicKey: publicKeyFromRawBytes(
-                            parsedUserSignature.signatureScheme,
-                            parsedUserSignature.publicKey
-                        ).toBase64(),
-                    };
-                } else {
-                    data = {
-                        signature:
-                            Buffer.from(parsedSignature.signature).toString("hex") +
-                            SIGNER_TYPES.UI_ED25519,
-                        publicKey: parsedSignature.publicKey.toString()
-                    };
-                }
-                return data;
+                const { signature } = await signer.signPersonalMessage(msgBytes);
+                const zkSignature = createZkSignature({
+                    userSignature: signature,
+                    zkPayload
+                });
+                return parseAndShapeSignedData({ signature: zkSignature });
             } catch (error) {
-                throw error;
+                throw error
+            }
+        }
+    }
+
+    static async signPayloadUsingWallet(
+        payload: unknown,
+        wallet: WalletContextState
+    ): Promise<SigPK> {
+        {
+            try {
+                const msgBytes = new TextEncoder().encode(JSON.stringify(payload));
+                const { signature } = await wallet.signMessage({ message: msgBytes });
+                return parseAndShapeSignedData({ signature, isParsingRequired: false });
+            } catch (error) {
+                throw error
             }
         }
     }
