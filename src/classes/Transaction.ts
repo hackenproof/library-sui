@@ -1,4 +1,3 @@
-
 import { UserPositionExtended } from "../interfaces";
 import { ERROR_CODES } from "../errors";
 import BigNumber from "bignumber.js";

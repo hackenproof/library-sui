@@ -1,4 +1,3 @@
-
 import BigNumber from "bignumber.js";
 import { Order, TradeData } from "../interfaces";
 import { Keypair } from "../types";

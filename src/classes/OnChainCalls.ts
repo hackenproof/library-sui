@@ -5,15 +5,9 @@ import {
     SuiClient
 } from "@mysten/sui.js/client";
 
+import { SUI_CLOCK_OBJECT_ID, toB64 } from "@mysten/sui.js/utils";
 
-
-import {
-    SUI_CLOCK_OBJECT_ID,
-    toB64
-} from "@mysten/sui.js/utils";
-
-
-import { SuiTransactionBlockResponse } from "@mysten/sui.js/client"
+import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
 import BigNumber from "bignumber.js";
 import { DEFAULT } from "../defaults";
 import {
@@ -33,11 +27,14 @@ import {
     toBigNumberStr,
     usdcToBaseNumber
 } from "../library";
+import { SUI_NATIVE_BASE, USDC_BASE_DECIMALS } from "../constants";
 import {
-    SUI_NATIVE_BASE,
-    USDC_BASE_DECIMALS
-} from "../constants";
-import { BigNumberable, address, Keypair, Ed25519Keypair, TransactionBlock } from "../types";
+    BigNumberable,
+    address,
+    Keypair,
+    Ed25519Keypair,
+    TransactionBlock
+} from "../types";
 import { sha256 } from "@noble/hashes/sha256";
 import { getSalt } from "../utils";
 import { SignatureWithBytes } from "@mysten/sui.js/dist/cjs/cryptography";
@@ -48,7 +45,12 @@ export class OnChainCalls {
     deployment: any;
     suiClient: SuiClient;
 
-    constructor(_signer: Keypair, _deployment: any, settlementCap?: string, suiClient?: SuiClient) {
+    constructor(
+        _signer: Keypair,
+        _deployment: any,
+        settlementCap?: string,
+        suiClient?: SuiClient
+    ) {
         this.signer = _signer;
         this.deployment = _deployment;
         this.settlementCap = settlementCap;
@@ -507,10 +509,10 @@ export class OnChainCalls {
             market?: string;
             imr: string;
         },
-        options?:{
-            gasBudget?: number,
-            signer?: Keypair,
-            multiSig?: address,
+        options?: {
+            gasBudget?: number;
+            signer?: Keypair;
+            multiSig?: address;
         }
     ): Promise<SuiTransactionBlockResponse | string> {
         const caller = options?.signer || this.signer;
@@ -522,18 +524,20 @@ export class OnChainCalls {
         callArgs.push(txb.object(this.getPerpetualID(args.market)));
 
         callArgs.push(txb.pure(args.imr));
-        
-        if(options?.gasBudget) txb.setGasBudget(options?.gasBudget);
+
+        if (options?.gasBudget) txb.setGasBudget(options?.gasBudget);
 
         txb.moveCall({
             arguments: callArgs,
             target: `${this.getPackageID()}::perpetual::set_initial_margin_required_v2`
-        })
+        });
 
         // if multi sig call return tx bytes
-        if(options?.multiSig) {
+        if (options?.multiSig) {
             txb.setSender(options?.multiSig);
-            return toB64(await txb.build({client: this.suiClient, onlyTransactionKind: false}))
+            return toB64(
+                await txb.build({ client: this.suiClient, onlyTransactionKind: false })
+            );
         } else {
             return caller.signAndExecuteTransactionBlock({
                 transactionBlock: txb,
@@ -554,10 +558,10 @@ export class OnChainCalls {
             safeID?: string;
             gasBudget?: number;
         },
-        options?:{
-            gasBudget?: number,
-            signer?: Keypair,
-            multiSig?: address,
+        options?: {
+            gasBudget?: number;
+            signer?: Keypair;
+            multiSig?: address;
         }
     ) {
         const caller = options?.signer || this.signer;
@@ -569,7 +573,7 @@ export class OnChainCalls {
         callArgs.push(txb.object(args.safeID || this.getSafeID()));
         callArgs.push(txb.pure(args.operator));
 
-        if(options?.gasBudget) txb.setGasBudget(options?.gasBudget);
+        if (options?.gasBudget) txb.setGasBudget(options?.gasBudget);
 
         txb.moveCall({
             arguments: callArgs,
@@ -577,9 +581,11 @@ export class OnChainCalls {
         });
 
         // if multi sig call return tx bytes
-        if(options?.multiSig) {
+        if (options?.multiSig) {
             txb.setSender(options?.multiSig);
-            return toB64(await txb.build({client: this.suiClient, onlyTransactionKind: false}))
+            return toB64(
+                await txb.build({ client: this.suiClient, onlyTransactionKind: false })
+            );
         } else {
             return caller.signAndExecuteTransactionBlock({
                 transactionBlock: txb,
@@ -992,7 +998,12 @@ export class OnChainCalls {
         callArgs.push(this.getPriceOracleObjectId(args.market));
 
         callArgs.push(args.liquidatee);
-        callArgs.push(args.liquidator || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())));
+        callArgs.push(
+            args.liquidator ||
+                (caller instanceof Keypair
+                    ? (caller as Keypair).toSuiAddress()
+                    : await caller.getAddress())
+        );
         callArgs.push(args.quantity);
         callArgs.push(args.leverage);
         callArgs.push(args.allOrNothing == true);
@@ -1044,7 +1055,12 @@ export class OnChainCalls {
                 txBlock.object(this.getPriceOracleObjectId(arg.market)),
 
                 txBlock.pure(arg.liquidatee),
-                txBlock.pure(arg.liquidator || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress()))),
+                txBlock.pure(
+                    arg.liquidator ||
+                        (caller instanceof Keypair
+                            ? (caller as Keypair).toSuiAddress()
+                            : await caller.getAddress())
+                ),
                 txBlock.pure(arg.quantity),
                 txBlock.pure(arg.leverage),
                 txBlock.pure(arg.allOrNothing === true)
@@ -1085,7 +1101,11 @@ export class OnChainCalls {
         signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
-        const txBlock = await this.getBatchLiquidationTransactionBlock(args, gasBudget, signer);
+        const txBlock = await this.getBatchLiquidationTransactionBlock(
+            args,
+            gasBudget,
+            signer
+        );
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: txBlock,
             options: {
@@ -1197,9 +1217,9 @@ export class OnChainCalls {
             callArgs.push(
                 txBlock.pure(
                     arg.txHash ||
-                    Buffer.from(
-                        sha256(JSON.stringify([...callArgs, getSalt()]))
-                    ).toString("hex")
+                        Buffer.from(
+                            sha256(JSON.stringify([...callArgs, getSalt()]))
+                        ).toString("hex")
                 )
             );
 
@@ -1230,7 +1250,11 @@ export class OnChainCalls {
         signer?: Keypair
     ): Promise<SuiTransactionBlockResponse> {
         const caller = signer || this.signer;
-        const txBlock = await this.getBatchDeleveragingTransactionBlock(args, gasBudget, signer);
+        const txBlock = await this.getBatchDeleveragingTransactionBlock(
+            args,
+            gasBudget,
+            signer
+        );
         return caller.signAndExecuteTransactionBlock({
             transactionBlock: txBlock,
             options: {
@@ -1241,7 +1265,6 @@ export class OnChainCalls {
             }
         });
     }
-
 
     public async addMargin(
         args: {
@@ -1267,7 +1290,12 @@ export class OnChainCalls {
 
         callArgs.push(this.getPriceOracleObjectId(args.market));
 
-        callArgs.push(args.account || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())));
+        callArgs.push(
+            args.account ||
+                (caller instanceof Keypair
+                    ? (caller as Keypair).toSuiAddress()
+                    : await caller.getAddress())
+        );
         callArgs.push(toBigNumberStr(args.amount));
 
         callArgs.push(
@@ -1311,7 +1339,12 @@ export class OnChainCalls {
         callArgs.push(this.getSequencer());
         callArgs.push(this.getPriceOracleObjectId(args.market));
 
-        callArgs.push(args.account || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())));
+        callArgs.push(
+            args.account ||
+                (caller instanceof Keypair
+                    ? (caller as Keypair).toSuiAddress()
+                    : await caller.getAddress())
+        );
         callArgs.push(toBigNumberStr(args.amount));
 
         callArgs.push(
@@ -1356,7 +1389,12 @@ export class OnChainCalls {
         callArgs.push(this.getSequencer());
         callArgs.push(this.getPriceOracleObjectId(args.market));
 
-        callArgs.push(args.account || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())));
+        callArgs.push(
+            args.account ||
+                (caller instanceof Keypair
+                    ? (caller as Keypair).toSuiAddress()
+                    : await caller.getAddress())
+        );
         callArgs.push(toBigNumberStr(args.leverage));
 
         callArgs.push(
@@ -1396,7 +1434,6 @@ export class OnChainCalls {
 
         const callArgs = [];
 
-
         callArgs.push(txb.object(args.perpID || this.getPerpetualID(args.market)));
         callArgs.push(txb.object(this.getBankID()));
         callArgs.push(txb.object(args.subAccountsMapID || this.getSubAccountsID()));
@@ -1404,24 +1441,33 @@ export class OnChainCalls {
         callArgs.push(txb.object(this.getSequencer()));
         callArgs.push(txb.object(this.getPriceOracleObjectId(args.market)));
 
-        callArgs.push(txb.pure(args.account || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress()))));
+        callArgs.push(
+            txb.pure(
+                args.account ||
+                    (caller instanceof Keypair
+                        ? (caller as Keypair).toSuiAddress()
+                        : await caller.getAddress())
+            )
+        );
         callArgs.push(txb.pure(toBigNumberStr(args.leverage)));
 
-        callArgs.push(txb.pure(
-            args.txHash ||
-                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
-                    "hex"
-                )
-        ));
+        callArgs.push(
+            txb.pure(
+                args.txHash ||
+                    Buffer.from(
+                        sha256(JSON.stringify([...callArgs, getSalt()]))
+                    ).toString("hex")
+            )
+        );
 
         txb.moveCall({
-            arguments:callArgs,
+            arguments: callArgs,
             target: `${this.getPackageID()}::exchange::adjust_leverage`,
             typeArguments: [this.getCurrencyType()]
         });
-            
+
         return caller.signTransactionBlock({
-            transactionBlock:  txb
+            transactionBlock: txb
         });
     }
 
@@ -1581,7 +1627,11 @@ export class OnChainCalls {
         callArgs.push(getSalt());
 
         callArgs.push(
-            args.accountAddress ? args.accountAddress : caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())
+            args.accountAddress
+                ? args.accountAddress
+                : caller instanceof Keypair
+                ? (caller as Keypair).toSuiAddress()
+                : await caller.getAddress()
         );
         callArgs.push(args.amount);
         callArgs.push(args.coinID);
@@ -1687,7 +1737,11 @@ export class OnChainCalls {
         callArgs.push(getSalt());
 
         callArgs.push(
-            args.accountAddress ? args.accountAddress : caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())
+            args.accountAddress
+                ? args.accountAddress
+                : caller instanceof Keypair
+                ? (caller as Keypair).toSuiAddress()
+                : await caller.getAddress()
         );
         callArgs.push(args.amount);
 
@@ -1724,7 +1778,11 @@ export class OnChainCalls {
 
         // temporary txHash, works as salt to make hash unique
         callArgs.push(getSalt());
-        callArgs.push(caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress()));
+        callArgs.push(
+            caller instanceof Keypair
+                ? (caller as Keypair).toSuiAddress()
+                : await caller.getAddress()
+        );
 
         if (!txHash) {
             txHash = Buffer.from(sha256(JSON.stringify(callArgs))).toString("hex");
@@ -1826,11 +1884,11 @@ export class OnChainCalls {
             signer?: Keypair;
             multiSig?: address;
         }
-    ):Promise<SuiTransactionBlockResponse | string> {
+    ): Promise<SuiTransactionBlockResponse | string> {
         const caller = options?.signer || this.signer;
 
         const callArgs = [];
-        
+
         const txb = new TransactionBlock();
 
         callArgs.push(txb.object(args.adminID || this.getExchangeAdminCap()));
@@ -1840,18 +1898,19 @@ export class OnChainCalls {
         callArgs.push(txb.pure(toBigNumberStr(args.makerFee)));
         callArgs.push(txb.pure(toBigNumberStr(args.takerFee)));
 
-
-        if(options?.gasBudget) txb.setGasBudget(options?.gasBudget);
+        if (options?.gasBudget) txb.setGasBudget(options?.gasBudget);
 
         txb.moveCall({
             arguments: callArgs,
             target: `${this.getPackageID()}::perpetual::set_special_fee_v2`
-        })
+        });
 
         // if multi sig call return tx bytes
-        if(options?.multiSig) {
+        if (options?.multiSig) {
             txb.setSender(options?.multiSig);
-            return toB64(await txb.build({client: this.suiClient, onlyTransactionKind: false}))
+            return toB64(
+                await txb.build({ client: this.suiClient, onlyTransactionKind: false })
+            );
         } else {
             return caller.signAndExecuteTransactionBlock({
                 transactionBlock: txb,
@@ -1869,17 +1928,17 @@ export class OnChainCalls {
      * Executes provided signed transaction block
      * @param blockBytes bytes of the tx block
      * @param signature signature of the block
-     * @returns 
+     * @returns
      */
-    public async executeSignedTxBlock(blockBytes:string, signature: string){
+    public async executeSignedTxBlock(blockBytes: string, signature: string) {
         return this.signer.provider.executeTransactionBlock({
-            transactionBlock:blockBytes,
+            transactionBlock: blockBytes,
             signature: signature,
-            options:  {
+            options: {
                 showEffects: true,
-                showEvents: true,
+                showEvents: true
             }
-        })
+        });
     }
 
     /*
@@ -1892,7 +1951,13 @@ export class OnChainCalls {
         const callArgs = [];
         callArgs.push(SUI_CLOCK_OBJECT_ID);
 
-        return this.signAndCall(caller,this.suiClient, "create_price_obj", callArgs, "price_info");
+        return this.signAndCall(
+            caller,
+            this.suiClient,
+            "create_price_obj",
+            callArgs,
+            "price_info"
+        );
     }
 
     /*
@@ -1927,7 +1992,13 @@ export class OnChainCalls {
         const callArgs = [];
         callArgs.push(this.getExchangeAdminCap());
 
-        return this.signAndCall(caller,this.suiClient, "create_sequencer", callArgs, "roles");
+        return this.signAndCall(
+            caller,
+            this.suiClient,
+            "create_sequencer",
+            callArgs,
+            "roles"
+        );
     }
 
     /*
@@ -1997,9 +2068,14 @@ export class OnChainCalls {
 
         callArgs.push(args?.amount || toBigNumberStr(1_000_000_000, USDC_BASE_DECIMALS));
 
-        callArgs.push(args?.to || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())));
+        callArgs.push(
+            args?.to ||
+                (caller instanceof Keypair
+                    ? (caller as Keypair).toSuiAddress()
+                    : await caller.getAddress())
+        );
 
-        return this.signAndCall(caller,this.suiClient, "mint", callArgs, "coin");
+        return this.signAndCall(caller, this.suiClient, "mint", callArgs, "coin");
     }
 
     public async getUSDCCoins(
@@ -2012,9 +2088,13 @@ export class OnChainCalls {
         signer?: Keypair
     ): Promise<any> {
         const caller = signer || this.signer;
-
-        const coins = await caller.provider.getCoins({
-            owner: args?.address || (caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())),
+        const provider = caller instanceof Keypair ? this.suiClient : caller.provider;
+        const coins = await provider.getCoins({
+            owner:
+                args?.address ||
+                (caller instanceof Keypair
+                    ? (caller as Keypair).toSuiAddress()
+                    : await caller.getAddress()),
             coinType: args?.currencyType || this.getCoinType(),
             cursor: args?.cursor ?? null,
             limit: args?.limit ?? null
@@ -2032,10 +2112,14 @@ export class OnChainCalls {
 
     async mergeAllUsdcCoins(coinType?: string, signer?: Keypair) {
         const caller = signer || this.signer;
+        const provider = caller instanceof Keypair ? this.suiClient : caller.provider;
         const txb = new TransactionBlock();
-        const coins = await caller.provider.getCoins({
+        const coins = await provider.getCoins({
             coinType: coinType || this.getCoinType(),
-            owner: caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress())
+            owner:
+                caller instanceof Keypair
+                    ? (caller as Keypair).toSuiAddress()
+                    : await caller.getAddress()
         });
 
         if (coins.length <= 1) {
@@ -2072,7 +2156,11 @@ export class OnChainCalls {
 
         const transferAmount = toBigNumber(args.balance, SUI_NATIVE_BASE);
         const existingBalance = BigNumber(
-            await this.getUserSuiBalance(caller instanceof Keypair?  (caller as Keypair).toSuiAddress() : (await caller.getAddress()))
+            await this.getUserSuiBalance(
+                caller instanceof Keypair
+                    ? (caller as Keypair).toSuiAddress()
+                    : await caller.getAddress()
+            )
         );
 
         if (existingBalance.lte(transferAmount)) {
@@ -2162,25 +2250,26 @@ export class OnChainCalls {
             typeArguments: typeArguments || []
         });
 
-         
-        return signer instanceof Keypair ? suiClient.signAndExecuteTransactionBlock({
-            transactionBlock: tx,
-            signer,
-            options: {
-                showObjectChanges: true,
-                showEffects: true,
-                showEvents: true,
-                showInput: true
-            }
-        }) : signer.signAndExecuteTransactionBlock({
-            transactionBlock: tx,
-            options: {
-                showObjectChanges: true,
-                showEffects: true,
-                showEvents: true,
-                showInput: true
-            }
-        })
+        return signer instanceof Keypair
+            ? suiClient.signAndExecuteTransactionBlock({
+                  transactionBlock: tx,
+                  signer,
+                  options: {
+                      showObjectChanges: true,
+                      showEffects: true,
+                      showEvents: true,
+                      showInput: true
+                  }
+              })
+            : signer.signAndExecuteTransactionBlock({
+                  transactionBlock: tx,
+                  options: {
+                      showObjectChanges: true,
+                      showEffects: true,
+                      showEvents: true,
+                      showInput: true
+                  }
+              });
     }
 
     // ===================================== //
@@ -2203,14 +2292,18 @@ export class OnChainCalls {
 
     async getUserSuiBalance(user?: string): Promise<string> {
         const address = user || (await this.signer.getAddress());
-        const suiCoin = await this.signer.provider.getBalance({
+        const provider =
+            this.signer instanceof Keypair ? this.suiClient : this.signer.provider;
+        const suiCoin = await provider.getBalance({
             owner: address
         });
         return suiCoin?.totalBalance;
     }
 
     async getOnChainObject(id: string): Promise<SuiObjectResponse> {
-        return this.signer.provider.getObject({
+        const provider =
+            this.signer instanceof Keypair ? this.suiClient : this.signer.provider;
+        return provider.getObject({
             id,
             options: {
                 showOwner: true,
@@ -2223,9 +2316,10 @@ export class OnChainCalls {
     async getOwnedObjects(objType: string, ownerAddr?: string): Promise<string[]> {
         const owner = ownerAddr || (await this.signer.getAddress());
         const ownedObjIds: string[] = [];
-
+        const provider =
+            this.signer instanceof Keypair ? this.suiClient : this.signer.provider;
         // get all owned object by the user, along with its type
-        const objects = await this.signer.provider.getOwnedObjects({
+        const objects = await provider.getOwnedObjects({
             owner,
             options: { showType: true }
         });
@@ -2242,8 +2336,9 @@ export class OnChainCalls {
 
     async getUserPosition(perpetual: string, user?: string): Promise<UserPosition> {
         const positionTable = this.getPositionsTableID(perpetual);
-
-        const userPos = await this.signer.provider.getDynamicFieldObject({
+        const provider =
+            this.signer instanceof Keypair ? this.suiClient : this.signer.provider;
+        const userPos = await provider.getDynamicFieldObject({
             parentId: positionTable,
             name: {
                 type: "address",
@@ -2286,7 +2381,9 @@ export class OnChainCalls {
 
     public async getUserBankBalance(user?: string, bankID?: string): Promise<BigNumber> {
         try {
-            const userBalance = await this.signer.provider.getDynamicFieldObject({
+            const provider =
+                this.signer instanceof Keypair ? this.suiClient : this.signer.provider;
+            const userBalance = await provider.getDynamicFieldObject({
                 parentId: bankID || this.getBankTableID(),
                 name: {
                     type: "address",

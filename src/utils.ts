@@ -273,7 +273,7 @@ export const parseAndShapeSignedData = ({
     isParsingRequired?: boolean;
 }): SigPK => {
     let data: SigPK;
-    let parsedSignature = parseSerializedSignature(signature);
+    const parsedSignature = parseSerializedSignature(signature);
     if (isParsingRequired && parsedSignature.signatureScheme === "ZkLogin") {
         //zk login signature
         const { userSignature } = parsedSignature.zkLogin;

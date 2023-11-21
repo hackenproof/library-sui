@@ -1,7 +1,15 @@
 import BigNumber from "bignumber.js";
 import { Order, OrderFlags } from "./interfaces";
 import { BASE_DECIMALS, USDC_BASE_DECIMALS } from "./constants";
-import { SignedNumber, BigNumberable, SigPK, Ed25519Keypair, Ed25519PublicKey, SignatureScheme, Secp256k1PublicKey } from "./types";
+import {
+    SignedNumber,
+    BigNumberable,
+    SigPK,
+    Ed25519Keypair,
+    Ed25519PublicKey,
+    SignatureScheme,
+    Secp256k1PublicKey
+} from "./types";
 import _ from "lodash";
 
 const toBnBase = (base: number) => {

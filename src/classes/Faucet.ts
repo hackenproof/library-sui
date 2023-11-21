@@ -1,4 +1,3 @@
-
 import { network } from "../DeploymentConfig";
 import { USDC_BASE_DECIMALS } from "../constants";
 import { toBigNumberStr } from "../library";
@@ -41,11 +40,19 @@ export class Faucet {
      * @param SuiClient client to execute transaction
      * @param amount amount to be funded (must be in normal decimals) default is 1
      */
-    static async requestSUIFromAccount(address: string, faucet: Keypair, suiClient: SuiClient, amount = 1) {
+    static async requestSUIFromAccount(
+        address: string,
+        faucet: Keypair,
+        suiClient: SuiClient,
+        amount = 1
+    ) {
         const txb = new TransactionBlock();
         const [coin] = txb.splitCoins(txb.gas, [txb.pure(toBigNumberStr(amount, 9))]);
         txb.transferObjects([coin], txb.pure(address));
-        await suiClient.signAndExecuteTransactionBlock({ transactionBlock: txb, signer: faucet });
+        await suiClient.signAndExecuteTransactionBlock({
+            transactionBlock: txb,
+            signer: faucet
+        });
     }
 
     /**

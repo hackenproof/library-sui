@@ -1,12 +1,6 @@
+import { bcs } from "@mysten/sui.js/bcs";
 
-import {
-    bcs
-} from "@mysten/sui.js/bcs";
-
-import {
-    IntentScope,
-    messageWithIntent
-} from "@mysten/sui.js/cryptography";
+import { IntentScope, messageWithIntent } from "@mysten/sui.js/cryptography";
 import { Order, SignedOrder, ZkPayload } from "../interfaces/order";
 import { base64ToUint8, bnToHex, encodeOrderFlags, hexToBuffer } from "../library";
 import { sha256 } from "@noble/hashes/sha256";
@@ -19,7 +13,7 @@ import { SIGNER_TYPES } from "../enums";
 import { createZkSignature, parseAndShapeSignedData } from "../utils";
 
 export class OrderSigner {
-    constructor(private keypair: Keypair) { }
+    constructor(private keypair: Keypair) {}
 
     public getSignedOrder(order: Order, keyPair?: Keypair): SignedOrder {
         const typedSignature = this.signOrder(order, keyPair);
