@@ -162,12 +162,12 @@ export class OrderSigner {
             }
         }
     }
-    private static encodePayload(payload: unknown): Uint8Array {
+    public static encodePayload(payload: unknown, intentScope: IntentScope = IntentScope.PersonalMessage): Uint8Array {
         const msgBytes = new TextEncoder().encode(JSON.stringify(payload));
         const size = 1024 + Math.floor(msgBytes.length / 1024) * 1024;
 
         const intentMsg = messageWithIntent(
-            IntentScope.PersonalMessage,
+            intentScope,
             bcs.ser(["vector", "u8"], msgBytes, { size }).toBytes()
         );
         const encodeData = blake2b(intentMsg, { dkLen: 32 });

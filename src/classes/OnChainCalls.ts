@@ -32,12 +32,12 @@ import {
     BigNumberable,
     address,
     Keypair,
-    Ed25519Keypair,
     TransactionBlock
 } from "../types";
 import { sha256 } from "@noble/hashes/sha256";
 import { getSalt } from "../utils";
-import { SignatureWithBytes } from "@mysten/sui.js/dist/cjs/cryptography";
+import { IntentScope, SignatureWithBytes } from "@mysten/sui.js/cryptography";
+import { OrderSigner } from "./OrderSigner";
 
 export class OnChainCalls {
     signer: Keypair | any;
@@ -1466,9 +1466,8 @@ export class OnChainCalls {
             typeArguments: [this.getCurrencyType()]
         });
 
-        return caller.signTransactionBlock({
-            transactionBlock: txb
-        });
+        const encodedBytes = OrderSigner.encodePayload(txb, IntentScope.TransactionData);
+        return caller.signTransactionBlock(encodedBytes);
     }
 
     public async cancelOrder(
