@@ -4,7 +4,6 @@ import BigNumber from "bignumber.js";
 import { Secp256k1Keypair, Secp256k1PublicKey } from "@mysten/sui.js/keypairs/secp256k1";
 import { Ed25519Keypair, Ed25519PublicKey } from "@mysten/sui.js/keypairs/ed25519";
 import { Secp256r1Keypair, Secp256r1PublicKey } from "@mysten/sui.js/keypairs/secp256r1";
-import { WalletContextState, SuiProvider } from "@suiet/wallet-kit";
 
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 
@@ -17,6 +16,10 @@ import {
 import { Keypair } from "@mysten/sui.js/cryptography";
 
 import { SuiClient } from "@mysten/sui.js/client";
+import {
+    SuiSignPersonalMessageInput,
+    SuiSignPersonalMessageOutput
+} from "@mysten/wallet-standard";
 import { SignatureScheme } from "@mysten/sui.js/cryptography";
 import { Socket } from "socket.io-client";
 
@@ -83,9 +86,7 @@ export {
     Ed25519PublicKey,
     Secp256k1PublicKey,
     Secp256r1PublicKey,
-    SignatureScheme,
-    WalletContextState,
-    SuiProvider
+    SignatureScheme
 };
 
 export type SigPK = {
@@ -98,3 +99,9 @@ export type PartialZkLoginSignature = Omit<
     Parameters<typeof getZkLoginSignature>["0"]["inputs"],
     "addressSeed"
 >;
+
+export interface BaseWallet {
+    signMessage(
+        input: Omit<SuiSignPersonalMessageInput, "account">
+    ): Promise<SuiSignPersonalMessageOutput>;
+}

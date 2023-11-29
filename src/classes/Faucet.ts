@@ -90,7 +90,7 @@ export class Faucet {
         amount?: number | string
     ) {
         const amt = Number(amount) || 10_000;
-        const ownerAddress = await onChain.signer.getAddress();
+        const ownerAddress = await onChain.signer.toSuiAddress();
 
         let coin = undefined;
         // TODO figure out why `onChain.getUSDCCoins` calls returns no coin

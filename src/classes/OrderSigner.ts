@@ -6,48 +6,51 @@ import { base64ToUint8, bnToHex, encodeOrderFlags, hexToBuffer } from "../librar
 import { sha256 } from "@noble/hashes/sha256";
 import { secp256k1 } from "@noble/curves/secp256k1";
 import { ed25519 } from "@noble/curves/ed25519";
-import { WalletContextState } from "@suiet/wallet-kit";
 import { blake2b } from "@noble/hashes/blake2b";
-import { SigPK, Keypair } from "../types";
+import { SigPK, Keypair, BaseWallet } from "../types";
 import { SIGNER_TYPES } from "../enums";
 import { createZkSignature, parseAndShapeSignedData } from "../utils";
+import { Signer } from "@mysten/sui.js/cryptography";
 
 export class OrderSigner {
-    constructor(private keypair: Keypair) {}
+    constructor(private signer: Signer) {}
 
-    public getSignedOrder(order: Order, keyPair?: Keypair): SignedOrder {
-        const typedSignature = this.signOrder(order, keyPair);
+    public async getSignedOrder(order: Order, signer?: Signer): Promise<SignedOrder> {
+        const typedSignature = await this.signOrder(order, signer);
         return {
             ...order,
             typedSignature: `${typedSignature.signature}${typedSignature.publicKey}`
         };
     }
 
-    public signOrder(order: Order, keyPair?: Keypair): SigPK {
-        const signer = keyPair || this.keypair;
-
-        let signature: string;
+    public async signOrder(order: Order, signer?: Signer): Promise<SigPK> {
+        const caller = signer || this.signer;
 
         // serialize order
         const msgData = new TextEncoder().encode(OrderSigner.getSerializedOrder(order));
         // take sha256 hash of order
         const msgHash = sha256(msgData);
-        const publicKey = signer.getPublicKey().toBase64();
-        const keyScheme = signer.getKeyScheme();
+        const publicKey = caller.getPublicKey().toBase64();
+        const keyScheme = caller.getKeyScheme();
+
+        let signatureType = null;
+        let signatureInput = null;
+
         if (keyScheme == "Secp256k1") {
             // sign the raw data
-            signature =
-                Buffer.from(signer.signData(msgData)).toString("hex") +
-                SIGNER_TYPES.KP_SECP256;
+            signatureType = SIGNER_TYPES.KP_SECP256;
+            signatureInput = msgData;
         } else if (keyScheme == "ED25519") {
             // in case of ed25519 we sign the hashed msg
-            signature =
-                Buffer.from(signer.signData(msgHash)).toString("hex") +
-                SIGNER_TYPES.KP_ED25519;
+            signatureType = SIGNER_TYPES.KP_ED25519;
+            signatureInput = msgHash;
         } else {
             throw "Invalid wallet type";
         }
 
+        const sign = await caller.sign(signatureInput);
+
+        const signature = Buffer.from(sign).toString("hex") + signatureType;
         return { signature, publicKey };
     }
 
@@ -82,10 +85,7 @@ export class OrderSigner {
      * @param wallet wallet context
      * @returns signature and public key
      */
-    static async signOrderUsingWallet(
-        order: Order,
-        wallet: WalletContextState
-    ): Promise<SigPK> {
+    static async signOrderUsingWallet(order: Order, wallet: BaseWallet): Promise<SigPK> {
         // serialize order
         const msgData = new TextEncoder().encode(OrderSigner.getSerializedOrder(order));
 
@@ -97,30 +97,28 @@ export class OrderSigner {
         return parseAndShapeSignedData({ signature });
     }
 
-    public signPayload(payload: unknown, keyPair?: Keypair): SigPK {
-        const signer = keyPair || this.keypair;
+    public async signPayload(payload: unknown, keyPair?: Signer): Promise<SigPK> {
+        const signer = keyPair || this.signer;
 
         const encodedData = OrderSigner.encodePayload(payload);
 
         const publicKey = signer.getPublicKey().toBase64();
 
-        let signature: string;
-
         const keyScheme = signer.getKeyScheme();
 
+        let signatureType = null;
+
         if (keyScheme == "Secp256k1") {
-            // sign the raw data
-            signature =
-                Buffer.from(signer.signData(encodedData)).toString("hex") +
-                SIGNER_TYPES.KP_SECP256;
+            signatureType = SIGNER_TYPES.KP_SECP256;
         } else if (keyScheme == "ED25519") {
-            // in case of ed25519 we sign the hashed msg
-            signature =
-                Buffer.from(signer.signData(encodedData)).toString("hex") +
-                SIGNER_TYPES.KP_ED25519;
+            signatureType = SIGNER_TYPES.KP_ED25519;
         } else {
             throw "Invalid wallet type";
         }
+
+        const sign = await signer.sign(encodedData);
+
+        const signature = Buffer.from(sign).toString("hex") + signatureType;
 
         return { signature, publicKey };
     }
@@ -150,7 +148,7 @@ export class OrderSigner {
     }
     static async signPayloadUsingWallet(
         payload: unknown,
-        wallet: WalletContextState
+        wallet: BaseWallet
     ): Promise<SigPK> {
         {
             try {
@@ -162,8 +160,12 @@ export class OrderSigner {
             }
         }
     }
-    public static encodePayload(payload: unknown, intentScope: IntentScope = IntentScope.PersonalMessage): Uint8Array {
+    public static encodePayload(
+        payload: unknown,
+        intentScope: IntentScope = IntentScope.PersonalMessage
+    ): Uint8Array {
         const msgBytes = new TextEncoder().encode(JSON.stringify(payload));
+
         const size = 1024 + Math.floor(msgBytes.length / 1024) * 1024;
 
         const intentMsg = messageWithIntent(
@@ -289,7 +291,7 @@ export class OrderSigner {
     }
 
     public getPublicKeyStr(keypair?: Keypair) {
-        const signer = keypair || this.keypair;
+        const signer = keypair || this.signer;
         return signer.getPublicKey().toBase64();
     }
 }

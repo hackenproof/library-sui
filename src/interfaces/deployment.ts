@@ -1,12 +1,12 @@
 import { OBJECT_OWNERSHIP_STATUS } from "../enums";
 import { MarketDetails } from "./market";
 
-export interface Object {
+export interface SuiObject {
     id: string;
     dataType: string;
 }
 
-export interface DeploymentObjects extends Object {
+export interface DeploymentObjects extends SuiObject {
     owner: OBJECT_OWNERSHIP_STATUS;
 }
 

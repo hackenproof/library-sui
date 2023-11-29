@@ -24,8 +24,8 @@ export class Trader {
             postOnly: false
         };
 
-        const makerSigPK = orderSigner.signOrder(makerOrder, maker);
-        const takerSigPK = orderSigner.signOrder(takerOrder, taker);
+        const makerSigPK = await orderSigner.signOrder(makerOrder, maker);
+        const takerSigPK = await orderSigner.signOrder(takerOrder, taker);
 
         return {
             makerOrder,
