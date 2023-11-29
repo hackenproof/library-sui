@@ -18,7 +18,7 @@ import {
     SignatureScheme,
     SuiClient
 } from "./types";
-import { SerializedSignature } from "@mysten/sui.js/dist/cjs/cryptography";
+import { SerializedSignature } from "@mysten/sui.js/cryptography";
 import { getZkLoginSignature, genAddressSeed } from "@mysten/zklogin";
 
 config({ path: ".env" });

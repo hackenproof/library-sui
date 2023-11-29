@@ -19,5 +19,5 @@ module.exports = {
     rules: {
         "no-case-declarations": "off"
     },
-    ignorePatterns: ["node_modules/", "build/", "coverage/"]
+    ignorePatterns: ["node_modules/", "dist/", "coverage/"]
 };
