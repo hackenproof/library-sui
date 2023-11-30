@@ -1030,15 +1030,18 @@ export class OnChainCalls {
             gasBudget,
             signer
         );
-        return this.executeTxBlock(txBlock, signer);
+        return this.executeTxBlock(txBlock, caller);
     }
 
     public async dryRun(
         txBlock: TransactionBlock,
-        signer?: Signer
+        signer: Signer
     ): Promise<DryRunTransactionBlockResponse> {
         const caller = signer || this.signer;
-        const builtTransactionBlock = await txBlock.build();
+        txBlock.setSenderIfNotSet(caller.toSuiAddress());
+        const builtTransactionBlock = await txBlock.build({
+            client: this.suiClient
+        });
         return this.suiClient.dryRunTransactionBlock({
             transactionBlock: builtTransactionBlock
         });
@@ -1146,6 +1149,8 @@ export class OnChainCalls {
             });
         }
         if (gasBudget) txBlock.setGasBudget(gasBudget);
+
+        txBlock.setSenderIfNotSet(caller.toSuiAddress());
         return txBlock;
     }
 
@@ -1771,7 +1776,7 @@ export class OnChainCalls {
         }
     }
 
-    private async executeTxBlock(
+    async executeTxBlock(
         transactionBlock: TransactionBlock,
         signer?: Signer,
         options: SuiTransactionBlockResponseOptions = {
