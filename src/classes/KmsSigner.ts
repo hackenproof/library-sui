@@ -38,14 +38,21 @@ export class KmsSigner extends Signer {
         }
     ) {
         super();
-        this.KmsClient = new KMSClient({
-            region: options?.region,
-            credentials: {
+        const params: any = {};
+
+        if (options?.region) {
+            params.region = options?.region;
+        }
+
+        if (options.accessKeyId || options.secretAccessKey || options.sessionToken) {
+            params.credentials = {
                 accessKeyId: options?.accessKeyId,
                 secretAccessKey: options?.secretAccessKey,
                 sessionToken: options?.sessionToken
-            }
-        });
+            };
+        }
+
+        this.KmsClient = new KMSClient(params);
     }
 
     private async loadPublicKey() {
