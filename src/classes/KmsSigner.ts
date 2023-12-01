@@ -44,7 +44,7 @@ export class KmsSigner extends Signer {
             params.region = options?.region;
         }
 
-        if (options.accessKeyId || options.secretAccessKey || options.sessionToken) {
+        if (options?.accessKeyId || options?.secretAccessKey || options?.sessionToken) {
             params.credentials = {
                 accessKeyId: options?.accessKeyId,
                 secretAccessKey: options?.secretAccessKey,
