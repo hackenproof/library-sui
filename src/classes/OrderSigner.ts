@@ -7,7 +7,7 @@ import { sha256 } from "@noble/hashes/sha256";
 import { secp256k1 } from "@noble/curves/secp256k1";
 import { ed25519 } from "@noble/curves/ed25519";
 import { blake2b } from "@noble/hashes/blake2b";
-import { SigPK, Keypair, BaseWallet } from "../types";
+import { SigPK, BaseWallet } from "../types";
 import { SIGNER_TYPES } from "../enums";
 import { createZkSignature, parseAndShapeSignedData } from "../utils";
 import { Signer } from "@mysten/sui.js/cryptography";
@@ -60,7 +60,7 @@ export class OrderSigner {
         zkPayload
     }: {
         order: Order;
-        signer: Keypair;
+        signer: Signer;
         zkPayload: ZkPayload;
     }): Promise<SigPK> {
         // serialize order
@@ -129,7 +129,7 @@ export class OrderSigner {
         zkPayload
     }: {
         payload: unknown;
-        signer: Keypair;
+        signer: Signer;
         zkPayload: ZkPayload;
     }): Promise<SigPK> {
         {
@@ -290,7 +290,7 @@ export class OrderSigner {
         return Buffer.from(hash).toString("hex");
     }
 
-    public getPublicKeyStr(keypair?: Keypair) {
+    public getPublicKeyStr(keypair?: Signer) {
         const signer = keypair || this.signer;
         return signer.getPublicKey().toBase64();
     }

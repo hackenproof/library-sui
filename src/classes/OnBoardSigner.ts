@@ -1,7 +1,8 @@
 import * as secp from "@noble/secp256k1";
 import { sha256 } from "@noble/hashes/sha256";
 import { hexToBuffer } from "../library";
-import { Keypair, Secp256k1PublicKey } from "../types";
+import { Secp256k1PublicKey } from "../types";
+import { Signer } from "@mysten/sui.js/cryptography";
 
 export class OnboardingSigner {
     /**
@@ -12,7 +13,7 @@ export class OnboardingSigner {
      */
     public static async createOnboardSignature(
         message: string,
-        signer: Keypair
+        signer: Signer
     ): Promise<string> {
         if (!signer) {
             throw Error(`Invalid signer`);

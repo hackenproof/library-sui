@@ -3,7 +3,8 @@ import { USDC_BASE_DECIMALS } from "../constants";
 import { toBigNumberStr } from "../library";
 import { OnChainCalls } from "./OnChainCalls";
 import { Transaction } from "./Transaction";
-import { Keypair, SuiClient, TransactionBlock } from "../types";
+import { SuiClient, TransactionBlock } from "../types";
+import { Signer } from "@mysten/sui.js/cryptography";
 
 export class Faucet {
     /**
@@ -42,16 +43,22 @@ export class Faucet {
      */
     static async requestSUIFromAccount(
         address: string,
-        faucet: Keypair,
+        faucet: Signer,
         suiClient: SuiClient,
         amount = 1
     ) {
         const txb = new TransactionBlock();
         const [coin] = txb.splitCoins(txb.gas, [txb.pure(toBigNumberStr(amount, 9))]);
         txb.transferObjects([coin], txb.pure(address));
-        await suiClient.signAndExecuteTransactionBlock({
-            transactionBlock: txb,
-            signer: faucet
+
+        txb.setSenderIfNotSet(faucet.toSuiAddress());
+        const builtTxb = await txb.build({
+            client: suiClient
+        });
+        const signature = await faucet.signTransactionBlock(builtTxb);
+        return suiClient.executeTransactionBlock({
+            transactionBlock: builtTxb,
+            signature: signature.signature
         });
     }
 

@@ -1,13 +1,13 @@
 import BigNumber from "bignumber.js";
 import { Order, TradeData } from "../interfaces";
-import { Keypair } from "../types";
+import { Signer } from "@mysten/sui.js/cryptography";
 import { OrderSigner } from "./OrderSigner";
 
 export class Trader {
     static async setupNormalTrade(
         orderSigner: OrderSigner,
-        maker: Keypair,
-        taker: Keypair,
+        maker: Signer,
+        taker: Signer,
         makerOrder: Order,
         options?: {
             takerOrder?: Order;
