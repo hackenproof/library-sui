@@ -112,7 +112,8 @@ export class KmsSigner extends Signer {
         const response = await this.KmsClient.send(command);
         const sigDER = response.Signature;
         const sigRS = secp256k1.Signature.fromDER(Buffer.from(sigDER).toString("hex"));
-        const sig = sigRS.toCompactHex();
+        const normalizedSigRS = sigRS.normalizeS();
+        const sig = normalizedSigRS.toCompactHex();
         return Uint8Array.from(Buffer.from(sig, "hex"));
     }
 
