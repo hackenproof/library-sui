@@ -2013,7 +2013,7 @@ export class OnChainCalls {
 
         // First, split the gas coin into multiple coins using gas coin:
         const coin = txb.splitCoins(txb.gas, [
-            txb.pure(toBigNumber(args.balance, SUI_NATIVE_BASE))
+            txb.pure(toBigNumberStr(args.balance, SUI_NATIVE_BASE))
         ]);
         txb.transferObjects([coin], txb.pure(args.to));
         return this.executeTxBlock(txb, caller);
