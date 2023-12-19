@@ -1717,12 +1717,43 @@ export class OnChainCalls {
     }
 
     /*
+     * Removes empty position objects from on-chain position table
+     * @param market: name of the market for which positions are to be removed
+     * @param users: user addresses whose position are to be removed
+     */
+    public async removeEmptyPositions(
+        args?: {
+            market: string;
+            users: string[];
+            gasBudget?: number;
+        },
+        signer?: Signer
+    ) {
+        const caller = signer || this.signer;
+
+        const callArgs = [];
+        callArgs.push(this.getSafeID());
+        callArgs.push(this.getGuardianCap());
+        callArgs.push(SUI_CLOCK_OBJECT_ID);
+        callArgs.push(this.getPerpetualID(args.market));
+        callArgs.push(args.users);
+
+        return this.signAndCall(
+            caller,
+            "remove_empty_positions",
+            callArgs,
+            "perpetual",
+            args.gasBudget
+        );
+    }
+
+    /*
      * @notice allows exchange admin to set a specific maker/taker tx fee for a user
      * @param args:
      *  marketName: (optional) Name of the perpetual (ETH-PERP, BTC-PERP etc..) for which to set special fee
      *              Default is ETH-PERP
      *  account: address of the user
-     *  status: staus indicating if the maker/taker fee are to be applied or not
+     *  status: status indicating if the maker/taker fee are to be applied or not
      *  makerFee: (base number) the maker fee to be charged from user on each tx
      *  takerFee: (base number) the taker fee to be charged from user on each tx
      *  adminID: (optional) exchange ownership object id
@@ -1860,7 +1891,7 @@ export class OnChainCalls {
     }
 
     /*
-     * Creates the seqeuncer object
+     * Creates the sequencer object
      */
     public async createSequencer(signer?: Signer) {
         const caller = signer || this.signer;
