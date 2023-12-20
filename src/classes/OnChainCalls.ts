@@ -1722,7 +1722,7 @@ export class OnChainCalls {
      * @param users: user addresses whose position are to be removed
      */
     public async removeEmptyPositions(
-        args?: {
+        args: {
             market: string;
             users: string[];
             gasBudget?: number;
@@ -1747,6 +1747,56 @@ export class OnChainCalls {
         );
     }
 
+    /**
+     * @notice Allows admin to update the default maker fee of a perpetual
+     * @param args:
+     *  market: name of the perpetual/market
+     *  fee: the maker fee to be charged from user on each tx NOTE: should be in bps 1.5/2.5
+     */
+    public async setMakerFee(
+        args: { market: string; fee: number; gasBudget?: number },
+        signer?: Signer
+    ) {
+        const caller = signer || this.signer;
+        const callArgs = [];
+        callArgs.push(this.getExchangeAdminCap());
+        callArgs.push(this.getPerpetualID(args.market));
+        callArgs.push(toBigNumberStr(args.fee, 14));
+
+        return this.signAndCall(
+            caller,
+            "set_maker_fee",
+            callArgs,
+            "perpetual",
+            args.gasBudget
+        );
+    }
+
+    /**
+     * @notice Allows admin to update the default taker fee of a perpetual
+     * @param args:
+     *  market: name of the perpetual/market
+     *  fee: the taker fee to be charged from user on each tx NOTE: should be in bps 1.5/2.5
+     */
+    public async setTakerFee(
+        args: { market: string; fee: number; gasBudget?: number },
+        signer?: Signer
+    ) {
+        const caller = signer || this.signer;
+        const callArgs = [];
+        callArgs.push(this.getExchangeAdminCap());
+        callArgs.push(this.getPerpetualID(args.market));
+        callArgs.push(toBigNumberStr(args.fee, 14));
+
+        return this.signAndCall(
+            caller,
+            "set_taker_fee",
+            callArgs,
+            "perpetual",
+            args.gasBudget
+        );
+    }
+
     /*
      * @notice allows exchange admin to set a specific maker/taker tx fee for a user
      * @param args:
@@ -1754,8 +1804,8 @@ export class OnChainCalls {
      *              Default is ETH-PERP
      *  account: address of the user
      *  status: status indicating if the maker/taker fee are to be applied or not
-     *  makerFee: (base number) the maker fee to be charged from user on each tx
-     *  takerFee: (base number) the taker fee to be charged from user on each tx
+     *  makerFee the maker fee to be charged from user on each tx NOTE: should be in bps 1.5/2.5
+     *  takerFee the taker fee to be charged from user on each tx NOTE: should be in bps 1.5/2.5
      *  adminID: (optional) exchange ownership object id
      *  gasBudget: (optional) the gas limit to be paid for call
      * @param signer: (optional) the caller performing the call
@@ -1786,8 +1836,8 @@ export class OnChainCalls {
         callArgs.push(txb.object(this.getPerpetualID(args.marketName)));
         callArgs.push(txb.pure(args.account));
         callArgs.push(txb.pure(args.status));
-        callArgs.push(txb.pure(toBigNumberStr(args.makerFee)));
-        callArgs.push(txb.pure(toBigNumberStr(args.takerFee)));
+        callArgs.push(txb.pure(toBigNumberStr(args.makerFee, 14)));
+        callArgs.push(txb.pure(toBigNumberStr(args.takerFee, 14)));
 
         if (options?.gasBudget) txb.setGasBudget(options?.gasBudget);
 
