@@ -754,8 +754,8 @@ export class OnChainCalls {
             args.fillQuantity
                 ? args.fillQuantity.toFixed(0)
                 : args.makerOrder.quantity.lte(args.takerOrder.quantity)
-                ? args.makerOrder.quantity.toFixed(0)
-                : args.takerOrder.quantity.toFixed(0)
+                    ? args.makerOrder.quantity.toFixed(0)
+                    : args.takerOrder.quantity.toFixed(0)
         );
 
         callArgs.push(
@@ -764,9 +764,9 @@ export class OnChainCalls {
 
         callArgs.push(
             args.txHash ||
-                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
-                    "hex"
-                )
+            Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                "hex"
+            )
         );
 
         return this.signAndCall(
@@ -875,8 +875,8 @@ export class OnChainCalls {
                     arg.fillQuantity
                         ? arg.fillQuantity.toFixed(0)
                         : arg.makerOrder.quantity.lte(arg.takerOrder.quantity)
-                        ? arg.makerOrder.quantity.toFixed(0)
-                        : arg.takerOrder.quantity.toFixed(0)
+                            ? arg.makerOrder.quantity.toFixed(0)
+                            : arg.takerOrder.quantity.toFixed(0)
                 ),
 
                 txBlock.pure(
@@ -889,9 +889,9 @@ export class OnChainCalls {
             callArgs.push(
                 txBlock.pure(
                     arg.txHash ||
-                        Buffer.from(
-                            sha256(JSON.stringify([...callArgs, getSalt()]))
-                        ).toString("hex")
+                    Buffer.from(
+                        sha256(JSON.stringify([...callArgs, getSalt()]))
+                    ).toString("hex")
                 )
             );
 
@@ -940,9 +940,9 @@ export class OnChainCalls {
 
         callArgs.push(
             args.txHash ||
-                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
-                    "hex"
-                )
+            Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                "hex"
+            )
         );
 
         return this.signAndCall(
@@ -993,9 +993,9 @@ export class OnChainCalls {
             callArgs.push(
                 txBlock.pure(
                     arg.txHash ||
-                        Buffer.from(
-                            sha256(JSON.stringify([...callArgs, getSalt()]))
-                        ).toString("hex")
+                    Buffer.from(
+                        sha256(JSON.stringify([...callArgs, getSalt()]))
+                    ).toString("hex")
                 )
             );
 
@@ -1082,9 +1082,9 @@ export class OnChainCalls {
 
         callArgs.push(
             args.txHash ||
-                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
-                    "hex"
-                )
+            Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                "hex"
+            )
         );
 
         return this.signAndCall(
@@ -1136,9 +1136,9 @@ export class OnChainCalls {
             callArgs.push(
                 txBlock.pure(
                     arg.txHash ||
-                        Buffer.from(
-                            sha256(JSON.stringify([...callArgs, getSalt()]))
-                        ).toString("hex")
+                    Buffer.from(
+                        sha256(JSON.stringify([...callArgs, getSalt()]))
+                    ).toString("hex")
                 )
             );
 
@@ -1208,9 +1208,9 @@ export class OnChainCalls {
 
         callArgs.push(
             args.txHash ||
-                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
-                    "hex"
-                )
+            Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                "hex"
+            )
         );
 
         return this.signAndCall(
@@ -1251,9 +1251,9 @@ export class OnChainCalls {
 
         callArgs.push(
             args.txHash ||
-                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
-                    "hex"
-                )
+            Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                "hex"
+            )
         );
 
         return this.signAndCall(
@@ -1295,9 +1295,9 @@ export class OnChainCalls {
 
         callArgs.push(
             args.txHash ||
-                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
-                    "hex"
-                )
+            Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                "hex"
+            )
         );
 
         return this.signAndCall(
@@ -1342,9 +1342,9 @@ export class OnChainCalls {
         callArgs.push(
             txb.pure(
                 args.txHash ||
-                    Buffer.from(
-                        sha256(JSON.stringify([...callArgs, getSalt()]))
-                    ).toString("hex")
+                Buffer.from(
+                    sha256(JSON.stringify([...callArgs, getSalt()]))
+                ).toString("hex")
             )
         );
 
@@ -1389,9 +1389,9 @@ export class OnChainCalls {
 
         callArgs.push(
             args.txHash ||
-                Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
-                    "hex"
-                )
+            Buffer.from(sha256(JSON.stringify([...callArgs, getSalt()]))).toString(
+                "hex"
+            )
         );
 
         return this.signAndCall(
@@ -2079,24 +2079,29 @@ export class OnChainCalls {
      * @param signer the signer object of the wallet that owns sui to transfer
      * @returns transaction Result
      */
-    async transferSuiBalance(args: { to: string; balance: number }, signer?: Signer) {
+    async transferSuiBalance(args: { to: string; balance: number }[], signer?: Signer) {
         const caller = signer || this.signer;
         const txb = new TransactionBlock();
 
-        const transferAmount = toBigNumber(args.balance, SUI_NATIVE_BASE);
+        const transferAmount = args.reduce((sum, currentArg) => sum + currentArg.balance, 0);
+
+        const transferAmountInBN = toBigNumber(transferAmount, SUI_NATIVE_BASE);
         const existingBalance = BigNumber(
             await this.getUserSuiBalance(caller.toSuiAddress())
         );
 
-        if (existingBalance.lte(transferAmount)) {
+        if (existingBalance.lte(transferAmountInBN)) {
             throw new Error("owner has not enough sui tokens to transfer");
         }
+        const mapped = args.map((currentArg) => txb.pure(toBigNumberStr(currentArg.balance, SUI_NATIVE_BASE)))
+        // First, split the gas coin into multiple coins
+        const coins = txb.splitCoins(txb.gas, mapped);
 
-        // First, split the gas coin into multiple coins using gas coin:
-        const coin = txb.splitCoins(txb.gas, [
-            txb.pure(toBigNumberStr(args.balance, SUI_NATIVE_BASE))
-        ]);
-        txb.transferObjects([coin], txb.pure(args.to));
+        // Transfer each coin to the respective recipient 
+        args.forEach((currentArg, index) => {
+            txb.transferObjects([coins[index]], txb.pure(currentArg.to));
+        })
+
         return this.executeTxBlock(txb, caller);
     }
 
