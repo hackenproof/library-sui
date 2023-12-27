@@ -16,7 +16,9 @@ import {
     Order,
     PerpCreationMarketDetails,
     BankAccountDetails,
-    Operator
+    Operator,
+    DecodeJWT,
+    ZkPayload
 } from "../interfaces";
 import {
     base64ToUint8,
@@ -29,9 +31,17 @@ import {
     usdcToBaseNumber
 } from "../library";
 import { SUI_NATIVE_BASE, USDC_BASE_DECIMALS } from "../constants";
-import { BigNumberable, address, TransactionBlock } from "../types";
+import {
+    BigNumberable,
+    address,
+    Keypair,
+    Ed25519Keypair,
+    TransactionBlock,
+    PartialZkLoginSignature
+} from "../types";
+import { createZkSignature, getSalt } from "../utils";
+import { Transaction } from "./Transaction";
 import { sha256 } from "@noble/hashes/sha256";
-import { getSalt } from "../utils";
 import { IntentScope, SignatureWithBytes } from "@mysten/sui.js/cryptography";
 import { OrderSigner } from "./OrderSigner";
 import { Signer } from "@mysten/sui.js/cryptography";
@@ -40,18 +50,38 @@ export class OnChainCalls {
     signer: Signer;
     settlementCap: string | undefined;
     deployment: any;
-    suiClient: SuiClient;
+    private suiClient: SuiClient;
+    private is_zkLogin: boolean;
+    private maxEpoch?: number;
+    private proof?: PartialZkLoginSignature;
+    private decodedJWT?: DecodeJWT;
+    private salt?: string;
+    private walletAddress?: string;
+    private is_wallet_extension: boolean;
 
     constructor(
         _signer: Signer,
         _deployment: any,
         suiClient: SuiClient,
+        isZkLogin = false,
+        zkPayload?: ZkPayload,
+        walletAddress?: string,
+        is_wallet_extension = false,
         settlementCap?: string
     ) {
         this.signer = _signer;
         this.deployment = _deployment;
+        this.is_zkLogin = isZkLogin;
+        if (isZkLogin && zkPayload) {
+            this.maxEpoch = zkPayload.maxEpoch;
+            this.proof = zkPayload.proof;
+            this.decodedJWT = zkPayload.decodedJWT;
+            this.salt = zkPayload.salt;
+        }
+        this.walletAddress = walletAddress || _signer.toSuiAddress();
         this.settlementCap = settlementCap;
         this.suiClient = suiClient;
+        this.is_wallet_extension = is_wallet_extension;
     }
 
     public async setExchangeAdmin(
@@ -1509,7 +1539,7 @@ export class OnChainCalls {
         // temporary txHash, works as salt to make hash unique
         callArgs.push(getSalt());
 
-        callArgs.push(args.accountAddress ? args.accountAddress : caller.toSuiAddress());
+        callArgs.push(args.accountAddress || caller.toSuiAddress());
         callArgs.push(args.amount);
         callArgs.push(args.coinID);
 
@@ -1610,7 +1640,7 @@ export class OnChainCalls {
         // temporary txHash, works as salt to make hash unique
         callArgs.push(getSalt());
 
-        callArgs.push(args.accountAddress ? args.accountAddress : caller.toSuiAddress());
+        callArgs.push(args.accountAddress || caller.toSuiAddress());
         callArgs.push(args.amount);
 
         if (!args.txHash) {
@@ -1632,6 +1662,7 @@ export class OnChainCalls {
 
     public async withdrawAllMarginFromBank(
         signer?: Signer,
+        walletAddress?: string,
         gasBudget?: number,
         bankID?: string,
         txHash?: string
@@ -1645,7 +1676,7 @@ export class OnChainCalls {
 
         // temporary txHash, works as salt to make hash unique
         callArgs.push(getSalt());
-        callArgs.push(caller.toSuiAddress());
+        callArgs.push(walletAddress || caller.toSuiAddress());
 
         if (!txHash) {
             txHash = Buffer.from(sha256(JSON.stringify(callArgs))).toString("hex");
@@ -2144,6 +2175,52 @@ export class OnChainCalls {
         return undefined;
     }
 
+    private executeZkTransaction = async ({
+        tx,
+        caller
+    }: {
+        tx: TransactionBlock;
+        caller: Keypair;
+    }) => {
+        tx.setSender(this.walletAddress);
+        const { bytes, signature: userSignature } = await tx.sign({
+            client: this.suiClient,
+            signer: caller
+        });
+        const zkSignature = createZkSignature({
+            userSignature,
+            zkPayload: this.getZkPayload()
+        });
+        return this.suiClient.executeTransactionBlock({
+            transactionBlock: bytes,
+            signature: zkSignature,
+            options: {
+                showObjectChanges: true,
+                showEffects: true,
+                showEvents: true,
+                showInput: true
+            }
+        });
+    };
+
+    private executeWalletTransaction = ({
+        caller,
+        tx
+    }: {
+        caller: any;
+        tx: TransactionBlock;
+    }): Promise<SuiTransactionBlockResponse> => {
+        return caller.signAndExecuteTransactionBlock({
+            transactionBlock: tx,
+            options: {
+                showObjectChanges: true,
+                showEffects: true,
+                showEvents: true,
+                showInput: true
+            }
+        });
+    };
+
     public async signAndCall(
         signer: Signer | any,
         method: string,
@@ -2156,19 +2233,31 @@ export class OnChainCalls {
         const caller = signer || this.signer;
 
         const tx = new TransactionBlock();
-        if (gasBudget) tx.setGasBudget(gasBudget);
 
-        const params = callArgs.map(v => tx.pure(v));
+        try {
+            if (gasBudget) tx.setGasBudget(gasBudget);
 
-        packageId = packageId || this.getPackageID();
+            const params = callArgs.map(v => tx.pure(v));
 
-        tx.moveCall({
-            target: `${packageId}::${moduleName}::${method}`,
-            arguments: params,
-            typeArguments: typeArguments || []
-        });
+            packageId = packageId || this.getPackageID();
 
-        return this.executeTxBlock(tx, caller);
+            tx.moveCall({
+                target: `${packageId}::${moduleName}::${method}`,
+                arguments: params,
+                typeArguments: typeArguments || []
+            });
+
+            if (this.is_zkLogin) {
+                return this.executeZkTransaction({ caller, tx });
+            } else if (this.is_wallet_extension) {
+                return this.executeWalletTransaction({ caller, tx });
+            } else {
+                return this.executeTxBlock(tx, caller);
+            }
+        } catch (error) {
+            console.log(Transaction.getDryRunError(String(error)));
+            console.log(error, "error block in sign");
+        }
     }
 
     // ===================================== //
@@ -2411,4 +2500,13 @@ export class OnChainCalls {
             balance: bigNumber(obj.data.content.fields.value.fields.balance)
         } as BankAccountDetails;
     }
+
+    getZkPayload = (): ZkPayload => {
+        return {
+            decodedJWT: this.decodedJWT,
+            proof: this.proof,
+            salt: this.salt,
+            maxEpoch: this.maxEpoch
+        };
+    };
 }
