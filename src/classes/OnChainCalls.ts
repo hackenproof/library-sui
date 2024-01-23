@@ -1,23 +1,26 @@
 /* eslint-disable no-shadow-restricted-names */
 import {
-    SuiObjectResponse,
     DryRunTransactionBlockResponse,
     SuiClient,
+    SuiObjectResponse,
     SuiTransactionBlockResponseOptions
 } from "@mysten/sui.js/client";
 
-import { SUI_CLOCK_OBJECT_ID, toB64 } from "@mysten/sui.js/utils";
+import { fromB64, SUI_CLOCK_OBJECT_ID, toB64 } from "@mysten/sui.js/utils";
 
 import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
+import { IntentScope, SignatureWithBytes, Signer } from "@mysten/sui.js/cryptography";
+import { sha256 } from "@noble/hashes/sha256";
 import BigNumber from "bignumber.js";
+import { SUI_NATIVE_BASE, USDC_BASE_DECIMALS } from "../constants";
 import { DEFAULT } from "../defaults";
 import {
-    UserPosition,
+    BankAccountDetails,
+    DecodeJWT,
+    Operator,
     Order,
     PerpCreationMarketDetails,
-    BankAccountDetails,
-    Operator,
-    DecodeJWT,
+    UserPosition,
     ZkPayload
 } from "../interfaces";
 import {
@@ -30,21 +33,15 @@ import {
     toBigNumberStr,
     usdcToBaseNumber
 } from "../library";
-import { SUI_NATIVE_BASE, USDC_BASE_DECIMALS } from "../constants";
 import {
-    BigNumberable,
     address,
+    BigNumberable,
     Keypair,
-    Ed25519Keypair,
-    TransactionBlock,
-    PartialZkLoginSignature
+    PartialZkLoginSignature,
+    TransactionBlock
 } from "../types";
 import { createZkSignature, getSalt } from "../utils";
 import { Transaction } from "./Transaction";
-import { sha256 } from "@noble/hashes/sha256";
-import { IntentScope, SignatureWithBytes } from "@mysten/sui.js/cryptography";
-import { OrderSigner } from "./OrderSigner";
-import { Signer } from "@mysten/sui.js/cryptography";
 
 export class OnChainCalls {
     signer: Signer;
@@ -1356,6 +1353,7 @@ export class OnChainCalls {
         const caller = signer || this.signer;
 
         const txb = new TransactionBlock();
+        txb.setSender(caller.toSuiAddress());
 
         const callArgs = [];
 
@@ -1384,8 +1382,59 @@ export class OnChainCalls {
             typeArguments: [this.getCurrencyType()]
         });
 
-        const encodedBytes = OrderSigner.encodePayload(txb, IntentScope.TransactionData);
-        return caller.signTransactionBlock(encodedBytes);
+        const bytes = toB64(
+            await txb.build({ client: this.suiClient, onlyTransactionKind: false })
+        );
+        return caller.signWithIntent(fromB64(bytes), IntentScope.TransactionData);
+    }
+
+    /**
+     * Create signed transaction for whitelisting/removing of the subaccounts on-chain
+     */
+    public async signUpsertSubAccount(
+        args: {
+            account?: string;
+            accountsToRemove?: Array<string>;
+            subAccountsMapID?: string;
+            gasBudget?: number;
+        },
+        signer?: Signer
+    ): Promise<SignatureWithBytes> {
+        const caller = signer || this.signer;
+
+        const txb = new TransactionBlock();
+        txb.setSender(caller.toSuiAddress());
+        if (args.gasBudget) txb.setGasBudget(args.gasBudget);
+
+        if (args.account) {
+            const callArgs = [];
+
+            callArgs.push(txb.object(args.subAccountsMapID || this.getSubAccountsID()));
+            callArgs.push(txb.pure(args.account));
+            callArgs.push(txb.pure(true));
+
+            txb.moveCall({
+                arguments: callArgs,
+                target: `${this.getPackageID()}::roles::set_sub_account`
+            });
+        }
+
+        for (const accountToRemove of args.accountsToRemove) {
+            const callArgs = [];
+            callArgs.push(txb.object(args.subAccountsMapID || this.getSubAccountsID()));
+            callArgs.push(txb.pure(accountToRemove));
+            callArgs.push(txb.pure(false));
+
+            txb.moveCall({
+                arguments: callArgs,
+                target: `${this.getPackageID()}::roles::set_sub_account`
+            });
+        }
+
+        const bytes = toB64(
+            await txb.build({ client: this.suiClient, onlyTransactionKind: false })
+        );
+        return caller.signWithIntent(fromB64(bytes), IntentScope.TransactionData);
     }
 
     public async cancelOrder(

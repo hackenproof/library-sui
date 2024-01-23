@@ -1,16 +1,15 @@
 import { bcs } from "@mysten/sui.js/bcs";
 
-import { IntentScope, messageWithIntent } from "@mysten/sui.js/cryptography";
+import { IntentScope, messageWithIntent, Signer } from "@mysten/sui.js/cryptography";
+import { ed25519 } from "@noble/curves/ed25519";
+import { secp256k1 } from "@noble/curves/secp256k1";
+import { blake2b } from "@noble/hashes/blake2b";
+import { sha256 } from "@noble/hashes/sha256";
+import { SIGNER_TYPES } from "../enums";
 import { Order, SignedOrder, ZkPayload } from "../interfaces/order";
 import { base64ToUint8, bnToHex, encodeOrderFlags, hexToBuffer } from "../library";
-import { sha256 } from "@noble/hashes/sha256";
-import { secp256k1 } from "@noble/curves/secp256k1";
-import { ed25519 } from "@noble/curves/ed25519";
-import { blake2b } from "@noble/hashes/blake2b";
-import { SigPK, BaseWallet } from "../types";
-import { SIGNER_TYPES } from "../enums";
+import { BaseWallet, SigPK } from "../types";
 import { createZkSignature, parseAndShapeSignedData } from "../utils";
-import { Signer } from "@mysten/sui.js/cryptography";
 
 export class OrderSigner {
     constructor(private signer: Signer) {}
