@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { SuiAddress } from "../types";
+import { BaseWallet, SuiAddress, SuiClient, TransactionBlock } from "../types";
 
 export interface wallet {
     address: string;
@@ -29,4 +29,19 @@ export interface Operator {
     phrase: string;
     privateKey: string;
     capID: SuiAddress;
+}
+
+export interface ExtendedWalletContextState
+extends Omit<BaseWallet, "signMessage"> 
+{
+    wallet: BaseWallet;
+    provider: SuiClient;
+    signData: (data: Uint8Array) => Promise<string>;
+    getAddress: () => string | undefined;
+    signMessage: (
+    data: Uint8Array
+    ) => Promise<{ messageBytes: string; signature: string }>;
+    signTransactionBlock: (
+        data: TransactionBlock
+        ) => Promise<{ transactionBlockBytes: string; signature: string;}>;
 }

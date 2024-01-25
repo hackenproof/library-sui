@@ -17,6 +17,7 @@ import { DEFAULT } from "../defaults";
 import {
     BankAccountDetails,
     DecodeJWT,
+    ExtendedWalletContextState,
     Operator,
     Order,
     PerpCreationMarketDetails,
@@ -1403,7 +1404,7 @@ export class OnChainCalls {
         const caller = signer || this.signer;
 
         const txb = new TransactionBlock();
-        txb.setSender(caller.toSuiAddress());
+        txb.setSender(this.walletAddress ?? caller.toSuiAddress());
         if (args.gasBudget) txb.setGasBudget(args.gasBudget);
 
         if (args.account) {
@@ -1430,11 +1431,16 @@ export class OnChainCalls {
                 target: `${this.getPackageID()}::roles::set_sub_account`
             });
         }
-
-        const bytes = toB64(
-            await txb.build({ client: this.suiClient, onlyTransactionKind: false })
-        );
-        return caller.signWithIntent(fromB64(bytes), IntentScope.TransactionData);
+        
+        if (this.is_wallet_extension) {
+            const response:{  transactionBlockBytes: string,signature: string,} =  await (caller as unknown as ExtendedWalletContextState).signTransactionBlock(txb);
+            return { bytes: response.transactionBlockBytes, signature: response.signature };
+        } else {
+            const bytes = toB64(
+                await txb.build({ client: this.suiClient, onlyTransactionKind: false })
+            );
+            return caller.signWithIntent(fromB64(bytes), IntentScope.TransactionData);      
+        }
     }
 
     public async cancelOrder(
