@@ -1431,15 +1431,20 @@ export class OnChainCalls {
                 target: `${this.getPackageID()}::roles::set_sub_account`
             });
         }
-        
+
         if (this.is_wallet_extension) {
-            const response:{  transactionBlockBytes: string,signature: string,} =  await (caller as unknown as ExtendedWalletContextState).signTransactionBlock(txb);
-            return { bytes: response.transactionBlockBytes, signature: response.signature };
+            const response: { transactionBlockBytes: string; signature: string } = await (
+                caller as unknown as ExtendedWalletContextState
+            ).signTransactionBlock(txb);
+            return {
+                bytes: response.transactionBlockBytes,
+                signature: response.signature
+            };
         } else {
             const bytes = toB64(
                 await txb.build({ client: this.suiClient, onlyTransactionKind: false })
             );
-            return caller.signWithIntent(fromB64(bytes), IntentScope.TransactionData);      
+            return caller.signWithIntent(fromB64(bytes), IntentScope.TransactionData);
         }
     }
 
@@ -2136,12 +2141,12 @@ export class OnChainCalls {
      * @returns transaction result
      */
 
-    async mergeAllUsdcCoins(coinType?: string, signer?: Signer) {
+    async mergeAllUsdcCoins(coinType?: string, signer?: Signer, address?: string) {
         const caller = signer || this.signer;
         const txb = new TransactionBlock();
         const coins = await this.suiClient.getCoins({
             coinType: coinType || this.getCoinType(),
-            owner: caller.toSuiAddress()
+            owner: address || caller.toSuiAddress()
         });
 
         if (coins.data.length <= 1) {
