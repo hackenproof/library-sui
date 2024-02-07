@@ -2141,9 +2141,9 @@ export class OnChainCalls {
      * @returns transaction result
      */
 
-    async mergeAllUsdcCoins(coinType?: string, signer?: Signer, address?: string) {
-        const caller = signer || this.signer;
-        const txb = new TransactionBlock();
+    async mergeAllUsdcCoins(coinType?: string, signer?: Signer | any, address?: string) {
+        const caller = signer || (this.signer as any);
+        const tx = new TransactionBlock();
         const coins = await this.suiClient.getCoins({
             coinType: coinType || this.getCoinType(),
             owner: address || caller.toSuiAddress()
@@ -2153,14 +2153,20 @@ export class OnChainCalls {
             throw new Error("User must have at least two coins to perform merge");
         }
 
-        const destCoinId = txb.object(coins.data[0].coinObjectId);
+        const destCoinId = tx.object(coins.data[0].coinObjectId);
         // Get all source coinIds other than First One (dest Coin)
         const srcCoinIds = coins.data.slice(1).map((coin: any) => {
-            return txb.object(coin.coinObjectId);
+            return tx.object(coin.coinObjectId);
         });
-        txb.mergeCoins(destCoinId, srcCoinIds);
+        tx.mergeCoins(destCoinId, srcCoinIds);
 
-        return this.executeTxBlock(txb, caller);
+        if (this.is_zkLogin) {
+            return this.executeZkTransaction({ tx, caller });
+        } else if (this.is_wallet_extension) {
+            return this.executeWalletTransaction({ tx, caller });
+        } else {
+            return this.executeTxBlock(tx, caller);
+        }
     }
 
     /**
